@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Tenor+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;1,800&family=Tenor+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2? Family= Lumanosimo & Family= Montserrat:wght@900 & Family= Poppins & Family= Raleway:wght@100 & Family= Roboto+Slab: wght@200;700 & Family= Rubik+Iso & Family= Sigmar & display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background: linear-gradient(100deg, #1DAAF9 -1.21%, rgba(0, 255, 41, 0.55) 102.66%);
+    background-repeat: no-repeat;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+    margin: 0;
+} 
+
+.conteiner {
+    width: 1200px;
+    margin: auto;               
+}

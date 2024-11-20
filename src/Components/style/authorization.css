@@ -1,0 +1,119 @@
+.img-logo {
+    width: 38px;
+    height: 38px;
+    position: relative;
+    transition: .5s;
+}
+
+.logo:hover .img-logo {
+    transform: rotateY(360deg);
+}
+
+.form-enter {
+    margin: auto;
+    width: 400px;
+    height: auto;
+    background-color: #fccb3a;
+    border-radius: 30px;
+    -webkit-box-shadow: 3px 5px 30px -2px rgba(0, 0, 0, 0.42);
+    -moz-box-shadow: 3px 5px 30px -2px rgba(0, 0, 0, 0.42);
+    box-shadow: 3px 5px 30px -2px rgba(0, 0, 0, 0.42);
+}
+
+.box-2-1 {
+    padding-top: 100px;
+}
+
+form {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    padding-top: px;
+}
+
+form>label {
+    margin-top: 30px;
+    margin-bottom: 5px;
+}
+
+form>input {
+    height: 30px;
+    border-radius: 10px;
+    border: black solid 1px;
+    padding-left: 20px;
+    font-size: 20px;
+}
+
+.button-enter-in-acc,
+.button-register-in-acc {
+    margin: auto;
+    width: 200px;
+    height: 35px;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: rgb(255, 255, 255);
+    border: solid 0px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 500ms;
+}
+
+.button-enter-in-acc:hover {
+    background-color: #000;
+    color: white;
+}
+
+.button-register-in-acc:hover {
+    background-color: #000;
+    color: white;
+}
+
+.button-register-in-acc {
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+.section-button {
+    padding-top: 50px;
+    display: flex;
+    flex-direction: column
+}
+
+.logo-text-flex {
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
+
+.text-logo-easymath {
+    font-size: 20px;
+    font-family: Montserrat;
+}
+
+.h-logo-text-enter {
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.h-text-enter {
+    font-family: Montserrat;
+    font-size: 25px;
+}
+
+.block-h-text-enter {
+    padding-top: 20px;
+}
+
+.login,
+.password {
+    font-family: Montserrat;
+    font-size: 15px;
+}
+
+.link-registration{
+    margin: auto;
+}

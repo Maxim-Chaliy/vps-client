@@ -1,0 +1,92 @@
+.box-3 {
+    margin-top: 101px;
+}
+
+.foter {
+    width: 100%;
+    background-color: #FCCD3A;
+    height: 80px;
+}
+
+.items-3 {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 20px;
+}
+
+.online-repetitor {
+    width: 130px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.Easymath {
+    width: 135px;
+    height: 32px;
+    flex-shrink: 0;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.flex-6 {
+    display: flex;
+    align-items: center;
+}
+
+.text-4 {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.img-4 {
+    padding: 0px 40px 0px 10px;
+    width: 25px;
+    height: 25px;
+}
+
+.flex-7 {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.telegram,
+.VK,
+.whats {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #FCCD3A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    transition: all 0.2s ease;
+}
+
+.telegram:hover,
+.VK:hover,
+.whats:hover {
+    border: 1px solid #000000;
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 10px #000000;
+}
+
+.telegram:active,
+.VK:active,
+.whats:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
