@@ -5,6 +5,7 @@ import Reviews from "./Pages/Reviews";
 import Registration from "./Pages/Registration";
 import Authorization from "./Pages/Authorization";
 import Schedule from "./Pages/Schedule"; 
+import Editing from "./Pages/Editing";
 import "./Components/style/config.css";
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/registration" element={<Registration/>} />
         <Route path="/authorization" element={<Authorization/>} />
         <Route path="/schedule" element={<Schedule/>} />
+        <Route path="/editing" element={<Editing/>} />
       </Routes>
     </Router>
 

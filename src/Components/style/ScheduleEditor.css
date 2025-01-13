@@ -1,0 +1,266 @@
+.schedule-edit {
+    font-family: Arial, sans-serif;
+    width: 70%;
+    height: auto;
+    background-color: #FCCD3A;
+    border-radius: 10px;
+}
+
+.info {
+    padding: 20px 20px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.window-padding {
+    padding: 20px;
+}
+
+.name-student {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.name-student p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.menu-add {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-add div {
+    margin-bottom: 10px;
+}
+
+.div-icon-add {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    border-radius: 100px;
+}
+
+.div-icon-add:hover {
+    border: 1px solid black;
+}
+
+.img-icon-add {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.table-container {
+    max-height: 330px; /* Установите максимальную высоту для контейнера */
+    overflow-y: auto; /* Добавьте вертикальную прокрутку */
+    margin-top: 10px;
+}
+
+#dataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#dataTable th, #dataTable td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+#dataTable th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+#dataTable td input[type="text"] {
+    width: 100%;
+    text-align: center;
+}
+
+#dataTable td input[type="checkbox"] {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Специфичный селектор для ячеек в столбце "Описание" */
+#dataTable td.description-cell {
+    text-align: left;
+}
+
+.img-group-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.block-list {
+    background-color: #FCCD3A;
+    min-width: 260px;
+    height: 500px;
+    padding-top: 20px;
+    border-radius: 10px;
+}
+
+.section {
+    display: flex;
+    justify-content: center;
+}
+
+.input-search {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.block-list>div:last-child {
+    padding: 0px 10px;
+}
+
+.blocks-flex {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #2d2d2d5a;
+    border-radius: 10px;
+}
+
+.blocks-flex>div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.block-img-style-circle {
+    height: 44px;
+    width: 44px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.block-img-style-circle:hover {
+    background-color: #FCCD3A;
+    cursor: pointer;
+}
+
+.block-img-style-circle.active {
+    background-color: #FCCD3A;
+    cursor: pointer;
+}
+
+.user-list {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+ul {
+    list-style: none;
+    line-height: 2;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 5px 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.757);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+.FIO {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    font-size: 20px;
+    flex-grow: 1;
+}
+
+.block-button-student-on {
+    display: flex;
+    justify-content: center;
+}
+
+.button-student-on {
+    font-size: 15px;
+    width: 200px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0);
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.482);
+    color: white;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.button-student-on:hover {
+    background-color: rgb(0, 0, 0);
+}
+
+.input-description {
+    min-width: 300px;
+}
+
+.searchBox {
+    display: flex;
+    max-width: 230px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #ffffff;
+    border-radius: 50px;
+    position: relative;
+}
+
+.searchButton {
+    color: white;
+    position: absolute;
+    right: 8px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--gradient-2, linear-gradient(90deg, #2AF598 0%, #009EFD 100%));
+    border: 0;
+    display: inline-block;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+}
+
+button:hover {
+    color: #fff;
+    background-color: #1A1A1A;
+    transform: translateY(-3px);
+}
+
+button:active {
+    box-shadow: none;
+    transform: translateY(0);
+}
+
+.searchInput {
+    border: none;
+    background: none;
+    outline: none;
+    color: rgb(0, 0, 0);
+    font-size: 15px;
+    padding: 10px 20px 10px 20px;
+}

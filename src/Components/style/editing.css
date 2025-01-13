@@ -1,0 +1,216 @@
+.img-group-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.block-list {
+    background-color: #FCCD3A;
+    min-width: 260px;
+    height: 500px;
+    padding-top: 20px;
+    /* Добавьте отступ сверху, если нужно */
+    border-radius: 10px;
+}
+
+.section {
+    display: flex;
+    justify-content: center;
+}
+
+.input-search {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.block-list>div:last-child {
+    padding: 0px 10px;
+}
+
+/* Основной контейнер */
+.blocks-flex {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #2d2d2d5a;
+    border-radius: 10px;
+}
+
+/* Контейнер для иконок */
+.blocks-flex>div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стилизация иконок */
+.img-group-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Стилизация поля ввода для поиска */
+.search-list {
+    width: 80%;
+    height: 30px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Дополнительные стили для пустых контейнеров */
+.info-editing{
+    width: 70%;
+    height: auto;
+    background-color: #FCCD3A;
+    border-radius: 10px;
+}
+
+.block-img-style-circle {
+    height: 44px;
+    width: 44px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.block-img-style-circle:hover {
+    background-color: #FCCD3A;
+    cursor: pointer;
+}
+
+.block-img-style-circle.active {
+    background-color: #FCCD3A;
+    /* Цвет для активной иконки */
+    cursor: pointer;
+}
+
+.user-list {
+    margin-top: 20px;
+    max-height: 400px;
+    /* Установите максимальную высоту */
+    overflow-y: auto;
+    /* Добавьте вертикальную прокрутку */
+}
+
+ul {
+    list-style: none;
+    line-height: 2;
+    padding: 0;
+    /* Уберите отступы по умолчанию */
+    margin: 0;
+    /* Уберите отступы по умолчанию */
+}
+
+ul li {
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 5px 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.757);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+.FIO {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    font-size: 20px;
+    flex-grow: 1;
+}
+
+.block-button-student-on {
+    display: flex;
+    justify-content: center;
+}
+
+.button-student-on {
+    font-size: 15px;
+    width: 200px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0);
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.482);
+    color: white;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.button-student-on:hover {
+    background-color: rgb(0, 0, 0);
+}
+
+/* Св-ва для таблицы */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table,
+th,
+td {
+    border: 1px solid black;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+}
+
+/* input */
+
+.searchBox {
+    display: flex;
+    max-width: 230px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #ffffff;
+    border-radius: 50px;
+    position: relative;
+}
+
+.searchButton {
+    color: white;
+    position: absolute;
+    right: 8px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--gradient-2, linear-gradient(90deg, #2AF598 0%, #009EFD 100%));
+    border: 0;
+    display: inline-block;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+}
+
+/*hover effect*/
+button:hover {
+    color: #fff;
+    background-color: #1A1A1A;
+    transform: translateY(-3px);
+}
+
+/*button pressing effect*/
+button:active {
+    box-shadow: none;
+    transform: translateY(0);
+}
+
+.searchInput {
+    border: none;
+    background: none;
+    outline: none;
+    color: rgb(0, 0, 0);
+    font-size: 15px;
+    padding: 10px 20px 10px 20px;
+}

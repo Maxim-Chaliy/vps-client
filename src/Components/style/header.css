@@ -134,7 +134,8 @@
     width: 125px;
     border-radius: 40px;
     transition-duration: .3s;
-}
+    background-color: #FCCD3A;
+} 
 
 .Btn:hover .sign {
     width: 30%;
@@ -148,11 +149,13 @@
     width: 70%;
     transition-duration: .3s;
     padding-right: -100px;
+   
 }
 
 /* button click effect*/
 .Btn:active {
     transform: translate(2px, 2px);
+    
 }
 
 /* plus sign */

@@ -1,5 +1,4 @@
 {
-  "homepage": "https://Maxim-Chaliy.github.io/Easymath",
   "name": "test",
   "version": "0.1.0",
   "private": true,
@@ -9,9 +8,11 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
     "date-fns": "^4.1.0",
+    "moment": "^2.30.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
+    "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-slick": "^0.30.2",
