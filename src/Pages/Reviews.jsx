@@ -6,10 +6,10 @@ import '../Components/style/reviews.css';
 import { format } from 'date-fns';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { FaQuoteLeft } from 'react-icons/fa';
 
 const Reviews = () => {
     const [comments, setComments] = useState([]);
-    const [expanded, setExpanded] = useState({});
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -18,10 +18,10 @@ const Reviews = () => {
     const fetchComments = async (page) => {
         try {
             const response = await axios.get('http://localhost:3001/api/comments/db', {
-                params: { page, limit: 9 }
+                params: { page, limit: 5 }
             });
             setComments(response.data.comments);
-            setTotalPages(Math.ceil(response.data.totalCount / 9));
+            setTotalPages(Math.ceil(response.data.totalCount / 5));
             setLoading(false);
         } catch (error) {
             console.error('Ошибка при получении комментариев:', error);
@@ -32,20 +32,9 @@ const Reviews = () => {
     useEffect(() => {
         fetchComments(page);
 
-        // Регулярный запрос для обновления комментариев
-        const interval = setInterval(() => fetchComments(page), 60000); // Обновляем комментарии каждые 60 секунд
-
-        return () => {
-            clearInterval(interval); // Очистка интервала при размонтировании компонента
-        };
+        const interval = setInterval(() => fetchComments(page), 60000);
+        return () => clearInterval(interval);
     }, [page]);
-
-    const toggleExpand = (id) => {
-        setExpanded(prevState => ({
-            ...prevState,
-            [id]: !prevState[id]
-        }));
-    };
 
     const handlePageChange = (newPage) => {
         setPage(newPage);
@@ -54,79 +43,115 @@ const Reviews = () => {
     return (
         <>
             <Header />
-            <main>
-                <div className="block-reviews">
-                    <div className="conteiner">
-                        <div className="flex-boxs-reviews">
-                            {loading ? (
-                                Array.from({ length: 9 }).map((_, index) => (
-                                    <div key={index} className="box-reviews">
-                                        <div className="in-box-ots">
-                                            <div className="flex-img-icon-text-stars">
-                                                <div className="flex-img-icon-text">
-                                                    <div className='avatar-and-text'>
-                                                        <div><Skeleton circle={true} height={50} width={50} /></div>
-                                                        <div className="teg-p-firstname-lastname">
-                                                            <Skeleton width={100} />
-                                                            <Skeleton width={100} />
-                                                        </div>
+            <main className="reviews-main">
+                <div className='reviews-all-content'>
+                    <div className="reviews-header">
+                        <div className="decorative-dots decorative-dots-1"></div>
+                        <div className="decorative-dots decorative-dots-2"></div>
+                        <h1>Отзывы наших учеников</h1>
+                        <p>Реальные истории успеха и благодарности</p>
+                    </div>
+
+                    <div className="block-reviews">
+                        <div className="reviews-container">
+                            {error && <div className="error-message">{error}</div>}
+
+                            <div className="comments-list">
+                                {loading ? (
+                                    Array.from({ length: 5 }).map((_, index) => (
+                                        <div key={index} className="comment-card skeleton-card">
+                                            <div className="comment-header">
+                                                <div className="comment-author">
+                                                    <div><Skeleton circle={true} height={60} width={60} /></div>
+                                                    <div className="author-info">
+                                                        <Skeleton width={150} />
+                                                        <Skeleton width={100} />
                                                     </div>
-                                                    <div className="comment-date"><Skeleton width={80} /></div>
-                                                </div>
-                                                <div className="flex-five-star">
-                                                    {/* Здесь можно добавить рейтинг */}
                                                 </div>
                                             </div>
+                                            <div className="comment-text">
+                                                <Skeleton count={4} />
+                                            </div>
                                         </div>
-                                        <div className="users-review">
-                                            <Skeleton count={3} />
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                comments.map(comment => (
-                                    <div key={comment.id} className="box-reviews">
-                                        <div className="in-box-ots">
-                                            <div className="flex-img-icon-text-stars">
-                                                <div className="flex-img-icon-text">
-                                                    <div className='avatar-and-text'>
-                                                        <div><img src={comment.user.photo_50} alt="" /></div>
-                                                        <div className="teg-p-firstname-lastname">
-                                                            <p>{comment.user.first_name}</p>
-                                                            <p>{comment.user.last_name}</p>
-                                                        </div>
+                                    ))
+                                ) : (
+                                    comments.map(comment => (
+                                        <div key={comment.id} className="comment-card">
+                                            <div className="quote-icon">
+                                                <FaQuoteLeft />
+                                            </div>
+                                            <div className="comment-header">
+                                                <div className="comment-author">
+                                                    <div className="avatar-wrapper">
+                                                        <img
+                                                            src={comment.user.photo_50 || '/default-avatar.png'}
+                                                            alt={`${comment.user.first_name} ${comment.user.last_name}`}
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = '/default-avatar.png';
+                                                            }}
+                                                        />
                                                     </div>
-                                                    <div className="comment-date"><p>{format(new Date(comment.date), 'dd.MM.yyyy')}</p></div>
-                                                </div>
-                                                <div className="flex-five-star">
-                                                    {/* Здесь можно добавить рейтинг */}
+                                                    <div className="author-info">
+                                                        <h3 className="user-name">{comment.user.first_name} {comment.user.last_name}</h3>
+                                                        <p className="user-date">{format(new Date(comment.date), 'dd.MM.yyyy')}</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="users-review">
-                                            <p>{expanded[comment.id] ? comment.text : comment.text.substring(0, 100) + '...'}</p>
-                                            <div className="ots-btn-show-all">
-                                                <button className="show-all" onClick={() => toggleExpand(comment.id)}>
-                                                    {expanded[comment.id] ? 'Скрыть' : 'Показать больше'}
-                                                </button>
+                                            <div className="comment-text">
+                                                <p>{comment.text}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
-                            )}
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="pagination">
-                    {Array.from({ length: totalPages }, (_, index) => (
-                        <button
-                            key={index}
-                            className={page === index + 1 ? 'active' : ''}
-                            onClick={() => handlePageChange(index + 1)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
+
+                    {totalPages > 1 && (
+                        <div className="pagination-container">
+                            <div className="pagination">
+                                <button
+                                    onClick={() => handlePageChange(page - 1)}
+                                    disabled={page === 1}
+                                    className="pagination-arrow"
+                                >
+                                    &lt;
+                                </button>
+
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+                                    let pageNum;
+                                    if (totalPages <= 5) {
+                                        pageNum = index + 1;
+                                    } else if (page <= 3) {
+                                        pageNum = index + 1;
+                                    } else if (page >= totalPages - 2) {
+                                        pageNum = totalPages - 4 + index;
+                                    } else {
+                                        pageNum = page - 2 + index;
+                                    }
+
+                                    return (
+                                        <button
+                                            key={index}
+                                            className={page === pageNum ? 'active' : ''}
+                                            onClick={() => handlePageChange(pageNum)}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+
+                                <button
+                                    onClick={() => handlePageChange(page + 1)}
+                                    disabled={page === totalPages}
+                                    className="pagination-arrow"
+                                >
+                                    &gt;
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />

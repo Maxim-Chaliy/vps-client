@@ -1,0 +1,716 @@
+/* listapp.css */
+
+.listapp-main{
+    padding: 170px 0px 85px 0px;
+}
+
+.listapp {
+    margin: auto;
+    width: 100%;
+    min-height: 578px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.listapp-padding {
+    padding: 25px;
+}
+
+.listapp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.listapp-h2-title {
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 0;
+    font-weight: 600;
+}
+
+.listapp-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+.count-badge {
+    background-color: #089d6e;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.listapp-filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.search-container {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    fill: #7f8c8d;
+}
+
+.listapp-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s;
+    background-color: white;
+}
+
+.listapp-search-input:focus {
+    border-color: #089d6e;
+    box-shadow: 0 0 0 3px rgba(8, 157, 110, 0.1);
+    outline: none;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    color: #34495e;
+}
+
+.listapp-filter-select {
+    height: 40px;
+    padding: 0 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.listapp-filter-select:focus {
+    border-color: #089d6e;
+    box-shadow: 0 0 0 3px rgba(8, 157, 110, 0.1);
+    outline: none;
+}
+
+.listapp-table-container {
+    max-height: 600px;
+    overflow: auto;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: white;
+    border: 1px solid #e0e0e0;
+}
+
+.listapp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+}
+
+.listapp-table th,
+.listapp-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.listapp-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #089d6e;
+    color: white;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.listapp-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.listapp-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.sort-icon {
+    font-size: 12px;
+}
+
+.listapp-table tr {
+    transition: background-color 0.2s;
+}
+
+.listapp-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.listapp-table tr.even-row {
+    background-color: white;
+}
+
+.listapp-table tr.even-row .name-cell{
+    background-color: white;
+}
+
+.listapp-table tr.odd-row {
+    background-color: #f8f9fa;
+}
+
+.listapp-table tr.odd-row .name-cell {
+    background-color: #f8f9fa;
+}
+
+.listapp-table tr.expanded {
+    background-color: #f1f8ff;
+}
+
+/* Фиксированный столбец ФИО */
+.listapp-table th:first-child,
+.listapp-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+.listapp-table th:first-child {
+    z-index: 3;
+    background-color: #089d6e; /* Цвет как у других заголовков */
+}
+
+/* Стили для ячеек */
+.name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #089d6e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.email-link, .phone-link {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.email-link:hover, .phone-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+.time-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-icon {
+    font-size: 16px;
+}
+
+.additional-info {
+    max-width: 250px;
+}
+
+.info-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Стили для статусов */
+.status-select {
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    text-align: center;
+    min-width: 100px;
+}
+
+.status-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(8, 157, 110, 0.2);
+}
+
+.status-select.новая {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-select.в-работе {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
+.status-select.завершена {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.status-select.отклонена {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+/* Кнопка подробнее */
+.expand-btn {
+    padding: 6px 12px;
+    background-color: #089d6e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.expand-btn:hover {
+    background-color: #067a54;
+}
+
+/* Детали строки */
+.details-row {
+    background-color: #f8f9fa !important;
+}
+
+.details-row td {
+    padding: 0;
+}
+
+.details-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.details-section {
+    margin-bottom: 15px;
+}
+
+.details-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.details-section p {
+    margin: 0;
+    font-size: 14px;
+    color: #34495e;
+    line-height: 1.5;
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    resize: vertical;
+    transition: all 0.2s;
+}
+
+.comment-textarea:focus {
+    border-color: #089d6e;
+    box-shadow: 0 0 0 3px rgba(8, 157, 110, 0.1);
+    outline: none;
+}
+
+/* Аналитика */
+.listapp-analytics {
+    margin: 40px auto 0;
+    width: 100%;
+    min-height: auto;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.listapp-analytics-padding {
+    padding: 25px;
+}
+
+.analytics-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin: 30px 0;
+}
+
+.analytics-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.analytics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-title {
+    color: #2c3e50;
+    margin: 0 0 25px 0;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.analytics-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    border-radius: 3px;
+}
+
+/* Прогресс-бары для целей */
+.progress-bars {
+    margin-top: 20px;
+}
+
+.progress-item {
+    margin-bottom: 20px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #34495e;
+}
+
+.progress-label span:first-child {
+    font-weight: 500;
+}
+
+.progress-label span:last-child {
+    color: #7f8c8d;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #f5f7fa;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    border-radius: 5px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Блок популярных часов */
+.time-slots {
+    margin-top: 15px;
+}
+
+.time-slot {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.time {
+    width: 60px;
+    font-size: 0.95rem;
+    color: #34495e;
+    font-weight: 500;
+}
+
+.slot-bar {
+    flex-grow: 1;
+    height: 10px;
+    background: #f5f7fa;
+    border-radius: 5px;
+    margin: 0 15px;
+    overflow: hidden;
+}
+
+.slot-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #f1c40f);
+    border-radius: 5px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.count {
+    width: 25px;
+    text-align: right;
+    font-size: 0.95rem;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .listapp-filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-container {
+        max-width: 100%;
+    }
+    
+    .filter-group {
+        justify-content: space-between;
+    }
+    
+    .listapp-table th, 
+    .listapp-table td {
+        padding: 10px;
+    }
+    
+    .listapp-table-container {
+        overflow-x: auto;
+    }
+
+    .analytics-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .analytics-card {
+        padding: 20px;
+    }
+}
+
+.details-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 20px;
+}
+
+.delete-btn {
+    padding: 8px 16px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.delete-btn:disabled {
+    background-color: #ff9999;
+    cursor: not-allowed;
+}
+
+/* Стили для модального окна удаления */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modalFadeIn 0.3s ease-out;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.modal-content p {
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+.warning-text {
+    color: #ff4444;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.modal-btn-cancel {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modal-btn-cancel:hover {
+    background-color: #e0e0e0;
+}
+
+.modal-btn-cancel:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.modal-btn-delete {
+    background-color: #ff4444;
+    color: white;
+}
+
+.modal-btn-delete:hover {
+    background-color: #cc0000;
+}
+
+.modal-btn-delete:disabled {
+    background-color: #ff9999;
+    cursor: not-allowed;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для футера таблицы и кнопки обновления */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding: 0 10px;
+}
+
+.refresh-btn {
+    padding: 8px 15px;
+    background-color: #089d6e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s;
+}
+
+/* Анимация при наведении на кнопку */
+.refresh-btn:hover .refresh-icon,
+/* Постоянная анимация во время загрузки */
+.refresh-btn.refreshing .refresh-icon {
+    animation: spin 1s linear infinite;
+}
+
+.refresh-btn:hover {
+    background-color: #067a54;
+}
+
+.refresh-btn:disabled {
+    background-color: #7fbaa8;
+    cursor: not-allowed;
+}
+
+.refresh-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.listapp-count {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Остальные стили остаются без изменений */

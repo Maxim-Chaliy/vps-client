@@ -7,18 +7,71 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    outline: none;
 }
 
-body{
-    background: linear-gradient(100deg, #1DAAF9 -1.21%, rgba(0, 255, 41, 0.55) 102.66%);
-    background-repeat: no-repeat;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    min-height: 100vh;
-    margin: 0;
-} 
+html, body{
+    height: 100%;
+}
 
-.conteiner {
+#root{
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(100deg, #1DAAF9 -1.21%, rgba(0, 255, 41, 0.55) 102.66%);
+}
+
+main {
+    flex-grow: 1;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
     max-width: 1200px;
-    margin: auto;               
+    margin: 0 auto;
+    
+}
+
+
+
+input {
+    outline: none;
+}
+
+/* ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.757);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+} */
+ 
+
+/* Общий стиль для скроллбаров */
+/* Для WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Для Firefox */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+/* Скроллбар поверх контента (Chrome, Edge, Safari) */
+html, body {
+    /* overflow: overlay; */
 }

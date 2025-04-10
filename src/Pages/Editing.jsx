@@ -13,20 +13,23 @@ const Editing = () => {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeImage, setActiveImage] = useState(1); // Устанавливаем начальное значение для первой иконки
+    const [activeImage, setActiveImage] = useState(1);
     const [selectedUser, setSelectedUser] = useState(null);
     const [schedule, setSchedule] = useState([]);
-    const [activeComponent, setActiveComponent] = useState('UserInfo'); // Устанавливаем начальное значение для компонента
-    const [sectionTitle, setSectionTitle] = useState("Пользователи"); // Устанавливаем начальное значение для названия раздела
+    const [activeComponent, setActiveComponent] = useState('UserInfo');
+    const [sectionTitle, setSectionTitle] = useState("Пользователи");
+    const [selectedStudentId, setSelectedStudentId] = useState(null);
+    const [showSearchContainer, setShowSearchContainer] = useState(true);
 
     useEffect(() => {
-        // Восстановление состояния из localStorage при монтировании компонента
         const savedActiveImage = localStorage.getItem('activeImage');
         const savedSearchQuery = localStorage.getItem('searchQuery');
         const savedSelectedUser = localStorage.getItem('selectedUser');
         const savedSchedule = localStorage.getItem('schedule');
         const savedActiveComponent = localStorage.getItem('activeComponent');
         const savedSectionTitle = localStorage.getItem('sectionTitle');
+        const savedSelectedStudentId = localStorage.getItem('selectedStudentId');
+        const savedShowSearchContainer = localStorage.getItem('showSearchContainer');
 
         if (savedActiveImage) setActiveImage(JSON.parse(savedActiveImage));
         if (savedSearchQuery) setSearchQuery(savedSearchQuery);
@@ -34,6 +37,8 @@ const Editing = () => {
         if (savedSchedule) setSchedule(JSON.parse(savedSchedule));
         if (savedActiveComponent) setActiveComponent(savedActiveComponent);
         if (savedSectionTitle) setSectionTitle(savedSectionTitle);
+        if (savedSelectedStudentId) setSelectedStudentId(savedSelectedStudentId);
+        if (savedShowSearchContainer) setShowSearchContainer(JSON.parse(savedShowSearchContainer));
 
         fetch('http://localhost:3001/api/users')
             .then(response => {
@@ -53,14 +58,15 @@ const Editing = () => {
     }, []);
 
     useEffect(() => {
-        // Сохранение состояния в localStorage при изменении состояния
         localStorage.setItem('activeImage', JSON.stringify(activeImage));
         localStorage.setItem('searchQuery', searchQuery);
         localStorage.setItem('selectedUser', JSON.stringify(selectedUser));
         localStorage.setItem('schedule', JSON.stringify(schedule));
         localStorage.setItem('activeComponent', activeComponent);
         localStorage.setItem('sectionTitle', sectionTitle);
-    }, [activeImage, searchQuery, selectedUser, schedule, activeComponent, sectionTitle]);
+        localStorage.setItem('selectedStudentId', selectedStudentId);
+        localStorage.setItem('showSearchContainer', JSON.stringify(showSearchContainer));
+    }, [activeImage, searchQuery, selectedUser, schedule, activeComponent, sectionTitle, selectedStudentId, showSearchContainer]);
 
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
@@ -69,12 +75,14 @@ const Editing = () => {
     const handleImageClick = (imageId) => {
         setActiveImage(imageId);
         setActiveComponent(imageId === 1 ? 'UserInfo' : imageId === 2 ? 'ScheduleEditor' : null);
-        setSelectedUser(null); // Сброс выбранного пользователя
-        setSectionTitle(imageId === 1 ? 'Пользователи' : imageId === 2 ? 'Студенты' : 'Группы'); // Обновление названия раздела
+        setSelectedUser(null);
+        setSelectedStudentId(null);
+        setSectionTitle(imageId === 1 ? 'Пользователи' : imageId === 2 ? 'Студенты' : 'Группы');
     };
 
     const handleUserClick = (user) => {
         setSelectedUser(user);
+        setSelectedStudentId(user._id);
     };
 
     const handleAddToStudents = async () => {
@@ -100,27 +108,6 @@ const Editing = () => {
                 setError(error.message);
             }
         }
-    };
-
-    const handleAddToSchedule = () => {
-        const dateInput = document.getElementById('dateInput').value;
-        const timeInput = document.getElementById('timeInput').value;
-        const subjectInput = document.getElementById('exampleSelect').value;
-        const descriptionInput = document.getElementById('descriptionInput').value;
-
-        const dateObj = new Date(dateInput);
-        const options = { weekday: 'long' };
-        const dayOfWeek = new Intl.DateTimeFormat('ru-RU', options).format(dateObj);
-
-        const newScheduleItem = {
-            day: dayOfWeek,
-            date: dateInput,
-            time: timeInput,
-            subject: subjectInput,
-            description: descriptionInput
-        };
-
-        setSchedule([...schedule, newScheduleItem]);
     };
 
     const filteredUsers = activeImage === 1 ? users
@@ -150,90 +137,112 @@ const Editing = () => {
     return (
         <>
             <Header />
-            <main>
-                <div className="conteiner">
+            <main className="editing-main">
+                <div className="editing-container">
                     <div className="blocks-flex">
-                        <div>
+                        <div className="sidebar-icons">
                             <div
-                                className={`block-img-style-circle ${activeImage === 1 ? 'active' : ''}`}
+                                className={`icon-container ${activeImage === 1 ? 'active' : ''}`}
                                 onClick={() => handleImageClick(1)}
+                                title="Пользователи"
                             >
-                                <img className="img-group-icon" src={iconUsers} alt="" />
+                                <img className="sidebar-icon" src={iconUsers} alt="Пользователи" />
+                                <span className="icon-tooltip">Пользователи</span>
                             </div>
                             <div
-                                className={`block-img-style-circle ${activeImage === 2 ? 'active' : ''}`}
+                                className={`icon-container ${activeImage === 2 ? 'active' : ''}`}
                                 onClick={() => handleImageClick(2)}
+                                title="Студенты"
                             >
-                                <img className="img-group-icon" src={iconGraduation} alt="" />
+                                <img className="sidebar-icon" src={iconGraduation} alt="Студенты" />
+                                <span className="icon-tooltip">Студенты</span>
                             </div>
                             <div
-                                className={`block-img-style-circle ${activeImage === 3 ? 'active' : ''}`}
+                                className={`icon-container ${activeImage === 3 ? 'active' : ''}`}
                                 onClick={() => handleImageClick(3)}
+                                title="Группы"
                             >
-                                <img className="img-group-icon" src={iconEducation} alt="" />
+                                <img className="sidebar-icon" src={iconEducation} alt="Группы" />
+                                <span className="icon-tooltip">Группы</span>
+                            </div>
+                            <div
+                                className="icon-container toggle-container"
+                                onClick={() => setShowSearchContainer(!showSearchContainer)}
+                                title={showSearchContainer ? "Скрыть панель" : "Показать панель"}
+                            >
+                                <svg className="sidebar-icon icon-90deg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    {showSearchContainer ? (
+                                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                                    ) : (
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
+                                    )}
+                                </svg>
+                                <span className="icon-tooltip">
+                                    {showSearchContainer ? "Скрыть панель" : "Показать панель"}
+                                </span>
                             </div>
                         </div>
-                        <div>
-                            <div className="search-container">
-                                <div className="block-list">
-                                    <div className="section">
-                                        <p>{sectionTitle}</p> {/* Отображение названия раздела */}
-                                    </div>
-                                    <div className="input-search">
-                                        <div className="searchBox">
-                                            <input className="searchInput" type="text" name="" placeholder="Поиск" value={searchQuery} onChange={handleSearchChange}/>
-                                                <button className="searchButton" href="#">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 29 29" fill="none">
-                                                        <g clip-path="url(#clip0_2_17)">
-                                                            <g filter="url(#filter0_d_2_17)">
-                                                                <path d="M23.7953 23.9182L19.0585 19.1814M19.0585 19.1814C19.8188 18.4211 20.4219 17.5185 20.8333 16.5251C21.2448 15.5318 21.4566 14.4671 21.4566 13.3919C21.4566 12.3167 21.2448 11.252 20.8333 10.2587C20.4219 9.2653 19.8188 8.36271 19.0585 7.60242C18.2982 6.84214 17.3956 6.23905 16.4022 5.82759C15.4089 5.41612 14.3442 5.20435 13.269 5.20435C12.1938 5.20435 11.1291 5.41612 10.1358 5.82759C9.1424 6.23905 8.23981 6.84214 7.47953 7.60242C5.94407 9.13789 5.08145 11.2204 5.08145 13.3919C5.08145 15.5634 5.94407 17.6459 7.47953 19.1814C9.01499 20.7168 11.0975 21.5794 13.269 21.5794C15.4405 21.5794 17.523 20.7168 19.0585 19.1814Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" shape-rendering="crispEdges"></path>
-                                                            </g>
-                                                        </g>
-                                                        <defs>
-                                                            <filter id="filter0_d_2_17" x="-0.418549" y="3.70435" width="29.7139" height="29.7139" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                                                <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
-                                                                <feOffset dy="4"></feOffset>
-                                                                <feGaussianBlur stdDeviation="2"></feGaussianBlur>
-                                                                <feComposite in2="hardAlpha" operator="out"></feComposite>
-                                                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
-                                                                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2_17"></feBlend>
-                                                                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2_17" result="shape"></feBlend>
-                                                            </filter>
-                                                            <clipPath id="clip0_2_17">
-                                                                <rect width="28.0702" height="28.0702" fill="white" transform="translate(0.403503 0.526367)"></rect>
-                                                            </clipPath>
-                                                        </defs>
-                                                    </svg>
-                                                </button>
+                        
+                        <div className="content-area">
+                            <div 
+                                className="editing-search-container" 
+                                style={{ display: showSearchContainer ? 'block' : 'none' }}
+                            >
+                                <div className="user-list-container">
+                                    <div className="section-header">
+                                        <h3>{sectionTitle}</h3>
+                                        <div className="search-box">
+                                            <input 
+                                                className="search-input" 
+                                                type="text" 
+                                                placeholder="Поиск..." 
+                                                value={searchQuery} 
+                                                onChange={handleSearchChange}
+                                            />
+                                            <span className="search-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="11" cy="11" r="8"></circle>
+                                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                                </svg>
+                                            </span>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="user-list">
-                                            {error && <p>Ошибка: {error}</p>}
-                                            <ul>
-                                                {filteredUsers.map(user => (
-                                                    <li key={user._id} onClick={() => handleUserClick(user)}>
+                                    
+                                    <div className="user-list-scroll">
+                                        {error && <p className="error-message">Ошибка: {error}</p>}
+                                        <ul className="user-list">
+                                            {filteredUsers.map(user => (
+                                                <li
+                                                    key={user._id}
+                                                    onClick={() => handleUserClick(user)}
+                                                    className={`user-item ${selectedStudentId === user._id ? 'selected' : ''}`}
+                                                >
+                                                    <span className="user-name">
                                                         {user.surname} {user.name} {user.patronymic}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
+                                                    </span>
+                                                    {activeImage === 1 && (
+                                                        <span className="user-role-badge">Пользователь</span>
+                                                    )}
+                                                    {activeImage === 2 && (
+                                                        <span className="user-role-badge student">Студент</span>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {activeComponent === 'UserInfo' && (
-                            <UserInfo selectedUser={selectedUser} handleAddToStudents={handleAddToStudents} />
-                        )}
-                        {activeComponent === 'ScheduleEditor' && (
-                            <ScheduleEditor
-                                schedule={schedule}
-                                handleAddToSchedule={handleAddToSchedule}
-                                selectedUser={selectedUser}
-                            />
-                        )}
+                            {activeComponent === 'UserInfo' && (
+                                <UserInfo selectedUser={selectedUser} handleAddToStudents={handleAddToStudents} />
+                            )}
+                            {activeComponent === 'ScheduleEditor' && (
+                                <ScheduleEditor
+                                    schedule={schedule}
+                                    selectedUser={selectedUser}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

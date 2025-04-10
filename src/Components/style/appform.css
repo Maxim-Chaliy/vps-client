@@ -1,0 +1,291 @@
+/* Основные стили для формы */
+.appform-main-container {
+    padding: 200px 0px 115px 0px;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+}
+
+.appform-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+.appform-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.appform-header {
+    background-color: #fccb3a;
+    padding: 25px 30px;
+    text-align: center;
+}
+
+.appform-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.appform-logo {
+    width: 50px;
+    height: 50px;
+}
+
+.appform-title-container {
+    text-align: left;
+}
+
+.appform-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.appform-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 5px 0 0 0;
+}
+
+.appform-form {
+    padding: 30px;
+}
+
+.appform-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.appform-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.appform-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.appform-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.appform-input:focus {
+    outline: none;
+    border-color: #fccb3a;
+    box-shadow: 0 0 0 3px rgba(252, 203, 58, 0.2);
+    background-color: white;
+}
+
+.appform-input::placeholder {
+    color: #95a5a6;
+}
+
+.appform-time-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.appform-time-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.appform-time-input:focus {
+    outline: none;
+    border-color: #fccb3a;
+    box-shadow: 0 0 0 3px rgba(252, 203, 58, 0.2);
+    background-color: white;
+}
+
+.appform-time-separator {
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.appform-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+}
+
+.appform-select:focus {
+    outline: none;
+    border-color: #fccb3a;
+    box-shadow: 0 0 0 3px rgba(252, 203, 58, 0.2);
+    background-color: white;
+}
+
+.appform-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.appform-textarea:focus {
+    outline: none;
+    border-color: #fccb3a;
+    box-shadow: 0 0 0 3px rgba(252, 203, 58, 0.2);
+    background-color: white;
+}
+
+.appform-char-counter {
+    text-align: right;
+    font-size: 12px;
+    color: #95a5a6;
+    margin-top: 5px;
+}
+
+.appform-submit-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.appform-submit-button {
+    background-color: #fccb3a;
+    color: #2c3e50;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 300px;
+}
+
+.appform-submit-button:hover {
+    background-color: #f8c11d;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(252, 203, 58, 0.4);
+}
+
+.appform-required-note {
+    font-size: 12px;
+    color: #95a5a6;
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .appform-card {
+        border-radius: 0;
+    }
+    
+    .appform-header {
+        padding: 20px;
+    }
+    
+    .appform-form {
+        padding: 20px;
+    }
+    
+    .appform-submit-button {
+        max-width: 100%;
+    }
+}
+
+/* Добавьте в существующие стили */
+
+.g-recaptcha {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    transform: scale(0.95);
+    transform-origin: left;
+}
+
+@media (max-width: 480px) {
+    .g-recaptcha {
+        transform: scale(0.85);
+    }
+}
+
+.recaptcha-loading {
+    color: #666;
+    padding: 10px;
+    text-align: center;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+/* Добавьте эти стили в ваш существующий appform.css */
+
+/* Стили для reCAPTCHA */
+.grecaptcha-badge {
+    visibility: visible !important;
+}
+
+/* Сообщения об ошибках */
+.appform-error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+/* Кнопка в состоянии загрузки */
+.appform-submit-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .appform-time-group {
+        flex-direction: column;
+    }
+    
+    .appform-time-separator {
+        margin: 10px 0;
+        text-align: center;
+    }
+}

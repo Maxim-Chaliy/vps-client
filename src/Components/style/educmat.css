@@ -1,0 +1,550 @@
+/* Основные стили */
+.educmat-main {
+    min-height: calc(100vh - 120px);
+    padding: 150px 0;
+}
+
+.padding-despription-info{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.conteiner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Заголовок и кнопка создания */
+.form-creat-material {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.educmat-title {
+    color: #343a40;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.button-creat-material {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background-color: #FCCD3A;
+    color: #343a40;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    gap: 8px; /* Добавляем отступ между иконкой и текстом */
+}
+
+.button-creat-material:hover {
+    background-color: #f5c21a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.plus-icon {
+    font-size: 25px;
+}
+
+.div-plus-icon {
+    display: flex;
+}
+
+/* Панель поиска */
+.input-box {
+    background-color: #FCCD3A;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.display-flex-inputs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-input-container {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.input-search-name {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.input-search-name:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.clear-search-btn:hover {
+    color: #495057;
+}
+
+.select-container {
+    position: relative;
+    min-width: 200px;
+}
+
+.select-name {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 16px;
+    appearance: none;
+    background-color: white;
+    cursor: pointer;
+}
+
+.select-name:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.educmat-button-search {
+    padding: 10px 20px;
+    background-color: #343a40;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.educmat-button-search:hover {
+    background-color: #23272b;
+    transform: translateY(-2px);
+}
+
+.educmat-button-search:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Карточки материалов */
+.blocks-material {
+    margin-top: 20px;
+}
+
+.display-flex-blocks-material {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.block-material {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid #FCCD3A;
+}
+
+.block-material:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.material-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background-color: #FCCD3A;
+    color: #343a40;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.img-block-material {
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+}
+
+.responsive-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-overlay span {
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+}
+
+.block-material:hover .image-overlay {
+    opacity: 1;
+}
+
+.block-material:hover .responsive-image {
+    transform: scale(1.05);
+}
+
+.padding-info-block-material {
+    padding: 15px;
+    
+}
+
+.name-material h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #343a40;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.three-dots-flex-end{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.three-dots-container {
+    position: relative;
+    display: inline-block;
+}
+
+.three-dots {
+    color: #6c757d;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+}
+
+.three-dots:hover {
+    background-color: #f1f1f1;
+    color: #343a40;
+}
+
+/* Всплывающее меню */
+.options-popup {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 10;
+    min-width: 120px;
+    margin-bottom: 5px;
+}
+
+.popup-button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+
+.popup-button:hover {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.delete-btn {
+    color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #f8d7da;
+}
+
+/* Модальное окно */
+.educmat-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.educmat-modal {
+    max-width: 900px;
+    width: 100%;
+    animation: fadeIn 0.3s ease;
+}
+
+.educmat-modal-content {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    z-index: 10;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+    color: #343a40;
+    background-color: #f1f1f1;
+}
+
+.educmat-modal-row {
+    display: flex;
+    overflow: hidden;
+}
+
+.educmat-modal-img {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-height: 500px;
+}
+
+.educmat-modal-info {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.educmat-modal-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.educmat-modal-header h2 {
+    margin: 0 0 10px 0;
+    color: #343a40;
+}
+
+.modal-category-badge {
+    display: inline-block;
+    background-color: #FCCD3A;
+    color: #343a40;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.educmat-modal-description {
+    margin-bottom: 20px;
+}
+
+.educmat-modal-description h4 {
+    margin: 0 0 10px 0;
+    color: #495057;
+    font-size: 16px;
+}
+
+.educmat-modal-description p {
+    margin: 0;
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+.educmat-modal-files-list h4 {
+    margin: 0 0 15px 0;
+    color: #495057;
+    font-size: 16px;
+}
+
+.educmat-modal-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.educmat-modal-li {
+    margin-bottom: 10px;
+}
+
+.file-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    word-break: break-all;
+}
+
+.file-link:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.file-download-icon {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+/* Нет результатов */
+.no-results {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.no-results p {
+    font-size: 18px;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+.reset-filters-btn {
+    padding: 10px 20px;
+    background-color: #FCCD3A;
+    color: #343a40;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reset-filters-btn:hover {
+    background-color: #f5c21a;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .educmat-modal-row {
+        flex-direction: column;
+    }
+    
+    .educmat-modal-img {
+        max-height: 300px;
+    }
+    
+    .display-flex-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .select-container, .educmat-button-search {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-creat-material {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .educmat-modal-info {
+        padding: 20px;
+    }
+}

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
+import freeIcon2 from "../img/FreeMathematics2.png";
+import ReCAPTCHA from "react-google-recaptcha";
 import '../Components/style/authorization.css';
 
 const Authorization = () => {
@@ -9,6 +11,10 @@ const Authorization = () => {
         username: '',
         password: ''
     });
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const recaptchaRef = useRef();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -17,59 +23,154 @@ const Authorization = () => {
             ...formData,
             [name]: value
         });
+        setError('');
+    };
+
+    const handleRecaptchaChange = (token) => {
+        setRecaptchaToken(token);
+        setError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        // Валидация обязательных полей
+        if (!formData.username || !formData.password) {
+            setError('Пожалуйста, заполните все поля');
+            setIsLoading(false);
+            return;
+        }
+
+        // Проверка reCAPTCHA
+        if (!recaptchaToken) {
+            setError('Пожалуйста, подтвердите, что вы не робот');
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:3001/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    recaptchaToken
+                })
             });
 
+            const data = await response.json();
+            
             if (response.ok) {
-                const data = await response.json();
                 localStorage.setItem('token', data.token);
-                alert('Авторизация прошла успешно');
-                navigate('/'); // Перенаправление на главную страницу после успешной авторизации
-                window.location.reload(); // Перезагрузка страницы для обновления состояния в Header
+                localStorage.setItem('studentId', data.userId);
+                navigate('/');
+                window.location.reload();
             } else {
-                alert('Ошибка при авторизации');
+                setError(data.message || 'Ошибка при авторизации');
+                recaptchaRef.current.reset();
+                setRecaptchaToken(null);
             }
         } catch (error) {
             console.error('Ошибка при отправке данных:', error);
-            alert('Ошибка при отправке данных');
+            setError('Ошибка соединения с сервером');
+            recaptchaRef.current.reset();
+            setRecaptchaToken(null);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <>
             <Header />
-            <main className="box-2-1">
-                <div className="conteiner">
-                    <div className="form-enter">
-                        <div className="h-logo-text-enter">
-                            <div className="logo-text-flex">
-                                {/* <div className=""><img className="img-logo" src="assets/img/free-icon-mathematics-symbol-2117721 1.png" alt=""></div> */}
-                                <div><p className="text-logo-easymath">Easymath</p></div>
+            <main className="auth-main-container">
+                <div className='auth-container'>
+                    <div className='auth-card'>
+                        <div className='auth-header'>
+                            <div className="auth-logo-container">
+                                <img src={freeIcon2} alt="Easymath Logo" className="auth-logo" />
+                                <div className="auth-title-container">
+                                    <h1 className="auth-title">Авторизация</h1>
+                                    <p className="auth-subtitle">Easymath</p>
+                                </div>
                             </div>
-                            <div className="block-h-text-enter"><p className="h-text-enter">Авторизация</p></div>
                         </div>
-
-                        <form onSubmit={handleSubmit}>
-                            <label className="login" htmlFor="username">Логин</label>
-                            <input type="text" name="username" value={formData.username} onChange={handleChange} required />
-
-                            <label className="password" htmlFor="password">Пароль</label>
-                            <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-                            <a href="#" style={{ color: 'black', margin: 'auto', marginTop: '10px' }}><p>Не помню пароль</p></a>
-
-                            <div className="section-button">
-                                <button className="button-enter-in-acc" type="submit">Войти</button>
-                                <Link className="link-registration" to="/registration"><button className="button-register-in-acc">Регистрация</button></Link>
+                        
+                        <form onSubmit={handleSubmit} className="auth-form">
+                            <div className='auth-fields'>
+                                <div className='auth-field-group'>
+                                    <label className='auth-label'>Логин или Email*</label>
+                                    <input
+                                        className='auth-input'
+                                        type="text"
+                                        placeholder='Введите ваш логин или email'
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className='auth-field-group'>
+                                    <label className='auth-label'>Пароль*</label>
+                                    <input
+                                        className='auth-input'
+                                        type="password"
+                                        placeholder='Введите ваш пароль'
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <div className="auth-forgot-password">
+                                        <Link to="/forgot-password" className="auth-forgot-link">Забыли пароль?</Link>
+                                    </div>
+                                </div>
+                                
+                                <div className='auth-field-group'>
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+                                        onChange={handleRecaptchaChange}
+                                    />
+                                </div>
+                            </div>
+                            
+                            {error && (
+                                <div className="auth-error-message">
+                                    {error}
+                                </div>
+                            )}
+                            
+                            <div className='auth-submit-container'>
+                                <button 
+                                    type="submit" 
+                                    className='auth-submit-button'
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <span>Вход...</span>
+                                    ) : (
+                                        <span>Войти</span>
+                                    )}
+                                </button>
+                                
+                                <div className="auth-divider">
+                                    <span className="auth-divider-text">или</span>
+                                </div>
+                                
+                                <Link to="/registration" className="auth-register-link">
+                                    <button 
+                                        className='auth-register-button'
+                                        type="button"
+                                    >
+                                        Зарегистрироваться
+                                    </button>
+                                </Link>
                             </div>
                         </form>
                     </div>

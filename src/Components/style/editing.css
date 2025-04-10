@@ -1,216 +1,265 @@
-.img-group-icon {
-    width: 30px;
-    height: 30px;
+.editing-main {
+    min-height: calc(100vh - 120px);
+    padding: 150px 0;
 }
 
-.block-list {
-    background-color: #FCCD3A;
-    min-width: 260px;
-    height: 500px;
-    padding-top: 20px;
-    /* Добавьте отступ сверху, если нужно */
-    border-radius: 10px;
+.editing-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-.section {
-    display: flex;
-    justify-content: center;
-}
-
-.input-search {
-    display: flex;
-    justify-content: center;
-    padding-top: 10px;
-}
-
-.block-list>div:last-child {
-    padding: 0px 10px;
-}
-
-/* Основной контейнер */
 .blocks-flex {
     display: flex;
-    gap: 20px;
-    padding: 20px;
-    background-color: #2d2d2d5a;
-    border-radius: 10px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-height: 700px;
+    max-height: 700px;
 }
 
-/* Контейнер для иконок */
-.blocks-flex>div:first-child {
+.sidebar-icons {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-}
-
-/* Стилизация иконок */
-.img-group-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Стилизация поля ввода для поиска */
-.search-list {
-    width: 80%;
-    height: 30px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-/* Дополнительные стили для пустых контейнеров */
-.info-editing{
-    width: 70%;
-    height: auto;
-    background-color: #FCCD3A;
-    border-radius: 10px;
-}
-
-.block-img-style-circle {
-    height: 44px;
-    width: 44px;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-
-.block-img-style-circle:hover {
-    background-color: #FCCD3A;
-    cursor: pointer;
-}
-
-.block-img-style-circle.active {
-    background-color: #FCCD3A;
-    /* Цвет для активной иконки */
-    cursor: pointer;
-}
-
-.user-list {
-    margin-top: 20px;
-    max-height: 400px;
-    /* Установите максимальную высоту */
-    overflow-y: auto;
-    /* Добавьте вертикальную прокрутку */
-}
-
-ul {
-    list-style: none;
-    line-height: 2;
-    padding: 0;
-    /* Уберите отступы по умолчанию */
-    margin: 0;
-    /* Уберите отступы по умолчанию */
-}
-
-ul li {
-    border: 1px solid black;
-    cursor: pointer;
-    padding: 5px 5px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.757);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar {
-    width: 7px;
-}
-
-.FIO {
-    display: flex;
     gap: 20px;
-    flex-direction: column;
-    font-size: 20px;
-    flex-grow: 1;
-}
-
-.block-button-student-on {
-    display: flex;
-    justify-content: center;
-}
-
-.button-student-on {
-    font-size: 15px;
-    width: 200px;
-    height: 30px;
-    border: 1px solid rgba(255, 255, 255, 0);
-    border-radius: 20px;
-    background-color: rgba(0, 0, 0, 0.482);
-    color: white;
-    cursor: pointer;
-    transition: 0.5s;
-}
-
-.button-student-on:hover {
-    background-color: rgb(0, 0, 0);
-}
-
-/* Св-ва для таблицы */
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-table,
-th,
-td {
-    border: 1px solid black;
-}
-
-th,
-td {
-    padding: 8px;
-    text-align: left;
-}
-
-/* input */
-
-.searchBox {
-    display: flex;
-    max-width: 230px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: #ffffff;
-    border-radius: 50px;
+    padding: 20px 15px;
+    background-color: #2d2d2d;
     position: relative;
 }
 
-.searchButton {
-    color: white;
-    position: absolute;
-    right: 8px;
-    width: 25px;
-    height: 25px;
+.icon-container {
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: var(--gradient-2, linear-gradient(90deg, #2AF598 0%, #009EFD 100%));
-    border: 0;
-    display: inline-block;
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-/*hover effect*/
-button:hover {
-    color: #fff;
-    background-color: #1A1A1A;
-    transform: translateY(-3px);
+.icon-container:hover {
+    background-color: #3d3d3d;
 }
 
-/*button pressing effect*/
-button:active {
-    box-shadow: none;
-    transform: translateY(0);
+.icon-container.active {
+    background-color: #FCCD3A;
 }
 
-.searchInput {
-    border: none;
-    background: none;
+.sidebar-icon {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+}
+
+.icon-container.active .sidebar-icon {
+    filter: none;
+}
+
+.icon-tooltip {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    margin-left: 10px;
+    z-index: 10;
+}
+
+.icon-container:hover .icon-tooltip {
+    opacity: 1;
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+    /* padding: 20px;
+    gap: 20px; */
+}
+
+.editing-search-container {
+    max-width: min-content;
+    min-width: 300px;
+}
+
+.user-list-container {
+    background-color: #FCCD3A;
+    /* border-radius: 10px; */
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-header {
+    padding: 15px;
+    /* background-color: #e6b800; */
+    border-bottom: 1px solid #d9a800;
+}
+
+.section-header h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.search-box {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 35px 8px 15px;
+    border: 1px solid #d9a800;
+    border-radius: 20px;
+    font-size: 14px;
     outline: none;
-    color: rgb(0, 0, 0);
-    font-size: 15px;
-    padding: 10px 20px 10px 20px;
+    transition: border-color 0.3s;
+    padding-left: 45px;
 }
+
+.search-input:focus {
+    border-color: #b38f00;
+}
+
+.search-icon {
+    position: absolute;
+    right: 10px;
+    top: 46%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.user-list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-item:hover {
+    background-color: #f8f8f8;
+    transform: translateX(2px);
+}
+
+.user-item.selected {
+    background-color: #333;
+    color: white;
+}
+
+/* Добавлено это правило для белого ФИО */
+.user-item.selected .user-name {
+    color: white;
+}
+
+.user-item.selected .user-role-badge {
+    background-color: #555;
+    color: white;
+}
+
+.user-item.selected .user-role-badge.student {
+    background-color: #555;
+    color: white;
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+.user-role-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background-color: #eee;
+    color: #555;
+}
+
+.user-role-badge.student {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.error-message {
+    color: #dc3545;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+@media (max-width: 1200px) {
+    .blocks-flex{
+        min-height: 1200px;
+    }
+
+    .content-area {
+        flex-direction: column;
+    }
+    
+    .editing-search-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .blocks-flex {
+        flex-direction: column;
+        min-height: 1500px;
+    }
+    
+    .sidebar-icons {
+        flex-direction: row;
+        padding: 10px;
+        justify-content: center;
+    }
+    
+    .icon-tooltip {
+        display: none;
+    }
+}
+
+/*НАЧАЛО Скрывает панель список студентов */
+.toggle-container .sidebar-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+/* Для мобильных устройств можно скрывать панель по умолчанию */
+@media (max-width: 768px) {
+    .icon-90deg {
+        transform: rotate(90deg);
+    } 
+}
+/*КОНЕЦ Скрывает панель список студентов */
