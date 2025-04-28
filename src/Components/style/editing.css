@@ -195,6 +195,11 @@
 
 .user-name {
     font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal; /* Всегда разрешаем перенос */
+    word-break: break-word;
 }
 
 .user-role-badge {
@@ -203,6 +208,7 @@
     border-radius: 10px;
     background-color: #eee;
     color: #555;
+    white-space: nowrap;
 }
 
 .user-role-badge.student {

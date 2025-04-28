@@ -6,7 +6,7 @@ import { PiMicrosoftPowerpointLogoThin } from "react-icons/pi";
 import { FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 
-const ScheduleEditor = ({ selectedUser }) => {
+const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
     const [schedule, setSchedule] = useState([]);
     const [homework, setHomework] = useState([]);
     const [editing, setEditing] = useState(null);
@@ -14,20 +14,30 @@ const ScheduleEditor = ({ selectedUser }) => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [mode, setMode] = useState('lessons');
     const [isAddingHomework, setIsAddingHomework] = useState(false);
+    const [editingGrade, setEditingGrade] = useState(null);
+    const [gradeValue, setGradeValue] = useState('');
 
     useEffect(() => {
-        if (selectedUser) {
-            fetch(`http://localhost:3001/api/schedules/${selectedUser._id}`)
-                .then(response => response.json())
-                .then(data => setSchedule(data))
-                .catch(error => console.error('Ошибка при получении расписания:', error));
+        const fetchData = async () => {
+            try {
+                if (selectedUser) {
+                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/student/${selectedUser._id}`);
+                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/student/${selectedUser._id}`);
+                    setSchedule(await scheduleResponse.json());
+                    setHomework(await homeworkResponse.json());
+                } else if (selectedGroup) {
+                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`);
+                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`);
+                    setSchedule(await scheduleResponse.json());
+                    setHomework(await homeworkResponse.json());
+                }
+            } catch (error) {
+                console.error('Ошибка при получении данных:', error);
+            }
+        };
 
-            fetch(`http://localhost:3001/api/homework/${selectedUser._id}`)
-                .then(response => response.json())
-                .then(data => setHomework(data))
-                .catch(error => console.error('Ошибка при получении домашнего задания:', error));
-        }
-    }, [selectedUser]);
+        fetchData();
+    }, [selectedUser, selectedGroup]);
 
     const handleAddToSchedule = async () => {
         const dateInput = document.getElementById('dateInput').value;
@@ -45,7 +55,8 @@ const ScheduleEditor = ({ selectedUser }) => {
         const dayOfWeek = getShortDayOfWeek(dateObj);
 
         const newScheduleItem = {
-            student_id: selectedUser._id,
+            student_id: selectedUser ? selectedUser._id : null,
+            group_id: selectedGroup ? selectedGroup._id : null,
             day: dayOfWeek,
             date: dateObj,
             time: timeInput,
@@ -83,41 +94,41 @@ const ScheduleEditor = ({ selectedUser }) => {
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
         const filesInput = document.getElementById('filesInput').files;
-
+    
         if (!dueDateInput || filesInput.length === 0) {
             alert('Пожалуйста, укажите дату выполнения и прикрепите файлы');
             return;
         }
-
+    
         const formData = new FormData();
-        formData.append('student_id', selectedUser._id);
+        if (selectedUser) formData.append('student_id', selectedUser._id);
+        if (selectedGroup) formData.append('group_id', selectedGroup._id);
         formData.append('day', getShortDayOfWeek(new Date(dueDateInput)));
         formData.append('dueDate', dueDateInput);
-        formData.append('answer', '');
-        formData.append('grade', null);
-
+    
         for (let i = 0; i < filesInput.length; i++) {
             formData.append('files', filesInput[i]);
         }
-
+    
         try {
             const response = await fetch('http://localhost:3001/api/homework', {
                 method: 'POST',
                 body: formData,
             });
-
-            if (response.ok) {
-                const savedHomeworkItem = await response.json();
-                setHomework([...homework, savedHomeworkItem]);
-                setIsAddingHomework(false);
-                document.getElementById('dueDateInput').value = '';
-                document.getElementById('filesInput').value = '';
-            } else {
-                throw new Error('Ошибка при добавлении домашнего задания');
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка при добавлении домашнего задания');
             }
+    
+            const savedHomeworkItem = await response.json();
+            setHomework([...homework, savedHomeworkItem]);
+            setIsAddingHomework(false);
+            document.getElementById('dueDateInput').value = '';
+            document.getElementById('filesInput').value = '';
         } catch (error) {
             console.error('Ошибка при добавлении домашнего задания:', error);
-            alert('Не удалось добавить домашнее задание');
+            alert(error.message || 'Не удалось добавить домашнее задание');
         }
     };
 
@@ -140,6 +151,46 @@ const ScheduleEditor = ({ selectedUser }) => {
         } catch (error) {
             console.error('Ошибка при обновлении посещаемости:', error);
         }
+    };
+
+    const handleEditGrade = (id, currentGrade) => {
+        setEditingGrade(id);
+        setGradeValue(currentGrade || '');
+    };
+
+    const handleGradeChange = (e) => {
+        setGradeValue(e.target.value);
+    };
+
+    const handleSaveGrade = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ grade: gradeValue ? parseInt(gradeValue) : null }),
+            });
+
+            if (response.ok) {
+                const updatedHomework = await response.json();
+                setHomework(homework.map(item => 
+                    item._id === id ? updatedHomework : item
+                ));
+                setEditingGrade(null);
+                setGradeValue('');
+            } else {
+                throw new Error('Ошибка при обновлении оценки');
+            }
+        } catch (error) {
+            console.error('Ошибка при сохранении оценки:', error);
+            alert('Не удалось сохранить оценку');
+        }
+    };
+
+    const handleCancelGradeEdit = () => {
+        setEditingGrade(null);
+        setGradeValue('');
     };
 
     const handleEdit = (id) => {
@@ -308,8 +359,9 @@ const ScheduleEditor = ({ selectedUser }) => {
     return (
         <div className="schedule-editor-container">
             <div className="editor-header">
-                <h3>
+                <h3 className='name-division'>
                     {selectedUser ? `${selectedUser.surname} ${selectedUser.name} ${selectedUser.patronymic}` : 'Выберите студента'}
+                    {selectedGroup && ` - ${selectedGroup.name}`}
                 </h3>
                 <div className='mode-switcher'>
                     <button
@@ -636,10 +688,45 @@ const ScheduleEditor = ({ selectedUser }) => {
                                                 )}
                                             </td>
                                             <td>
-                                                {item.grade ? (
-                                                    <span className="grade-badge">{item.grade}</span>
+                                                {editingGrade === item._id ? (
+                                                    <div className="grade-edit-container">
+                                                        <input
+                                                            type="number"
+                                                            value={gradeValue}
+                                                            onChange={handleGradeChange}
+                                                            className="grade-input"
+                                                            min="1"
+                                                            max="5"
+                                                        />
+                                                        <div className="grade-edit-actions">
+                                                            <button 
+                                                                onClick={() => handleSaveGrade(item._id)}
+                                                                className="action-button save-button"
+                                                            >
+                                                                <FiCheck />
+                                                            </button>
+                                                            <button 
+                                                                onClick={handleCancelGradeEdit}
+                                                                className="action-button cancel-button"
+                                                            >
+                                                                <FiX />
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 ) : (
-                                                    <span className="no-grade">-</span>
+                                                    <div className="grade-display">
+                                                        {item.grade ? (
+                                                            <span className="grade-badge">{item.grade}</span>
+                                                        ) : (
+                                                            <span className="no-grade">-</span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleEditGrade(item._id, item.grade)}
+                                                            className="action-button edit-button"
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>

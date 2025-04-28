@@ -13,9 +13,10 @@ import "./Components/style/config.css";
 import "./Components/style/buttonStyle.css";
 import AppForm from "./Pages/ApplicationForm";
 import ListApp from "./Pages/ListApplications";
-import { NotificationProvider } from './Components/NotificationContext';
+// import { NotificationProvider } from './Components/NotificationContext';
 import ScrollTop from "./Components/ScrollTop";
 import ControlPanel from "./Pages/ControlPanel";
+import Employment from "./Pages/Employment";
 import VerifyEmail from "./Pages/VerifyEmail";
 
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/appform" element={<AppForm/>} />
           <Route path="/listapp" element={<ListApp/>} />
           <Route path="/controlpanel" element={<ControlPanel/>} />
+          <Route path="/employment" element={<Employment/>} />
           <Route path="/verify-email" element={<VerifyEmail/>} />
         </Routes>
       </Router>

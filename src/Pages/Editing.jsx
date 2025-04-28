@@ -3,6 +3,7 @@ import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 import UserInfo from "../Components/UserInfo";
 import ScheduleEditor from "../Components/ScheduleEditor";
+import GroupEditor from "../Components/GroupEditor";
 import "../Components/style/config.css";
 import "../Components/style/editing.css";
 import iconUsers from "../img/user.png";
@@ -11,10 +12,12 @@ import iconEducation from "../img/education.png";
 
 const Editing = () => {
     const [users, setUsers] = useState([]);
+    const [groups, setGroups] = useState([]);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeImage, setActiveImage] = useState(1);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState(null); // Убедитесь, что эта функция определена
     const [schedule, setSchedule] = useState([]);
     const [activeComponent, setActiveComponent] = useState('UserInfo');
     const [sectionTitle, setSectionTitle] = useState("Пользователи");
@@ -25,6 +28,7 @@ const Editing = () => {
         const savedActiveImage = localStorage.getItem('activeImage');
         const savedSearchQuery = localStorage.getItem('searchQuery');
         const savedSelectedUser = localStorage.getItem('selectedUser');
+        const savedSelectedGroup = localStorage.getItem('selectedGroup');
         const savedSchedule = localStorage.getItem('schedule');
         const savedActiveComponent = localStorage.getItem('activeComponent');
         const savedSectionTitle = localStorage.getItem('sectionTitle');
@@ -34,6 +38,7 @@ const Editing = () => {
         if (savedActiveImage) setActiveImage(JSON.parse(savedActiveImage));
         if (savedSearchQuery) setSearchQuery(savedSearchQuery);
         if (savedSelectedUser) setSelectedUser(JSON.parse(savedSelectedUser));
+        if (savedSelectedGroup) setSelectedGroup(JSON.parse(savedSelectedGroup));
         if (savedSchedule) setSchedule(JSON.parse(savedSchedule));
         if (savedActiveComponent) setActiveComponent(savedActiveComponent);
         if (savedSectionTitle) setSectionTitle(savedSectionTitle);
@@ -55,18 +60,35 @@ const Editing = () => {
                 console.error('Ошибка при получении пользователей:', error);
                 setError(error.message);
             });
+
+        fetch('http://localhost:3001/api/groups')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при получении групп');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Полученные группы:', data);
+                setGroups(data);
+            })
+            .catch(error => {
+                console.error('Ошибка при получении групп:', error);
+                setError(error.message);
+            });
     }, []);
 
     useEffect(() => {
         localStorage.setItem('activeImage', JSON.stringify(activeImage));
         localStorage.setItem('searchQuery', searchQuery);
         localStorage.setItem('selectedUser', JSON.stringify(selectedUser));
+        localStorage.setItem('selectedGroup', JSON.stringify(selectedGroup));
         localStorage.setItem('schedule', JSON.stringify(schedule));
         localStorage.setItem('activeComponent', activeComponent);
         localStorage.setItem('sectionTitle', sectionTitle);
         localStorage.setItem('selectedStudentId', selectedStudentId);
         localStorage.setItem('showSearchContainer', JSON.stringify(showSearchContainer));
-    }, [activeImage, searchQuery, selectedUser, schedule, activeComponent, sectionTitle, selectedStudentId, showSearchContainer]);
+    }, [activeImage, searchQuery, selectedUser, selectedGroup, schedule, activeComponent, sectionTitle, selectedStudentId, showSearchContainer]);
 
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
@@ -76,13 +98,20 @@ const Editing = () => {
         setActiveImage(imageId);
         setActiveComponent(imageId === 1 ? 'UserInfo' : imageId === 2 ? 'ScheduleEditor' : null);
         setSelectedUser(null);
+        setSelectedGroup(null);
         setSelectedStudentId(null);
         setSectionTitle(imageId === 1 ? 'Пользователи' : imageId === 2 ? 'Студенты' : 'Группы');
     };
 
     const handleUserClick = (user) => {
         setSelectedUser(user);
+        setSelectedGroup(null);
         setSelectedStudentId(user._id);
+    };
+
+    const handleGroupClick = (group) => {
+        setSelectedGroup(group);
+        setSelectedUser(null);
     };
 
     const handleAddToStudents = async () => {
@@ -105,6 +134,31 @@ const Editing = () => {
                 }
             } catch (error) {
                 console.error('Ошибка при обновлении роли пользователя:', error);
+                setError(error.message);
+            }
+        }
+    };
+
+    const handleCreateGroup = async () => {
+        const groupName = prompt("Введите название группы:");
+        if (groupName) {
+            try {
+                const response = await fetch('http://localhost:3001/api/groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: groupName }),
+                });
+
+                if (response.ok) {
+                    const newGroup = await response.json();
+                    setGroups([...groups, newGroup]);
+                } else {
+                    throw new Error('Ошибка при создании группы');
+                }
+            } catch (error) {
+                console.error('Ошибка при создании группы:', error);
                 setError(error.message);
             }
         }
@@ -182,21 +236,26 @@ const Editing = () => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div className="content-area">
-                            <div 
-                                className="editing-search-container" 
+                            <div
+                                className="editing-search-container"
                                 style={{ display: showSearchContainer ? 'block' : 'none' }}
                             >
                                 <div className="user-list-container">
                                     <div className="section-header">
                                         <h3>{sectionTitle}</h3>
+                                        {activeImage === 3 && (
+                                            <button onClick={handleCreateGroup} className="create-group-button">
+                                                Создать группу
+                                            </button>
+                                        )}
                                         <div className="search-box">
-                                            <input 
-                                                className="search-input" 
-                                                type="text" 
-                                                placeholder="Поиск..." 
-                                                value={searchQuery} 
+                                            <input
+                                                className="search-input"
+                                                type="text"
+                                                placeholder="Поиск..."
+                                                value={searchQuery}
                                                 onChange={handleSearchChange}
                                             />
                                             <span className="search-icon">
@@ -207,28 +266,45 @@ const Editing = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="user-list-scroll">
                                         {error && <p className="error-message">Ошибка: {error}</p>}
-                                        <ul className="user-list">
-                                            {filteredUsers.map(user => (
-                                                <li
-                                                    key={user._id}
-                                                    onClick={() => handleUserClick(user)}
-                                                    className={`user-item ${selectedStudentId === user._id ? 'selected' : ''}`}
-                                                >
-                                                    <span className="user-name">
-                                                        {user.surname} {user.name} {user.patronymic}
-                                                    </span>
-                                                    {activeImage === 1 && (
-                                                        <span className="user-role-badge">Пользователь</span>
-                                                    )}
-                                                    {activeImage === 2 && (
-                                                        <span className="user-role-badge student">Студент</span>
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        {activeImage === 3 ? (
+                                            <ul className="user-list">
+                                                {groups.map(group => (
+                                                    <li
+                                                        key={group._id}
+                                                        onClick={() => handleGroupClick(group)}
+                                                        className={`user-item ${selectedGroup?._id === group._id ? 'selected' : ''}`}
+                                                    >
+                                                        <span className="user-name">{group.name}</span>
+                                                        <span className="user-role-badge">
+                                                            {group.students?.length || 0} студентов
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <ul className="user-list">
+                                                {filteredUsers.map(user => (
+                                                    <li
+                                                        key={user._id}
+                                                        onClick={() => handleUserClick(user)}
+                                                        className={`user-item ${selectedStudentId === user._id ? 'selected' : ''}`}
+                                                    >
+                                                        <span className="user-name">
+                                                            {user.surname} {user.name} {user.patronymic}
+                                                        </span>
+                                                        {activeImage === 1 && (
+                                                            <span className="user-role-badge">Пользователь</span>
+                                                        )}
+                                                        {activeImage === 2 && (
+                                                            <span className="user-role-badge student">Студент</span>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -240,6 +316,16 @@ const Editing = () => {
                                 <ScheduleEditor
                                     schedule={schedule}
                                     selectedUser={selectedUser}
+                                />
+                            )}
+                            {activeImage === 3 && (
+                                <GroupEditor
+                                    selectedGroup={selectedGroup}
+                                    setSelectedGroup={setSelectedGroup} // Убедитесь, что эта функция передается
+                                    groups={groups}
+                                    setGroups={setGroups}
+                                    users={users}
+                                    setUsers={setUsers}
                                 />
                             )}
                         </div>

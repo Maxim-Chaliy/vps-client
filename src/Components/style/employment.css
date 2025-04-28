@@ -1,0 +1,570 @@
+.employment-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 20px 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+.view-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.view-controls button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #ecf0f1;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.3s;
+    min-width: 120px;
+}
+
+.view-controls button.active {
+    background-color: #3498db;
+    color: white;
+}
+
+.view-controls button:hover {
+    background-color: #bdc3c7;
+}
+
+.view-controls button.active:hover {
+    background-color: #2980b9;
+}
+
+/* Day View Styles */
+.day-view {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.date-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.nav-button {
+    padding: 8px 15px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+    min-width: 80px;
+}
+
+.nav-button:hover {
+    background-color: #2980b9;
+}
+
+.current-date, .current-week {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.date-picker {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.date-text, .week-text {
+    font-weight: bold;
+    color: #2c3e50;
+    text-transform: capitalize;
+}
+
+.schedule-intervals {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-interval {
+    display: flex;
+    align-items: flex-start;
+    border-radius: 4px;
+    padding: 15px;
+    min-height: 80px;
+    box-sizing: border-box;
+}
+
+.time-interval.booked {
+    background-color: #e8f4fc;
+    border-left: 4px solid #3498db;
+}
+
+.time-interval.free {
+    background-color: #f5f5f5;
+    border-left: 4px solid #95a5a6;
+}
+
+.interval-time {
+    width: 150px;
+    font-weight: bold;
+    color: #2c3e50;
+    flex-shrink: 0;
+    padding-right: 15px;
+    border-right: 1px solid #eee;
+}
+
+.interval-content {
+    flex-grow: 1;
+    padding-left: 15px;
+    min-width: 0;
+}
+
+.student-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subject {
+    font-size: 14px;
+    color: #34495e;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.duration {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.free-label {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 16px;
+    align-self: center;
+    width: 100%;
+}
+
+.lesson-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.action-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    min-width: 90px;
+}
+
+.action-button.reschedule {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.action-button.reschedule:hover {
+    background-color: #45a049;
+}
+
+.action-button.cancel {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.action-button.cancel:hover {
+    background-color: #ff5252;
+}
+
+/* Week View Styles */
+.week-view {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    overflow-x: auto;
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.week-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.week-table th, .week-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.week-table th {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.time-cell {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+.day-cell {
+    vertical-align: top;
+    min-width: 100px;
+    height: 40px;
+    padding: 0;
+}
+
+.week-interval {
+    margin: 2px;
+    border-radius: 3px;
+    padding: 4px;
+    font-size: 12px;
+    min-height: 36px;
+    box-shadow: none; /* Убираем тень */
+}
+
+.week-interval.booked {
+    background-color: #e8f4fc;
+    border-left: 3px solid #3498db;
+}
+
+.week-lesson-info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2px;
+}
+
+.week-student-name {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+}
+
+.week-subject {
+    font-size: 10px;
+    color: #34495e;
+    margin: 2px 0;
+}
+
+.week-time {
+    font-size: 9px;
+    color: #7f8c8d;
+}
+
+.week-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.week-action-button {
+    padding: 2px 4px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 10px;
+    flex-grow: 1;
+}
+
+.week-action-button.reschedule {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.week-action-button.cancel {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.reschedule-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.reschedule-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.reschedule-controls input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-lesson-info {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.modal-lesson-info p {
+    margin: 5px 0;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 100px;
+}
+
+.modal-button.confirm {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.modal-button.confirm:hover {
+    background-color: #45a049;
+}
+
+.modal-button.cancel {
+    background-color: #e0e0e0;
+}
+
+.modal-button.cancel:hover {
+    background-color: #d0d0d0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .employment-container {
+        padding: 80px 10px 10px;
+    }
+
+    .time-interval {
+        flex-direction: column;
+        gap: 8px;
+        min-height: auto;
+        padding: 12px;
+    }
+
+    .interval-time {
+        width: 100%;
+        padding-right: 0;
+        border-right: none;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .interval-content {
+        padding-left: 0;
+        width: 100%;
+    }
+
+    .date-navigation, .week-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-button {
+        width: 100%;
+    }
+
+    .view-controls button {
+        min-width: 100px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .action-button {
+        min-width: 80px;
+        padding: 5px 8px;
+    }
+
+    .week-table {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .interval-time {
+        font-size: 14px;
+    }
+
+    .student-name, .subject {
+        font-size: 13px;
+    }
+
+    .free-label {
+        font-size: 14px;
+    }
+
+    .date-text, .week-text {
+        font-size: 14px;
+    }
+
+    .modal-button {
+        min-width: 80px;
+        padding: 6px 10px;
+    }
+
+    .week-table th, .week-table td {
+        padding: 4px;
+        font-size: 12px;
+    }
+
+    .week-interval {
+        padding: 2px;
+        font-size: 10px;
+    }
+
+    .week-student-name {
+        font-size: 9px;
+    }
+
+    .week-subject, .week-time {
+        font-size: 8px;
+    }
+
+    .week-action-button {
+        font-size: 8px;
+        padding: 1px 2px;
+    }
+}
+
+@media (max-width: 360px) {
+    .employment-container {
+        padding: 70px 5px 5px;
+    }
+
+    .view-controls button {
+        min-width: 80px;
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+
+    .week-table {
+        font-size: 10px;
+    }
+
+    .week-table th, .week-table td {
+        padding: 2px;
+    }
+
+    .week-interval {
+        margin: 1px;
+    }
+
+    .week-student-name {
+        display: none;
+    }
+
+    .week-subject {
+        font-size: 7px;
+        margin: 1px 0;
+    }
+
+    .week-time {
+        display: none;
+    }
+
+    .week-actions {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .week-action-button {
+        width: 100%;
+        padding: 1px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 10px;
+    }
+
+    .modal-button {
+        min-width: 70px;
+        padding: 5px 8px;
+        font-size: 13px;
+    }
+}

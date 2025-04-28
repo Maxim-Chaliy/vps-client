@@ -1,0 +1,1150 @@
+import React, { useEffect, useState } from 'react';
+import "../Components/style/ScheduleEditor.css";
+import { FiEdit2, FiTrash2, FiCheck, FiX, FiPlus, FiMinus, FiUsers } from "react-icons/fi";
+import { BsFiletypeTxt, BsFiletypeDocx, BsFiletypeDoc, BsFiletypePdf, BsFiletypeXlsx } from "react-icons/bs";
+import { PiMicrosoftPowerpointLogoThin } from "react-icons/pi";
+import { FaRegCheckCircle, FaRegTimesCircle, FaUserCheck, FaUserTimes } from "react-icons/fa";
+import iconadd from "../img/icon-add.png";
+import GroupAttendanceModal from './GroupAttendanceModal';
+
+const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => {
+    const [groupStudents, setGroupStudents] = useState([]);
+    const [availableStudents, setAvailableStudents] = useState([]);
+    const [editing, setEditing] = useState(false);
+    const [editValues, setEditValues] = useState({});
+    const [schedule, setSchedule] = useState([]);
+    const [homework, setHomework] = useState([]);
+    const [mode, setMode] = useState('students');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [editingSchedule, setEditingSchedule] = useState(null);
+    const [editScheduleValues, setEditScheduleValues] = useState({});
+    const [selectedScheduleItems, setSelectedScheduleItems] = useState([]);
+    const [isAddingHomework, setIsAddingHomework] = useState(false);
+    const [attendanceModal, setAttendanceModal] = useState({
+        open: false,
+        scheduleItem: null,
+        students: []
+    });
+    const [editingGrades, setEditingGrades] = useState({});
+    const [studentGrades, setStudentGrades] = useState({});
+
+    useEffect(() => {
+        if (selectedGroup) {
+            setLoading(true);
+            setError(null);
+    
+            const loadData = async () => {
+                try {
+                    const studentsResponse = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/students`);
+                    if (!studentsResponse.ok) throw new Error('Ошибка загрузки студентов группы');
+                    const groupStudentsData = await studentsResponse.json();
+
+                    const allStudentsResponse = await fetch('http://localhost:3001/api/users/students');
+                    if (!allStudentsResponse.ok) throw new Error('Ошибка загрузки всех студентов');
+                    const allStudentsData = await allStudentsResponse.json();
+
+                    const groupStudentIds = groupStudentsData.map(student => student._id);
+                    const availableStudentsData = allStudentsData.filter(
+                        student => !groupStudentIds.includes(student._id)
+                    );
+
+                    setGroupStudents(groupStudentsData);
+                    setAvailableStudents(availableStudentsData);
+
+                    const [scheduleRes, homeworkRes] = await Promise.all([
+                        fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`),
+                        fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`)
+                    ]);
+
+                    if (!scheduleRes.ok) console.error('Ошибка загрузки расписания');
+                    if (!homeworkRes.ok) console.error('Ошибка загрузки домашних заданий');
+
+                    const scheduleData = await scheduleRes.json().catch(() => []);
+                    const homeworkData = await homeworkRes.json().catch(() => []);
+
+                    setSchedule(scheduleData);
+                    setHomework(homeworkData);
+
+                } catch (error) {
+                    console.error('Ошибка загрузки данных:', error);
+                    setError(error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+    
+            loadData();
+        }
+    }, [selectedGroup]);
+
+    const handleEditStudentGrade = (homeworkId, studentId, currentGrade) => {
+        setEditingGrades(prev => ({
+            ...prev,
+            [homeworkId]: studentId
+        }));
+        setStudentGrades(prev => ({
+            ...prev,
+            [studentId]: currentGrade || ''
+        }));
+    };
+
+    const handleGradeChange = (studentId, value) => {
+        setStudentGrades(prev => ({
+            ...prev,
+            [studentId]: value
+        }));
+    };
+
+    const handleSaveStudentGrade = async (homeworkId, studentId) => {
+        try {
+            const gradeValue = studentGrades[studentId] ? parseInt(studentGrades[studentId]) : null;
+            
+            const response = await fetch(`http://localhost:3001/api/homework/${homeworkId}/grade/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ grade: gradeValue }),
+            });
+
+            if (response.ok) {
+                const updatedHomework = await response.json();
+                setHomework(homework.map(hw => 
+                    hw._id === updatedHomework._id ? updatedHomework : hw
+                ));
+                setEditingGrades(prev => {
+                    const newState = {...prev};
+                    delete newState[homeworkId];
+                    return newState;
+                });
+            } else {
+                throw new Error('Ошибка при обновлении оценки');
+            }
+        } catch (error) {
+            console.error('Ошибка при сохранении оценки:', error);
+            alert('Не удалось сохранить оценку');
+        }
+    };
+
+    const handleCancelGradeEdit = (homeworkId) => {
+        setEditingGrades(prev => {
+            const newState = {...prev};
+            delete newState[homeworkId];
+            return newState;
+        });
+    };
+
+    const handleOpenAttendance = async (scheduleItem) => {
+        try {
+            let students = [];
+            
+            if (scheduleItem.group_id) {
+                const response = await fetch(`http://localhost:3001/api/groups/${scheduleItem.group_id}/students`);
+                if (response.ok) {
+                    students = await response.json();
+                }
+            } else if (scheduleItem.student_id) {
+                const response = await fetch(`http://localhost:3001/api/users/${scheduleItem.student_id}`);
+                if (response.ok) {
+                    const student = await response.json();
+                    students = [student];
+                }
+            }
+
+            setAttendanceModal({
+                open: true,
+                scheduleItem,
+                students
+            });
+        } catch (error) {
+            console.error('Ошибка загрузки студентов:', error);
+            setError('Не удалось загрузить данные студентов');
+        }
+    };
+
+    const handleSaveAttendance = async (attendanceData) => {
+        try {
+            const { scheduleItem } = attendanceModal;
+            let url = `http://localhost:3001/api/schedules/${scheduleItem._id}/`;
+            
+            if (scheduleItem.group_id) {
+                url += 'updateGroupAttendance';
+            } else {
+                url += 'updateAttendance';
+            }
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    attendance: attendanceData,
+                    ...(scheduleItem.student_id && { studentId: scheduleItem.student_id })
+                }),
+            });
+
+            if (response.ok) {
+                const updatedItem = await response.json();
+                setSchedule(schedule.map(item => 
+                    item._id === updatedItem._id ? updatedItem : item
+                ));
+                setAttendanceModal({ open: false, scheduleItem: null, students: [] });
+            } else {
+                throw new Error('Ошибка сохранения посещаемости');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError('Не удалось сохранить посещаемость');
+        }
+    };
+
+    const renderAttendanceStatus = (item) => {
+        if (item.student_id) {
+            return (
+                <label className="attendance-toggle">
+                    <input
+                        type="checkbox"
+                        checked={item.attendance || false}
+                        onChange={() => handleToggleIndividualAttendance(item._id, !item.attendance)}
+                    />
+                    <span className="toggle-slider">
+                        {item.attendance ? (
+                            <FaRegCheckCircle className="attendance-icon present" />
+                        ) : (
+                            <FaRegTimesCircle className="attendance-icon absent" />
+                        )}
+                    </span>
+                </label>
+            );
+        }
+        
+        if (!item.attendance) {
+            return <span className="attendance-not-marked">Не отмечено</span>;
+        }
+        
+        const attendedCount = Object.values(item.attendance).filter(Boolean).length;
+        return (
+            <div className="attendance-summary">
+                <span className="attended-count">
+                    <FaUserCheck /> {attendedCount}
+                </span>
+                <span className="absent-count">
+                    <FaUserTimes /> {groupStudents.length - attendedCount}
+                </span>
+            </div>
+        );
+    };
+
+    const handleToggleIndividualAttendance = async (scheduleId, attendance) => {
+        try {
+            const response = await fetch(`http://localhost:3001/api/schedules/${scheduleId}/updateAttendance`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ attendance }),
+            });
+
+            if (response.ok) {
+                const updatedItem = await response.json();
+                setSchedule(schedule.map(item => 
+                    item._id === updatedItem._id ? updatedItem : item
+                ));
+            } else {
+                throw new Error('Ошибка обновления посещаемости');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError('Не удалось обновить посещаемость');
+        }
+    };
+
+    const handleAddToSchedule = async () => {
+        const dateInput = document.getElementById('dateInput').value;
+        const timeInput = document.getElementById('timeInput').value;
+        const durationInput = document.getElementById('durationInput').value;
+        const subjectInput = document.getElementById('exampleSelect').value;
+        const descriptionInput = document.getElementById('descriptionInput').value;
+
+        if (!dateInput || !timeInput || !durationInput || !subjectInput) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+
+        const dateObj = new Date(dateInput);
+        const dayOfWeek = getShortDayOfWeek(dateObj);
+
+        const newScheduleItem = {
+            group_id: selectedGroup._id,
+            day: dayOfWeek,
+            date: dateObj,
+            time: timeInput,
+            duration: parseInt(durationInput) || 60,
+            subject: subjectInput,
+            description: descriptionInput || '',
+            attendance: null
+        };
+
+        try {
+            const response = await fetch('http://localhost:3001/api/schedules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newScheduleItem),
+            });
+
+            if (response.ok) {
+                const savedScheduleItem = await response.json();
+                setSchedule([...schedule, savedScheduleItem]);
+                document.getElementById('dateInput').value = '';
+                document.getElementById('timeInput').value = '';
+                document.getElementById('durationInput').value = '60';
+                document.getElementById('descriptionInput').value = '';
+            } else {
+                throw new Error('Ошибка при добавлении занятия в расписание');
+            }
+        } catch (error) {
+            console.error('Ошибка при добавлении занятия в расписание:', error);
+            alert('Не удалось добавить занятие');
+        }
+    };
+
+    const handleEditGroup = () => {
+        setEditing(true);
+        setEditValues({
+            name: selectedGroup.name
+        });
+    };
+
+    const handleSaveGroup = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(editValues),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при обновлении группы');
+            }
+
+            const updatedGroup = await response.json();
+            setGroups(groups.map(g => g._id === updatedGroup._id ? updatedGroup : g));
+            setSelectedGroup(updatedGroup);
+            setEditing(false);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteGroup = async () => {
+        if (window.confirm(`Вы уверены, что хотите удалить группу "${selectedGroup.name}"?`)) {
+            try {
+                setLoading(true);
+                const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении группы');
+                }
+
+                setGroups(groups.filter(g => g._id !== selectedGroup._id));
+                setSelectedGroup(null);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleAddStudent = async (studentId) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/addStudent`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studentId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при добавлении студента');
+            }
+
+            const updatedGroup = await response.json();
+            setGroups(groups.map(g => g._id === updatedGroup._id ? updatedGroup : g));
+            setSelectedGroup(updatedGroup);
+
+            const addedStudent = availableStudents.find(s => s._id === studentId);
+            setGroupStudents([...groupStudents, addedStudent]);
+            setAvailableStudents(availableStudents.filter(s => s._id !== studentId));
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveStudent = async (studentId) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/removeStudent`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studentId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при удалении студента');
+            }
+
+            const updatedGroup = await response.json();
+            setGroups(groups.map(g => g._id === updatedGroup._id ? updatedGroup : g));
+            setSelectedGroup(updatedGroup);
+            setGroupStudents(groupStudents.filter(s => s._id !== studentId));
+            setAvailableStudents([...availableStudents, groupStudents.find(s => s._id === studentId)]);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEditSchedule = (id) => {
+        const itemToEdit = schedule.find(item => item._id === id);
+        setEditingSchedule(id);
+        setEditScheduleValues({
+            date: formatDateForInput(itemToEdit.date),
+            time: itemToEdit.time,
+            duration: itemToEdit.duration,
+            subject: itemToEdit.subject,
+            description: itemToEdit.description
+        });
+    };
+
+    const handleScheduleInputChange = (field, value) => {
+        setEditScheduleValues(prevValues => ({
+            ...prevValues,
+            [field]: value
+        }));
+    };
+
+    const handleSaveSchedule = async () => {
+        if (editingSchedule) {
+            const updatedItem = {
+                ...schedule.find(item => item._id === editingSchedule),
+                ...editScheduleValues,
+                date: new Date(editScheduleValues.date),
+                day: getShortDayOfWeek(new Date(editScheduleValues.date)),
+                duration: parseInt(editScheduleValues.duration) || 60
+            };
+
+            try {
+                const response = await fetch(`http://localhost:3001/api/schedules/${editingSchedule}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedItem),
+                });
+
+                if (response.ok) {
+                    const updatedScheduleItem = await response.json();
+                    setSchedule(schedule.map(item => item._id === editingSchedule ? updatedScheduleItem : item));
+                    setEditingSchedule(null);
+                    setEditScheduleValues({});
+                } else {
+                    throw new Error('Ошибка при сохранении изменений');
+                }
+            } catch (error) {
+                console.error('Ошибка при сохранении изменений:', error);
+                alert('Не удалось сохранить изменения');
+            }
+        }
+    };
+
+    const handleCancelSchedule = () => {
+        setEditingSchedule(null);
+        setEditScheduleValues({});
+    };
+
+    const handleDeleteSchedule = async (id) => {
+        if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
+
+        try {
+            const response = await fetch(`http://localhost:3001/api/schedules/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                setSchedule(schedule.filter(item => item._id !== id));
+                setSelectedScheduleItems(selectedScheduleItems.filter(itemId => itemId !== id));
+            } else {
+                throw new Error('Ошибка при удалении записи');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении записи:', error);
+            alert('Не удалось удалить запись');
+        }
+    };
+
+    const handleDeleteSelectedSchedule = async () => {
+        if (selectedScheduleItems.length === 0) return;
+        if (!window.confirm(`Вы уверены, что хотите удалить ${selectedScheduleItems.length} выбранных записей?`)) return;
+
+        try {
+            const response = await fetch('http://localhost:3001/api/schedules/deleteMultiple', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ids: selectedScheduleItems }),
+            });
+
+            if (response.ok) {
+                setSchedule(schedule.filter(item => !selectedScheduleItems.includes(item._id)));
+                setSelectedScheduleItems([]);
+            } else {
+                throw new Error('Ошибка при удалении записей');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении записей:', error);
+            alert('Не удалось удалить выбранные записи');
+        }
+    };
+
+    const handleSelectScheduleItem = (id) => {
+        setSelectedScheduleItems(prevSelectedItems =>
+            prevSelectedItems.includes(id)
+                ? prevSelectedItems.filter(itemId => itemId !== id)
+                : [...prevSelectedItems, id]
+        );
+    };
+
+    const handleAddToHomework = async () => {
+        const dueDateInput = document.getElementById('dueDateInput').value;
+        const filesInput = document.getElementById('filesInput').files;
+
+        if (!dueDateInput || filesInput.length === 0) {
+            alert('Пожалуйста, укажите дату выполнения и прикрепите файлы');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('group_id', selectedGroup._id);
+        formData.append('day', getShortDayOfWeek(new Date(dueDateInput)));
+        formData.append('dueDate', dueDateInput);
+
+        for (let i = 0; i < filesInput.length; i++) {
+            formData.append('files', filesInput[i]);
+        }
+
+        try {
+            const response = await fetch('http://localhost:3001/api/homework', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const savedHomeworkItem = await response.json();
+                setHomework([...homework, savedHomeworkItem]);
+                setIsAddingHomework(false);
+                document.getElementById('dueDateInput').value = '';
+                document.getElementById('filesInput').value = '';
+            } else {
+                throw new Error('Ошибка при добавлении домашнего задания');
+            }
+        } catch (error) {
+            console.error('Ошибка при добавлении домашнего задания:', error);
+            alert('Не удалось добавить домашнее задание');
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+    };
+
+    const getShortDayOfWeek = (date) => {
+        if (!(date instanceof Date)) {
+            date = new Date(date);
+        }
+        const daysOfWeek = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+        return daysOfWeek[date.getDay()];
+    };
+
+    const formatDuration = (minutes) => {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return hours > 0 ? `${hours}ч ${mins > 0 ? `${mins}м` : ''}` : `${mins}м`;
+    };
+
+    const calculateEndTime = (startTime, duration) => {
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const totalMinutes = hours * 60 + minutes + duration;
+        const endHours = Math.floor(totalMinutes / 60) % 24;
+        const endMinutes = totalMinutes % 60;
+        return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+    };
+
+    const getFileIcon = (file) => {
+        const extension = file.split('.').pop().toLowerCase();
+        switch (extension) {
+            case 'txt': return <BsFiletypeTxt className="file-icon" />;
+            case 'docx': return <BsFiletypeDocx className="file-icon" />;
+            case 'doc': return <BsFiletypeDoc className="file-icon" />;
+            case 'pptx': return <PiMicrosoftPowerpointLogoThin className="file-icon" />;
+            case 'pdf': return <BsFiletypePdf className="file-icon" />;
+            case 'xlsx': return <BsFiletypeXlsx className="file-icon" />;
+            default: return <BsFiletypeTxt className="file-icon" />;
+        }
+    };
+
+    const formatCombinedDateTime = (item) => {
+        const date = formatDate(item.date);
+        const startTime = item.time;
+        const endTime = calculateEndTime(item.time, item.duration);
+        const duration = formatDuration(item.duration);
+        return `${date}<br>${startTime}-${endTime}<br>${duration}`;
+    };
+
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    if (!selectedGroup) {
+        return (
+            <div className="schedule-editor-container">
+                <div className="no-group-selected">
+                    Выберите группу из списка слева
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="schedule-editor-container">
+            <div className="editor-header">
+                <h3>
+                    {editing ? (
+                        <input
+                            type="text"
+                            value={editValues.name}
+                            onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                            className="form-input"
+                        />
+                    ) : (
+                        selectedGroup.name
+                    )}
+                </h3>
+                <div className='mode-switcher'>
+                    <button
+                        className={`mode-button ${mode === 'students' ? 'active' : ''}`}
+                        onClick={() => setMode('students')}
+                    >
+                        Студенты
+                    </button>
+                    <button
+                        className={`mode-button ${mode === 'schedule' ? 'active' : ''}`}
+                        onClick={() => setMode('schedule')}
+                    >
+                        Расписание
+                    </button>
+                    <button
+                        className={`mode-button ${mode === 'homework' ? 'active' : ''}`}
+                        onClick={() => setMode('homework')}
+                    >
+                        Домашнее задание
+                    </button>
+                </div>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+            {loading && <div className="loading-indicator">Загрузка...</div>}
+
+            <div className="group-actions">
+                {editing ? (
+                    <>
+                        <button onClick={handleSaveGroup} className="action-button save-button">
+                            <FiCheck /> Сохранить
+                        </button>
+                        <button onClick={() => setEditing(false)} className="action-button cancel-button">
+                            <FiX /> Отменить
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <button onClick={handleEditGroup} className="action-button edit-button">
+                            <FiEdit2 /> Редактировать
+                        </button>
+                        <button onClick={handleDeleteGroup} className="action-button delete-button">
+                            <FiTrash2 /> Удалить
+                        </button>
+                    </>
+                )}
+            </div>
+
+            {mode === 'students' ? (
+                <div className="group-students-container">
+                    <div className="students-section">
+                        <h4>Студенты в группе ({groupStudents.length})</h4>
+                        <div className="students-list">
+                            {groupStudents.length > 0 ? (
+                                groupStudents.map(student => (
+                                    <div key={student._id} className="student-item">
+                                        <span className="student-name">
+                                            {student.surname} {student.name} {student.patronymic}
+                                        </span>
+                                        <button
+                                            onClick={() => handleRemoveStudent(student._id)}
+                                            className="remove-student-button"
+                                            disabled={loading}
+                                        >
+                                            <FiMinus />
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-data">Нет студентов в группе</div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="students-section">
+                        <h4>Доступные студенты ({availableStudents.length})</h4>
+                        <div className="students-list">
+                            {availableStudents.length > 0 ? (
+                                availableStudents.map(student => (
+                                    <div key={student._id} className="student-item">
+                                        <span className="student-name">
+                                            {student.surname} {student.name} {student.patronymic}
+                                        </span>
+                                        <button
+                                            onClick={() => handleAddStudent(student._id)}
+                                            className="add-student-button"
+                                            disabled={loading}
+                                        >
+                                            <FiPlus />
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-data">Нет доступных студентов</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : mode === 'schedule' ? (
+                <>
+                    <div className="add-lesson-form">
+                        <div className="form-group">
+                            <label htmlFor="dateInput">Дата</label>
+                            <input type="date" id="dateInput" className="form-input" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="timeInput">Время начала</label>
+                            <input type="time" id="timeInput" className="form-input" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="durationInput">Продолжительность (мин)</label>
+                            <input
+                                type="number"
+                                id="durationInput"
+                                className="form-input"
+                                min="30"
+                                step="30"
+                                defaultValue="60"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="exampleSelect">Предмет</label>
+                            <select id="exampleSelect" className="form-input">
+                                <option value="">Выберите предмет</option>
+                                <option value="Алгебра">Алгебра</option>
+                                <option value="Геометрия">Геометрия</option>
+                                <option value="Физика">Физика</option>
+                                <option value="Химия">Химия</option>
+                                <option value="Информатика">Информатика</option>
+                            </select>
+                        </div>
+                        <div className="form-group description-group">
+                            <label htmlFor="descriptionInput">Описание</label>
+                            <input
+                                type="text"
+                                id="descriptionInput"
+                                className="form-input"
+                                placeholder="Дополнительная информация"
+                            />
+                        </div>
+                        <button
+                            className="add-button"
+                            onClick={handleAddToSchedule}
+                        >
+                            <img src={iconadd} alt="Добавить" className="add-icon" />
+                            Добавить
+                        </button>
+                    </div>
+
+                    {selectedScheduleItems.length > 0 && (
+                        <div className="bulk-actions">
+                            <button
+                                onClick={handleDeleteSelectedSchedule}
+                                className="delete-selected-button"
+                            >
+                                <FiTrash2 /> Удалить выбранные ({selectedScheduleItems.length})
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="schedule-table-container">
+                        <table className="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '40px' }}></th>
+                                    <th>День</th>
+                                    <th>Дата/Время/Продолжительность</th>
+                                    <th>Предмет</th>
+                                    <th>Описание</th>
+                                    <th style={{ width: '150px' }}>Посещаемость</th>
+                                    <th style={{ width: '150px' }}>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {schedule.length > 0 ? (
+                                    schedule.map((item) => (
+                                        <React.Fragment key={item._id}>
+                                            <tr className={editingSchedule === item._id ? 'editing-row' : ''}>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedScheduleItems.includes(item._id)}
+                                                        onChange={() => handleSelectScheduleItem(item._id)}
+                                                        className="row-checkbox"
+                                                    />
+                                                </td>
+                                                <td>{item.day}</td>
+                                                <td dangerouslySetInnerHTML={{ __html: formatCombinedDateTime(item) }}></td>
+                                                <td>{item.subject}</td>
+                                                <td>{item.description || '-'}</td>
+                                                <td>
+                                                    {renderAttendanceStatus(item)}
+                                                </td>
+                                                <td>
+                                                    <div className="row-actions">
+                                                        {item.group_id && (
+                                                            <button
+                                                                onClick={() => handleOpenAttendance(item)}
+                                                                className="action-button attendance-button"
+                                                                title="Отметить посещаемость"
+                                                            >
+                                                                <FiUsers />
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleEditSchedule(item._id)}
+                                                            className="action-button edit-button"
+                                                            title="Редактировать"
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteSchedule(item._id)}
+                                                            className="action-button delete-button"
+                                                            title="Удалить"
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {editingSchedule === item._id && (
+                                                <tr className="edit-card-row">
+                                                    <td colSpan="10">
+                                                        <div className="edit-card">
+                                                            <div className="edit-card-content">
+                                                                <div className="edit-form-group">
+                                                                    <label>Дата</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={editScheduleValues.date}
+                                                                        onChange={(e) => handleScheduleInputChange('date', e.target.value)}
+                                                                        className="edit-input"
+                                                                    />
+                                                                </div>
+                                                                <div className="edit-form-group">
+                                                                    <label>Время начала</label>
+                                                                    <input
+                                                                        type="time"
+                                                                        value={editScheduleValues.time}
+                                                                        onChange={(e) => handleScheduleInputChange('time', e.target.value)}
+                                                                        className="edit-input"
+                                                                    />
+                                                                </div>
+                                                                <div className="edit-form-group">
+                                                                    <label>Продолжительность (мин)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={editScheduleValues.duration}
+                                                                        onChange={(e) => handleScheduleInputChange('duration', e.target.value)}
+                                                                        className="edit-input"
+                                                                        min="30"
+                                                                        step="30"
+                                                                    />
+                                                                </div>
+                                                                <div className="edit-form-group">
+                                                                    <label>Предмет</label>
+                                                                    <select
+                                                                        value={editScheduleValues.subject}
+                                                                        onChange={(e) => handleScheduleInputChange('subject', e.target.value)}
+                                                                        className="edit-input"
+                                                                    >
+                                                                        <option value="Алгебра">Алгебра</option>
+                                                                        <option value="Геометрия">Геометрия</option>
+                                                                        <option value="Физика">Физика</option>
+                                                                        <option value="Химия">Химия</option>
+                                                                        <option value="Информатика">Информатика</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="edit-form-group description-group">
+                                                                    <label>Описание</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editScheduleValues.description || ''}
+                                                                        onChange={(e) => handleScheduleInputChange('description', e.target.value)}
+                                                                        className="edit-input"
+                                                                        placeholder="Дополнительная информация"
+                                                                    />
+                                                                </div>
+                                                                <div className="edit-card-actions">
+                                                                    <button
+                                                                        onClick={handleSaveSchedule}
+                                                                        className="action-button save-button"
+                                                                    >
+                                                                        <FiCheck /> Сохранить
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={handleCancelSchedule}
+                                                                        className="action-button cancel-button"
+                                                                    >
+                                                                        <FiX /> Отменить
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <tr className="no-data-row">
+                                        <td colSpan="10">Нет данных о занятиях</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="homework-actions">
+                        <button
+                            className={`add-homework-button ${isAddingHomework ? 'cancel' : 'add'}`}
+                            onClick={() => setIsAddingHomework(!isAddingHomework)}
+                        >
+                            {isAddingHomework ? 'Отменить' : 'Добавить задание'}
+                        </button>
+                    </div>
+
+                    {isAddingHomework && (
+                        <div className="add-homework-form">
+                            <div className="form-group">
+                                <label htmlFor="dueDateInput">Дата выполнения</label>
+                                <input type="date" id="dueDateInput" className="form-input" />
+                            </div>
+                            <div className="form-group file-group">
+                                <label htmlFor="filesInput">Файлы задания</label>
+                                <input
+                                    type="file"
+                                    id="filesInput"
+                                    multiple
+                                    className="file-input"
+                                />
+                                <label htmlFor="filesInput" className="file-input-label">
+                                    Выберите файлы...
+                                </label>
+                            </div>
+                            <button
+                                className="submit-homework-button"
+                                onClick={handleAddToHomework}
+                            >
+                                Сохранить задание
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="homework-table-container">
+                        <table className="homework-table">
+                            <thead>
+                                <tr>
+                                    <th>День</th>
+                                    <th>Выполнить до</th>
+                                    <th>Файлы задания</th>
+                                    <th>Ответ</th>
+                                    <th>Оценки студентов</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {homework.length > 0 ? (
+                                    homework.map((item) => (
+                                        <tr key={item._id}>
+                                            <td>{item.day}</td>
+                                            <td>{formatDate(item.dueDate)}</td>
+                                            <td>
+                                                <div className="files-list">
+                                                    {item.files.map((file, idx) => (
+                                                        <div key={idx} className="file-item">
+                                                            {getFileIcon(file)}
+                                                            <a
+                                                                href={`http://localhost:3001/homework/${file}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                download
+                                                                className="file-link"
+                                                            >
+                                                                {file}
+                                                            </a>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {item.answer && item.answer.length > 0 ? (
+                                                    <div className="files-list">
+                                                        {item.answer.map((file, idx) => (
+                                                            <div key={idx} className="file-item">
+                                                                {getFileIcon(file)}
+                                                                <a
+                                                                    href={`http://localhost:3001/homework/${file}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    download
+                                                                    className="file-link"
+                                                                >
+                                                                    {file}
+                                                                </a>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <span className="no-answer">Нет ответа</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="student-grades-container">
+                                                    {groupStudents.map(student => {
+                                                        const studentGrade = item.grades?.[student._id] || null;
+                                                        const isEditing = editingGrades[item._id] === student._id;
+                                                        
+                                                        return (
+                                                            <div key={student._id} className="student-grade-item">
+                                                                <span className="student-name">
+                                                                    {student.surname} {student.name[0]}.{student.patronymic && `${student.patronymic[0]}.`}
+                                                                </span>
+                                                                {isEditing ? (
+                                                                    <div className="grade-edit-container">
+                                                                        <input
+                                                                            type="number"
+                                                                            value={studentGrades[student._id] || ''}
+                                                                            onChange={(e) => handleGradeChange(student._id, e.target.value)}
+                                                                            className="grade-input"
+                                                                            min="1"
+                                                                            max="5"
+                                                                        />
+                                                                        <div className="grade-edit-actions">
+                                                                            <button 
+                                                                                onClick={() => handleSaveStudentGrade(item._id, student._id)}
+                                                                                className="action-button save-button"
+                                                                            >
+                                                                                <FiCheck />
+                                                                            </button>
+                                                                            <button 
+                                                                                onClick={() => handleCancelGradeEdit(item._id)}
+                                                                                className="action-button cancel-button"
+                                                                            >
+                                                                                <FiX />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="grade-display">
+                                                                        {studentGrade ? (
+                                                                            <span className="grade-badge">{studentGrade}</span>
+                                                                        ) : (
+                                                                            <span className="no-grade">-</span>
+                                                                        )}
+                                                                        <button
+                                                                            onClick={() => handleEditStudentGrade(item._id, student._id, studentGrade)}
+                                                                            className="action-button edit-button"
+                                                                        >
+                                                                            <FiEdit2 />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr className="no-data-row">
+                                        <td colSpan="5">Нет данных о домашних заданиях</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
+
+            {attendanceModal.open && (
+                <GroupAttendanceModal
+                    scheduleItem={attendanceModal.scheduleItem}
+                    students={attendanceModal.students}
+                    onClose={() => setAttendanceModal({ open: false, scheduleItem: null, students: [] })}
+                    onSave={handleSaveAttendance}
+                />
+            )}
+        </div>
+    );
+};
+
+export default GroupEditor;

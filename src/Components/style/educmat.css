@@ -246,18 +246,38 @@
     transform: scale(1.05);
 }
 
+.justy-content-space{
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 .padding-info-block-material {
     padding: 15px;
-    
+    width: 100%;
+    height: 100%; /* или конкретное значение */
+    display: flex;
+    flex-direction: column;
+}
+
+.name-material {
+    width: 100%; /* Занимает всю доступную ширину */
+    padding-top: 10px;
 }
 
 .name-material h3 {
     margin: 0;
     font-size: 18px;
     color: #343a40;
-    white-space: nowrap;
+    /* Убрано white-space: nowrap */
     overflow: hidden;
     text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Ограничиваем количество строк (по желанию) */
+    -webkit-box-orient: vertical;
+    word-wrap: break-word; /* Перенос длинных слов */
+    max-width: 100%; /* Не превышает ширину родителя */
 }
 
 .three-dots-flex-end{
@@ -331,6 +351,7 @@
 
 /* Модальное окно */
 .educmat-modal-overlay {
+    font-family: Arial, Helvetica, sans-serif;
     position: fixed;
     top: 0;
     left: 0;
@@ -389,13 +410,18 @@
 .educmat-modal-img {
     flex: 1;
     min-width: 0;
+    max-height: 500px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    max-height: 500px;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .educmat-modal-info {

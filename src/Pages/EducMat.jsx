@@ -201,44 +201,47 @@ const EducMat = () => {
                                                         <span>Просмотреть</span>
                                                     </div>
                                                 </div>
-                                                <div className="padding-despription-info">
-                                                    <div className="name-material">
-                                                        <h3>{material.title}</h3>
-                                                    </div>
-                                                </div>
-                                                <div className="three-dots-flex-end">
-                                                    <div className="three-dots-container">
-                                                        <div
-                                                            className="three-dots"
-                                                            onClick={(e) => handleOptionsClick(material._id, e)}
-                                                        >
-                                                            <BsThreeDotsVertical />
+                                                <div className="justy-content-space">
+                                                    <div className="padding-despription-info">
+                                                        <div className="name-material">
+                                                            <h3 title={material.title}>{material.title}</h3>
                                                         </div>
-                                                        {showOptions === material._id && (
-                                                            <div className="options-popup" ref={optionsPopupRef}>
-                                                                <Link
-                                                                    to={`/setmat/${material._id}`}
-                                                                    className="popup-button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleEditClick(material._id);
-                                                                    }}
-                                                                >
-                                                                    Изменить
-                                                                </Link>
-                                                                <button
-                                                                    className="popup-button delete-btn"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteClick(material._id);
-                                                                    }}
-                                                                >
-                                                                    Удалить
-                                                                </button>
+                                                    </div>
+                                                    <div className="three-dots-flex-end">
+                                                        <div className="three-dots-container">
+                                                            <div
+                                                                className="three-dots"
+                                                                onClick={(e) => handleOptionsClick(material._id, e)}
+                                                            >
+                                                                <BsThreeDotsVertical />
                                                             </div>
-                                                        )}
+                                                            {showOptions === material._id && (
+                                                                <div className="options-popup" ref={optionsPopupRef}>
+                                                                    <Link
+                                                                        to={`/setmat/${material._id}`}
+                                                                        className="popup-button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleEditClick(material._id);
+                                                                        }}
+                                                                    >
+                                                                        Изменить
+                                                                    </Link>
+                                                                    <button
+                                                                        className="popup-button delete-btn"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteClick(material._id);
+                                                                        }}
+                                                                    >
+                                                                        Удалить
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     ))}

@@ -175,7 +175,7 @@
     font-size: 14px;
 }
 
-.grade-badge {
+/* .grade-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -185,7 +185,7 @@
     font-weight: 600;
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+} */
 
 .hw-files-section, .hw-answer-section {
     padding: 15px 0;

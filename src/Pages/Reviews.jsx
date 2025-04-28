@@ -93,7 +93,7 @@ const Reviews = () => {
                                                         />
                                                     </div>
                                                     <div className="author-info">
-                                                        <h3 className="user-name">{comment.user.first_name} {comment.user.last_name}</h3>
+                                                        <h3 className="reviews-user-name">{comment.user.first_name} {comment.user.last_name}</h3>
                                                         <p className="user-date">{format(new Date(comment.date), 'dd.MM.yyyy')}</p>
                                                     </div>
                                                 </div>

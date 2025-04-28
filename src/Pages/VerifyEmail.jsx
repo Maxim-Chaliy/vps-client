@@ -1,61 +1,56 @@
-// frontend/src/components/VerifyEmail.js
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../Components/style/verifyEmail.css';
+import '../Components/style/emailVerification.css';
 
 const VerifyEmail = () => {
-    const { token } = useParams();
-    const navigate = useNavigate();
-    const [message, setMessage] = useState('Проверка токена подтверждения...');
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const verifyEmailToken = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3001/verify-email/${token}`);
-                
-                if (response.data.success) {
-                    setMessage(response.data.message);
-                    setIsSuccess(true);
-                } else {
-                    setMessage(response.data.message);
-                    setIsSuccess(false);
-                }
-            } catch (error) {
-                setMessage(error.response?.data?.message || 'Произошла ошибка при подтверждении email');
-                setIsSuccess(false);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+  useEffect(() => {
+    const verifyEmailToken = async () => {
+      const token = searchParams.get('token');
+      
+      if (!token) {
+        setError('Токен подтверждения отсутствует');
+        setLoading(false);
+        return;
+      }
 
-        verifyEmailToken();
-    }, [token]);
+      try {
+        await axios.get(`http://localhost:3001/verify-email?token=${token}`);
+        navigate('/email-verified');
+      } catch (err) {
+        setError(err.response?.data?.error || 'Ошибка при подтверждении email');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return (
-        <div className="verify-email-container">
-            <div className="verify-email-card">
-                <h2>Подтверждение Email</h2>
-                {isLoading ? (
-                    <div className="loading-spinner"></div>
-                ) : (
-                    <>
-                        <p className={isSuccess ? 'success-message' : 'error-message'}>
-                            {message}
-                        </p>
-                        <button 
-                            onClick={() => navigate('/authorization')}
-                            className="verify-email-button"
-                        >
-                            Перейти к странице входа
-                        </button>
-                    </>
-                )}
-            </div>
-        </div>
-    );
+    verifyEmailToken();
+  }, [searchParams, navigate]);
+
+  return (
+    <div className="email-verification-container">
+      <h2 className="email-verification-title">Подтверждение Email</h2>
+      
+      {loading ? (
+        <>
+          <div className="verify-email-spinner"></div>
+          <p className="email-verification-message">Идет подтверждение вашего email...</p>
+        </>
+      ) : error ? (
+        <>
+          <p className="verify-email-error">{error}</p>
+          <a href="/resend-verification" className="verify-email-resend-link">
+            Отправить письмо повторно
+          </a>
+        </>
+      ) : null}
+    </div>
+  );
 };
 
 export default VerifyEmail;
