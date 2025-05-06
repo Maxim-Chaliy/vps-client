@@ -18,12 +18,14 @@ const EducMat = () => {
     const serverUrl = 'http://localhost:3001';
     const placeholderImage = `${serverUrl}/uploads/to/placeholder.png`;
 
+    const userRole = localStorage.getItem('role');
+
     const fetchMaterials = async () => {
         try {
             const response = await fetch(`${serverUrl}/api/educmat`);
             const data = await response.json();
             setMaterials(data);
-            setFilteredMaterials(data);
+            filterMaterials(data);
         } catch (error) {
             console.error('Ошибка при получении данных:', error);
         }
@@ -70,7 +72,7 @@ const EducMat = () => {
             material.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
             (selectedCategory === "" || material.category.toLowerCase() === selectedCategory.toLowerCase())
         );
-        setFilteredMaterials(filtered);
+        filterMaterials(filtered);
     };
 
     const handleOptionsClick = (materialId, e) => {
@@ -96,9 +98,7 @@ const EducMat = () => {
             setMaterials((prevMaterials) =>
                 prevMaterials.filter((material) => material._id !== materialId)
             );
-            setFilteredMaterials((prevMaterials) =>
-                prevMaterials.filter((material) => material._id !== materialId)
-            );
+            filterMaterials(materials.filter((material) => material._id !== materialId));
 
             console.log('Запись успешно удалена');
         } catch (error) {
@@ -108,6 +108,16 @@ const EducMat = () => {
         }
     };
 
+    const filterMaterials = (data) => {
+        let filteredData = data;
+        if (userRole !== 'admin') {
+            if (userRole !== 'student') {
+                filteredData = filteredData.filter(material => material.visibility !== 'Только студенты');
+            }
+        }
+        setFilteredMaterials(filteredData);
+    };
+
     return (
         <>
             <Header />
@@ -115,10 +125,12 @@ const EducMat = () => {
                 <div className="conteiner">
                     <div className="form-creat-material">
                         <h1 className="educmat-title">Учебные материалы</h1>
-                        <Link className="button-creat-material" to="/setmat">
-                            <div>Создать материал</div>
-                            <div className="div-plus-icon"><BsPlus className="plus-icon" /></div>
-                        </Link>
+                        {userRole === 'admin' && (
+                            <Link className="button-creat-material" to="/setmat">
+                                <div>Создать материал</div>
+                                <div className="div-plus-icon"><BsPlus className="plus-icon" /></div>
+                            </Link>
+                        )}
                     </div>
                     <div className="input-box">
                         <div className="display-flex-inputs">
@@ -169,7 +181,7 @@ const EducMat = () => {
                                 onClick={() => {
                                     setSearchQuery("");
                                     setSelectedCategory("");
-                                    setFilteredMaterials(materials);
+                                    filterMaterials(materials);
                                 }}
                             >
                                 Сбросить фильтры
@@ -182,9 +194,14 @@ const EducMat = () => {
                                     {filteredMaterials.map((material) => (
                                         <div
                                             key={material._id}
-                                            className="block-material"
+                                            className={`block-material ${material.visibility === 'Только студенты' ? 'student-only' : ''}`}
                                             onClick={() => handleImageClick(material)}
                                         >
+                                            {material.visibility === 'Только студенты' && (
+                                                <div className="student-only-badge">
+                                                    <span>Только для студентов</span>
+                                                </div>
+                                            )}
                                             <div className="material-badge">
                                                 {material.category}
                                             </div>
@@ -207,41 +224,42 @@ const EducMat = () => {
                                                             <h3 title={material.title}>{material.title}</h3>
                                                         </div>
                                                     </div>
-                                                    <div className="three-dots-flex-end">
-                                                        <div className="three-dots-container">
-                                                            <div
-                                                                className="three-dots"
-                                                                onClick={(e) => handleOptionsClick(material._id, e)}
-                                                            >
-                                                                <BsThreeDotsVertical />
-                                                            </div>
-                                                            {showOptions === material._id && (
-                                                                <div className="options-popup" ref={optionsPopupRef}>
-                                                                    <Link
-                                                                        to={`/setmat/${material._id}`}
-                                                                        className="popup-button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handleEditClick(material._id);
-                                                                        }}
-                                                                    >
-                                                                        Изменить
-                                                                    </Link>
-                                                                    <button
-                                                                        className="popup-button delete-btn"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handleDeleteClick(material._id);
-                                                                        }}
-                                                                    >
-                                                                        Удалить
-                                                                    </button>
+                                                    {userRole === 'admin' && (
+                                                        <div className="three-dots-flex-end">
+                                                            <div className="three-dots-container">
+                                                                <div
+                                                                    className="three-dots"
+                                                                    onClick={(e) => handleOptionsClick(material._id, e)}
+                                                                >
+                                                                    <BsThreeDotsVertical />
                                                                 </div>
-                                                            )}
+                                                                {showOptions === material._id && (
+                                                                    <div className="options-popup" ref={optionsPopupRef}>
+                                                                        <Link
+                                                                            to={`/setmat/${material._id}`}
+                                                                            className="popup-button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleEditClick(material._id);
+                                                                            }}
+                                                                        >
+                                                                            Изменить
+                                                                        </Link>
+                                                                        <button
+                                                                            className="popup-button delete-btn"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleDeleteClick(material._id);
+                                                                            }}
+                                                                        >
+                                                                            Удалить
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    )}
                                                 </div>
-
                                             </div>
                                         </div>
                                     ))}
@@ -275,6 +293,11 @@ const EducMat = () => {
                                         <span className="modal-category-badge">
                                             {selectedMaterial.category}
                                         </span>
+                                        {selectedMaterial.visibility === 'Только студенты' && (
+                                            <span className="modal-student-badge">
+                                                Только для студентов
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="educmat-modal-description">
                                         <h4>Описание:</h4>
@@ -308,7 +331,6 @@ const EducMat = () => {
             )}
 
             <Footer />
-
         </>
     );
 };

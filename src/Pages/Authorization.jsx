@@ -35,21 +35,21 @@ const Authorization = () => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-
+    
         // Валидация обязательных полей
         if (!formData.username || !formData.password) {
             setError('Пожалуйста, заполните все поля');
             setIsLoading(false);
             return;
         }
-
+    
         // Проверка reCAPTCHA
         if (!recaptchaToken) {
             setError('Пожалуйста, подтвердите, что вы не робот');
             setIsLoading(false);
             return;
         }
-
+    
         try {
             const response = await fetch('http://localhost:3001/login', {
                 method: 'POST',
@@ -61,13 +61,19 @@ const Authorization = () => {
                     recaptchaToken
                 })
             });
-
+    
             const data = await response.json();
-            
+    
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('studentId', data.userId);
-                navigate('/');
+                localStorage.setItem('studentId', data.user.id); // Сохранение studentId
+                localStorage.setItem('role', data.user.role); // Сохранение роли пользователя
+    
+                if (data.user.role === 'admin') {
+                    navigate('/controlpanel');
+                } else {
+                    navigate('/');
+                }
                 window.location.reload();
             } else {
                 setError(data.message || 'Ошибка при авторизации');
@@ -83,6 +89,8 @@ const Authorization = () => {
             setIsLoading(false);
         }
     };
+    
+    
 
     return (
         <>
@@ -99,7 +107,7 @@ const Authorization = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <form onSubmit={handleSubmit} className="auth-form">
                             <div className='auth-fields'>
                                 <div className='auth-field-group'>
@@ -114,7 +122,7 @@ const Authorization = () => {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div className='auth-field-group'>
                                     <label className='auth-label'>Пароль*</label>
                                     <input
@@ -130,7 +138,7 @@ const Authorization = () => {
                                         <Link to="/forgot-password" className="auth-forgot-link">Забыли пароль?</Link>
                                     </div>
                                 </div>
-                                
+
                                 <div className='auth-field-group'>
                                     <ReCAPTCHA
                                         ref={recaptchaRef}
@@ -139,16 +147,16 @@ const Authorization = () => {
                                     />
                                 </div>
                             </div>
-                            
+
                             {error && (
                                 <div className="auth-error-message">
                                     {error}
                                 </div>
                             )}
-                            
+
                             <div className='auth-submit-container'>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className='auth-submit-button'
                                     disabled={isLoading}
                                 >
@@ -158,13 +166,13 @@ const Authorization = () => {
                                         <span>Войти</span>
                                     )}
                                 </button>
-                                
+
                                 <div className="auth-divider">
                                     <span className="auth-divider-text">или</span>
                                 </div>
-                                
+
                                 <Link to="/registration" className="auth-register-link">
-                                    <button 
+                                    <button
                                         className='auth-register-button'
                                         type="button"
                                     >

@@ -5,16 +5,24 @@ import '../Components/style/header.css';
 
 const Header = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
     const [showHeader, setShowHeader] = useState(true);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+        
         if (token) {
             setIsAuthenticated(true);
+            
+            if (userRole === 'admin') {
+                setIsAdmin(true);
+            }
         }
 
         const handleScroll = () => {
@@ -26,23 +34,36 @@ const Header = () => {
                 setIsScrolled(false);
             }
 
-            // Прячем шапку при прокрутке вниз, показываем при прокрутке вверх
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                setShowHeader(false);
-            } else if (currentScrollY < lastScrollY) {
-                setShowHeader(true);
+            // Не скрываем шапку если открыто мобильное меню
+            if (!isMenuOpen) {
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    setShowHeader(false);
+                } else if (currentScrollY < lastScrollY) {
+                    setShowHeader(true);
+                }
             }
 
             setLastScrollY(currentScrollY);
         };
 
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [lastScrollY, isMenuOpen]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
         setIsAuthenticated(false);
+        setIsAdmin(false);
         setIsMenuOpen(false);
         navigate('/');
     };
@@ -55,8 +76,43 @@ const Header = () => {
         setIsMenuOpen(false);
     };
 
+    const renderNavLinks = () => {
+        if (!isAdmin) return null;
+
+        if (windowWidth <= 992) {
+            return (
+                <>
+                    <Link className="nav-link" to="/educmat" onClick={closeMenu}>Учебные материалы</Link>
+                    <Link className="nav-link" to="/editing" onClick={closeMenu}>Расписание</Link>
+                    <Link className="nav-link" to="/listapp" onClick={closeMenu}>Заявки</Link>
+                    <Link className="nav-link" to="/reviews" onClick={closeMenu}>Отзывы</Link>
+                    <Link className="nav-link" to="/employment" onClick={closeMenu}>Занятость</Link>
+                </>
+            );
+        } else {
+            return (
+                <Link className="nav-link" to="/controlpanel" onClick={closeMenu}>Админ-панель</Link>
+            );
+        }
+    };
+
+    const renderUserLinks = () => {
+        if (isAdmin) return null;
+        
+        return (
+            <>
+                <Link className="nav-link" to="/educmat" onClick={closeMenu}>Учебные материалы</Link>
+                <Link className="nav-link" to="/schedule" onClick={closeMenu}>Расписание</Link>
+                <Link className="nav-link" to="/reviews" onClick={closeMenu}>Отзывы</Link>
+            </>
+        );
+    };
+
     return (
         <header className={`header ${isScrolled ? 'scrolled' : ''} ${!showHeader ? 'hidden' : ''}`}>
+            {/* Добавляем оверлей для мобильного меню */}
+            <div className={`navigation-overlay ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu} />
+            
             <div className="header-container">
                 <div className="header-content">
                     <div className="logo">
@@ -85,19 +141,20 @@ const Header = () => {
 
                     <div className={`navigation ${isMenuOpen ? 'open' : ''}`}>
                         <nav className="main-nav">
-                            <Link className="nav-link" to="/educmat" onClick={closeMenu}>Учебные материалы</Link>
-                            <Link className="nav-link" to="/schedule" onClick={closeMenu}>Расписание</Link>
-                            <Link className="nav-link" to="/reviews" onClick={closeMenu}>Отзывы</Link>
+                            {renderUserLinks()}
+                            {renderNavLinks()}
                         </nav>
 
                         <div className="header-actions">
-                            <Link 
-                                className="application-button" 
-                                to="/appform" 
-                                onClick={closeMenu}
-                            >
-                                Подать заявку
-                            </Link>
+                            {!isAdmin && (
+                                <Link 
+                                    className="application-button" 
+                                    to="/appform" 
+                                    onClick={closeMenu}
+                                >
+                                    Подать заявку
+                                </Link>
+                            )}
                             {isAuthenticated ? (
                                 <button 
                                     className="auth-button logout" 

@@ -328,7 +328,7 @@ const Employment = () => {
     <>
       <Header />
       <main className="employment-container">
-        <h1>Мое расписание</h1>
+        <h1 className="h1-my-shcedule">Мое расписание</h1>
 
         <div className="view-controls">
           <button

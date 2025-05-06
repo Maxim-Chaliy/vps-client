@@ -22,7 +22,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             try {
                 if (selectedUser) {
                     const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/student/${selectedUser._id}`);
-                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/student/${selectedUser._id}`);
+                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/${selectedUser._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 } else if (selectedGroup) {
@@ -94,33 +94,33 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
         const filesInput = document.getElementById('filesInput').files;
-    
+
         if (!dueDateInput || filesInput.length === 0) {
             alert('Пожалуйста, укажите дату выполнения и прикрепите файлы');
             return;
         }
-    
+
         const formData = new FormData();
         if (selectedUser) formData.append('student_id', selectedUser._id);
         if (selectedGroup) formData.append('group_id', selectedGroup._id);
         formData.append('day', getShortDayOfWeek(new Date(dueDateInput)));
         formData.append('dueDate', dueDateInput);
-    
+
         for (let i = 0; i < filesInput.length; i++) {
             formData.append('files', filesInput[i]);
         }
-    
+
         try {
             const response = await fetch('http://localhost:3001/api/homework', {
                 method: 'POST',
                 body: formData,
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Ошибка при добавлении домашнего задания');
             }
-    
+
             const savedHomeworkItem = await response.json();
             setHomework([...homework, savedHomeworkItem]);
             setIsAddingHomework(false);
@@ -174,7 +174,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
             if (response.ok) {
                 const updatedHomework = await response.json();
-                setHomework(homework.map(item => 
+                setHomework(homework.map(item =>
                     item._id === id ? updatedHomework : item
                 ));
                 setEditingGrade(null);
@@ -699,13 +699,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                             max="5"
                                                         />
                                                         <div className="grade-edit-actions">
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleSaveGrade(item._id)}
                                                                 className="action-button save-button"
                                                             >
                                                                 <FiCheck />
                                                             </button>
-                                                            <button 
+                                                            <button
                                                                 onClick={handleCancelGradeEdit}
                                                                 className="action-button cancel-button"
                                                             >
