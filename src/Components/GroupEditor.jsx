@@ -36,36 +36,42 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     
             const loadData = async () => {
                 try {
+                    // Загрузка студентов группы
                     const studentsResponse = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/students`);
                     if (!studentsResponse.ok) throw new Error('Ошибка загрузки студентов группы');
                     const groupStudentsData = await studentsResponse.json();
-
+    
+                    // Загрузка всех студентов
                     const allStudentsResponse = await fetch('http://localhost:3001/api/users/students');
                     if (!allStudentsResponse.ok) throw new Error('Ошибка загрузки всех студентов');
                     const allStudentsData = await allStudentsResponse.json();
-
+    
+                    // Фильтрация доступных студентов
                     const groupStudentIds = groupStudentsData.map(student => student._id);
                     const availableStudentsData = allStudentsData.filter(
                         student => !groupStudentIds.includes(student._id)
                     );
-
+    
                     setGroupStudents(groupStudentsData);
                     setAvailableStudents(availableStudentsData);
-
+    
+                    // Загрузка расписания и домашних заданий
                     const [scheduleRes, homeworkRes] = await Promise.all([
                         fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`),
                         fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`)
                     ]);
-
+    
                     if (!scheduleRes.ok) console.error('Ошибка загрузки расписания');
                     if (!homeworkRes.ok) console.error('Ошибка загрузки домашних заданий');
-
+    
                     const scheduleData = await scheduleRes.json().catch(() => []);
                     const homeworkData = await homeworkRes.json().catch(() => []);
-
+    
+                    console.log('Homework Data:', homeworkData); // Временный лог для проверки данных
+    
                     setSchedule(scheduleData);
                     setHomework(homeworkData);
-
+    
                 } catch (error) {
                     console.error('Ошибка загрузки данных:', error);
                     setError(error.message);
@@ -77,6 +83,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             loadData();
         }
     }, [selectedGroup]);
+    
 
     const handleEditStudentGrade = (homeworkId, studentId, currentGrade) => {
         setEditingGrades(prev => ({
@@ -99,7 +106,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleSaveStudentGrade = async (homeworkId, studentId) => {
         try {
             const gradeValue = studentGrades[studentId] ? parseInt(studentGrades[studentId]) : null;
-            
+
             const response = await fetch(`http://localhost:3001/api/homework/${homeworkId}/grade/${studentId}`, {
                 method: 'PUT',
                 headers: {
@@ -110,7 +117,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
             if (response.ok) {
                 const updatedHomework = await response.json();
-                setHomework(homework.map(hw => 
+                setHomework(homework.map(hw =>
                     hw._id === updatedHomework._id ? updatedHomework : hw
                 ));
                 setEditingGrades(prev => {
@@ -138,7 +145,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleOpenAttendance = async (scheduleItem) => {
         try {
             let students = [];
-            
+
             if (scheduleItem.group_id) {
                 const response = await fetch(`http://localhost:3001/api/groups/${scheduleItem.group_id}/students`);
                 if (response.ok) {
@@ -167,7 +174,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         try {
             const { scheduleItem } = attendanceModal;
             let url = `http://localhost:3001/api/schedules/${scheduleItem._id}/`;
-            
+
             if (scheduleItem.group_id) {
                 url += 'updateGroupAttendance';
             } else {
@@ -187,7 +194,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
             if (response.ok) {
                 const updatedItem = await response.json();
-                setSchedule(schedule.map(item => 
+                setSchedule(schedule.map(item =>
                     item._id === updatedItem._id ? updatedItem : item
                 ));
                 setAttendanceModal({ open: false, scheduleItem: null, students: [] });
@@ -219,11 +226,11 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 </label>
             );
         }
-        
+
         if (!item.attendance) {
             return <span className="attendance-not-marked">Не отмечено</span>;
         }
-        
+
         const attendedCount = Object.values(item.attendance).filter(Boolean).length;
         return (
             <div className="attendance-summary">
@@ -249,7 +256,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
             if (response.ok) {
                 const updatedItem = await response.json();
-                setSchedule(schedule.map(item => 
+                setSchedule(schedule.map(item =>
                     item._id === updatedItem._id ? updatedItem : item
                 ));
             } else {
@@ -609,6 +616,11 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     };
 
     const getFileIcon = (file) => {
+        if (!file) {
+            // Возвращаем значок по умолчанию или сообщение об ошибке
+            return <BsFiletypeTxt className="file-icon" />;
+        }
+    
         const extension = file.split('.').pop().toLowerCase();
         switch (extension) {
             case 'txt': return <BsFiletypeTxt className="file-icon" />;
@@ -620,6 +632,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             default: return <BsFiletypeTxt className="file-icon" />;
         }
     };
+    
 
     const formatCombinedDateTime = (item) => {
         const date = formatDate(item.date);
@@ -636,6 +649,113 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    };
+
+    const renderStudentGrades = (item) => {
+        return (
+            <div className="homework-responses">
+                <div className="homework-files">
+                    <h4>Файлы задания:</h4>
+                    <div className="files-list">
+                        {item.files.map((file, idx) => (
+                            <div key={idx} className="file-item">
+                                {getFileIcon(file)}
+                                <a
+                                    href={`http://localhost:3001/homework/${file}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download
+                                    className="file-link"
+                                >
+                                    {file}
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+    
+                <div className="students-responses">
+                    <h4>Ответы студентов:</h4>
+                    {groupStudents.map(student => {
+                        const studentGrade = item.grades?.[student._id] || null;
+                        const studentAnswer = item.answer.find(ans => ans.student_id === student._id);
+                        const isEditing = editingGrades[item._id] === student._id;
+    
+                        return (
+                            <div key={student._id} className="student-response">
+                                <div className="student-info">
+                                    <span className="student-name">
+                                        {student.surname} {student.name[0]}.{student.patronymic && `${student.patronymic[0]}.`}
+                                    </span>
+                                </div>
+                                
+                                <div className="student-answer">
+                                    {studentAnswer ? (
+                                        <div className="answer-file">
+                                            {getFileIcon(studentAnswer.file)}
+                                            <a
+                                                href={`http://localhost:3001/homework/${studentAnswer.file}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                className="file-link"
+                                            >
+                                                {studentAnswer.file}
+                                            </a>
+                                        </div>
+                                    ) : (
+                                        <span className="no-answer">Нет ответа</span>
+                                    )}
+                                </div>
+                                
+                                <div className="student-grade">
+                                    {isEditing ? (
+                                        <div className="grade-edit-container">
+                                            <input
+                                                type="number"
+                                                value={studentGrades[student._id] || ''}
+                                                onChange={(e) => handleGradeChange(student._id, e.target.value)}
+                                                className="grade-input"
+                                                min="1"
+                                                max="5"
+                                            />
+                                            <button
+                                                onClick={() => handleSaveStudentGrade(item._id, student._id)}
+                                                className="action-button save-button"
+                                            >
+                                                <FiCheck />
+                                            </button>
+                                            <button
+                                                onClick={() => handleCancelGradeEdit(item._id)}
+                                                className="action-button cancel-button"
+                                            >
+                                                <FiX />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="grade-display">
+                                            {studentGrade ? (
+                                                <span className={`grade-badge grade-${studentGrade}`}>
+                                                    {studentGrade}
+                                                </span>
+                                            ) : (
+                                                <span className="no-grade">-</span>
+                                            )}
+                                            <button
+                                                onClick={() => handleEditStudentGrade(item._id, student._id, studentGrade)}
+                                                className="action-button edit-button"
+                                            >
+                                                <FiEdit2 />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
     };
 
     if (!selectedGroup) {
@@ -1015,8 +1135,8 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                 <tr>
                                     <th>День</th>
                                     <th>Выполнить до</th>
-                                    <th>Файлы задания</th>
-                                    <th>Ответ</th>
+                                    {/* <th>Файлы задания</th> */}
+                                    {/* <th>Ответ</th> */}
                                     <th>Оценки студентов</th>
                                 </tr>
                             </thead>
@@ -1026,7 +1146,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                         <tr key={item._id}>
                                             <td>{item.day}</td>
                                             <td>{formatDate(item.dueDate)}</td>
-                                            <td>
+                                            {/* <td>
                                                 <div className="files-list">
                                                     {item.files.map((file, idx) => (
                                                         <div key={idx} className="file-item">
@@ -1043,21 +1163,21 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </td>
-                                            <td>
-                                                {item.answer && item.answer.length > 0 ? (
+                                            </td> */}
+                                            {/* <td>
+                                                {item.answer.length > 0 ? (
                                                     <div className="files-list">
-                                                        {item.answer.map((file, idx) => (
+                                                        {item.answer.map((ans, idx) => (
                                                             <div key={idx} className="file-item">
-                                                                {getFileIcon(file)}
+                                                                {getFileIcon(ans.file)}
                                                                 <a
-                                                                    href={`http://localhost:3001/homework/${file}`}
+                                                                    href={`http://localhost:3001/homework/${ans.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download
                                                                     className="file-link"
                                                                 >
-                                                                    {file}
+                                                                    {ans.file}
                                                                 </a>
                                                             </div>
                                                         ))}
@@ -1065,62 +1185,9 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                                 ) : (
                                                     <span className="no-answer">Нет ответа</span>
                                                 )}
-                                            </td>
+                                            </td> */}
                                             <td>
-                                                <div className="student-grades-container">
-                                                    {groupStudents.map(student => {
-                                                        const studentGrade = item.grades?.[student._id] || null;
-                                                        const isEditing = editingGrades[item._id] === student._id;
-                                                        
-                                                        return (
-                                                            <div key={student._id} className="student-grade-item">
-                                                                <span className="student-name">
-                                                                    {student.surname} {student.name[0]}.{student.patronymic && `${student.patronymic[0]}.`}
-                                                                </span>
-                                                                {isEditing ? (
-                                                                    <div className="grade-edit-container">
-                                                                        <input
-                                                                            type="number"
-                                                                            value={studentGrades[student._id] || ''}
-                                                                            onChange={(e) => handleGradeChange(student._id, e.target.value)}
-                                                                            className="grade-input"
-                                                                            min="1"
-                                                                            max="5"
-                                                                        />
-                                                                        <div className="grade-edit-actions">
-                                                                            <button 
-                                                                                onClick={() => handleSaveStudentGrade(item._id, student._id)}
-                                                                                className="action-button save-button"
-                                                                            >
-                                                                                <FiCheck />
-                                                                            </button>
-                                                                            <button 
-                                                                                onClick={() => handleCancelGradeEdit(item._id)}
-                                                                                className="action-button cancel-button"
-                                                                            >
-                                                                                <FiX />
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="grade-display">
-                                                                        {studentGrade ? (
-                                                                            <span className="grade-badge">{studentGrade}</span>
-                                                                        ) : (
-                                                                            <span className="no-grade">-</span>
-                                                                        )}
-                                                                        <button
-                                                                            onClick={() => handleEditStudentGrade(item._id, student._id, studentGrade)}
-                                                                            className="action-button edit-button"
-                                                                        >
-                                                                            <FiEdit2 />
-                                                                        </button>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                                {renderStudentGrades(item)}
                                             </td>
                                         </tr>
                                     ))

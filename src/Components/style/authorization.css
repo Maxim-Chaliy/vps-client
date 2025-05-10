@@ -233,3 +233,33 @@
         padding: 180px 0px 95px 0px;
     }
 }
+
+/* Стили для ForgotPassword.jsx */
+
+.auth-success-message {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    font-size: 14px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Для мобильных устройств можно добавить дополнительные стили */
+@media (max-width: 480px) {
+    .auth-title {
+        font-size: 22px;
+    }
+    
+    .auth-subtitle {
+        font-size: 16px;
+    }
+    
+    .auth-submit-button, 
+    .auth-register-button {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+}

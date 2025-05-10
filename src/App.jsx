@@ -18,6 +18,8 @@ import Employment from "./Pages/Employment";
 import VerifyEmail from "./Pages/VerifyEmail";
 import AdminRoute from './Components/AdminRoute';
 import PrivateRoute from './Components/PrivateRoute';
+import ForgotPassword from './Pages/ForgotPassword';
+import ResetPassword from './Pages/ResetPassword';
 
 const App = () => {
   return (
@@ -31,6 +33,8 @@ const App = () => {
         <Route path="/authorization" element={<Authorization/>} />
         <Route path="/appform" element={<AppForm/>} />
         <Route path="/verify-email" element={<VerifyEmail/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Защищенные маршруты для авторизованных пользователей */}
         <Route element={<PrivateRoute />}>

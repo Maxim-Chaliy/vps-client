@@ -153,7 +153,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         }
     };
 
-    const handleEditGrade = (id, currentGrade) => {
+    const handleEditGrade = (id, studentId, currentGrade) => {
         setEditingGrade(id);
         setGradeValue(currentGrade || '');
     };
@@ -162,14 +162,16 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         setGradeValue(e.target.value);
     };
 
-    const handleSaveGrade = async (id) => {
+    const handleSaveGrade = async (id, studentId) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade`, {
+            const gradeValueToSave = gradeValue ? parseInt(gradeValue) : null;
+
+            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ grade: gradeValue ? parseInt(gradeValue) : null }),
+                body: JSON.stringify({ grade: gradeValueToSave }),
             });
 
             if (response.ok) {
@@ -335,8 +337,11 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
     };
 
-    const getFileIcon = (file) => {
-        const extension = file.split('.').pop().toLowerCase();
+    const getFileIcon = (filename) => {
+        if (!filename) return <BsFiletypeTxt className="file-icon" />;
+        const extension = typeof filename === 'string'
+            ? filename.split('.').pop().toLowerCase()
+            : '';
         switch (extension) {
             case 'txt': return <BsFiletypeTxt className="file-icon" />;
             case 'docx': return <BsFiletypeDocx className="file-icon" />;
@@ -668,17 +673,17 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                             <td>
                                                 {item.answer && item.answer.length > 0 ? (
                                                     <div className="files-list">
-                                                        {item.answer.map((file, idx) => (
+                                                        {item.answer.map((answer, idx) => (
                                                             <div key={idx} className="file-item">
-                                                                {getFileIcon(file)}
+                                                                {getFileIcon(answer.file)}
                                                                 <a
-                                                                    href={`http://localhost:3001/homework/${file}`}
+                                                                    href={`http://localhost:3001/homework/${answer.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download
                                                                     className="file-link"
                                                                 >
-                                                                    {file}
+                                                                    {answer.file}
                                                                 </a>
                                                             </div>
                                                         ))}
@@ -700,7 +705,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                         />
                                                         <div className="grade-edit-actions">
                                                             <button
-                                                                onClick={() => handleSaveGrade(item._id)}
+                                                                onClick={() => handleSaveGrade(item._id, selectedUser._id)}
                                                                 className="action-button save-button"
                                                             >
                                                                 <FiCheck />
@@ -715,13 +720,15 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                     </div>
                                                 ) : (
                                                     <div className="grade-display">
-                                                        {item.grade ? (
-                                                            <span className="grade-badge">{item.grade}</span>
+                                                        {item.grades?.[selectedUser._id] ? (
+                                                            <span className={`grade-badge grade-${item.grades[selectedUser._id]}`}>
+                                                                {item.grades[selectedUser._id]}
+                                                            </span>
                                                         ) : (
                                                             <span className="no-grade">-</span>
                                                         )}
                                                         <button
-                                                            onClick={() => handleEditGrade(item._id, item.grade)}
+                                                            onClick={() => handleEditGrade(item._id, selectedUser._id, item.grades?.[selectedUser._id])}
                                                             className="action-button edit-button"
                                                         >
                                                             <FiEdit2 />
@@ -729,6 +736,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                     </div>
                                                 )}
                                             </td>
+
                                         </tr>
                                     ))
                                 ) : (

@@ -216,6 +216,11 @@ const Schedule = () => {
     };
 
     const getFileIcon = (file) => {
+        if (typeof file !== 'string') {
+            // Если file не является строкой, возвращаем значок по умолчанию
+            return <BsFiletypeTxt className="file-icon" />;
+        }
+    
         const extension = file.split('.').pop().toLowerCase();
         switch (extension) {
             case 'txt': return <BsFiletypeTxt className="file-icon" />;
@@ -227,6 +232,7 @@ const Schedule = () => {
             default: return <BsFiletypeTxt className="file-icon" />;
         }
     };
+    
 
     const renderStatusIcon = (status) => {
         switch (status) {
@@ -337,7 +343,7 @@ const Schedule = () => {
         const isExpanded = expandedItems[hw._id];
         const isSelected = selectedItem === hw._id;
         const isGroupHomework = !!hw.group_id;
-
+    
         return (
             <motion.div
                 key={hw._id}
@@ -359,13 +365,13 @@ const Schedule = () => {
                             )}
                         </div>
                         <span className="hw-day">{hw.day}</span>
-                        <span className="hw-duedate">
+                        <span className="hw-due-date">
                             <FiCalendar className="icon" />
                             {formatDate(hw.dueDate)}
                         </span>
                         <span className="hw-subject">{hw.subject}</span>
                     </div>
-
+    
                     <div className="hw-status">
                         {hw.answer.length > 0 ? (
                             <span className="status-badge submitted">
@@ -378,7 +384,7 @@ const Schedule = () => {
                                 Ожидается
                             </span>
                         )}
-
+    
                         {hw.grade && (
                             <span
                                 className="schedule-grade-badge"
@@ -388,12 +394,12 @@ const Schedule = () => {
                             </span>
                         )}
                     </div>
-
+    
                     <div className="expand-icon">
                         {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                     </div>
                 </div>
-
+    
                 <AnimatePresence>
                     {isExpanded && (
                         <motion.div
@@ -411,7 +417,7 @@ const Schedule = () => {
                                         'Индивидуальное'}
                                 </p>
                             </div>
-
+    
                             <div className="hw-files-section">
                                 <h4>Файлы задания:</h4>
                                 <div className="files-container">
@@ -430,21 +436,21 @@ const Schedule = () => {
                                     ))}
                                 </div>
                             </div>
-
+    
                             <div className="hw-answer-section">
                                 <h4>Ваш ответ:</h4>
                                 {hw.answer.length > 0 ? (
                                     <div className="files-container">
-                                        {hw.answer.map((file, idx) => (
+                                        {hw.answer.map((ans, idx) => (
                                             <a
                                                 key={idx}
-                                                href={`http://localhost:3001/homework/${file}`}
+                                                href={`http://localhost:3001/homework/${ans.file}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="file-link"
                                             >
-                                                {getFileIcon(file)}
-                                                <span>{file}</span>
+                                                {getFileIcon(ans.file)}
+                                                <span>{ans.file}</span>
                                                 <FiDownload className="download-icon" />
                                             </a>
                                         ))}
@@ -453,7 +459,7 @@ const Schedule = () => {
                                     <p className="no-answer">Ответ не отправлен</p>
                                 )}
                             </div>
-
+    
                             <div className="hw-upload-section">
                                 <input
                                     type="radio"
@@ -473,6 +479,8 @@ const Schedule = () => {
             </motion.div>
         );
     };
+    
+    
 
     return (
         <>
@@ -501,7 +509,7 @@ const Schedule = () => {
                                     Домашнее задание
                                 </motion.button>
                             </div>
-
+    
                             {mode === 'lessons' && (
                                 <div className="view-options">
                                     <button
@@ -524,7 +532,7 @@ const Schedule = () => {
                                     </button>
                                 </div>
                             )}
-
+    
                             <div className='margin-top'>
                                 {isLoading ? (
                                     <div className="loading-container">
@@ -582,7 +590,7 @@ const Schedule = () => {
                                                                 Загрузить
                                                             </motion.button>
                                                         </div>
-
+    
                                                         <AnimatePresence>
                                                             {uploadStatus && (
                                                                 <motion.div
@@ -598,7 +606,7 @@ const Schedule = () => {
                                                             )}
                                                         </AnimatePresence>
                                                     </div>
-
+    
                                                     <div className="cards-container">
                                                         {homework.length > 0 ? (
                                                             homework.map(renderHomeworkCard)
@@ -622,6 +630,7 @@ const Schedule = () => {
             <Footer />
         </>
     );
+    
 };
 
 export default Schedule;

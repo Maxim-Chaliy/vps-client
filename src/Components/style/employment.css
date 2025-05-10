@@ -233,7 +233,6 @@
 
 .week-table th, .week-table td {
     border: 1px solid #ddd;
-    padding: 8px;
     text-align: center;
 }
 
@@ -488,7 +487,6 @@
     }
 
     .week-table th, .week-table td {
-        padding: 4px;
         font-size: 12px;
     }
 
@@ -527,7 +525,7 @@
     }
 
     .week-table th, .week-table td {
-        padding: 2px;
+
     }
 
     .week-interval {
@@ -568,3 +566,4 @@
         font-size: 13px;
     }
 }
+
