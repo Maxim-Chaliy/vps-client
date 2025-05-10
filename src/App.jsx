@@ -39,7 +39,7 @@ const App = () => {
         {/* Защищенные маршруты для авторизованных пользователей */}
         <Route element={<PrivateRoute />}>
           <Route path="/schedule" element={<Schedule/>} />
-          <Route path="/appform" element={<AppForm/>} />
+          {/* <Route path="/appform" element={<AppForm/>} /> */}
           <Route path="/educmat" element={<EducMat/>} />
 
           {/* Защищенные маршруты для админов */}
