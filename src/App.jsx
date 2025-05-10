@@ -26,8 +26,8 @@ const App = () => {
     <Router>
       <ScrollTop />
       <Routes>
-        <Route path="/" element={<Navigate to="/home"/>}/>
-        <Route path="/home" element={<Home />} />
+        {/* <Route path="/" element={<Navigate to="/home"/>}/> */}
+        <Route path="/" element={<Home />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/registration" element={<Registration/>} />
         <Route path="/authorization" element={<Authorization/>} />
