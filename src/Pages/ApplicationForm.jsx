@@ -84,7 +84,7 @@ const ApplicationForm = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/applications`, {
+            const response = await fetch(`/api/applications`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
