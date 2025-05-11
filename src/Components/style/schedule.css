@@ -12,9 +12,7 @@
     padding: 0 20px;
 }
 
-.schedulepage-background-color {
-
-}
+.schedulepage-background-color {}
 
 /* Стили для кнопок переключения режимов */
 .buttons-section-2 {
@@ -345,12 +343,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.hw-files-section, .hw-answer-section {
+.hw-files-section,
+.hw-answer-section {
     padding: 15px 0;
     border-top: 1px solid #eee;
 }
 
-.hw-files-section h4, .hw-answer-section h4 {
+.hw-files-section h4,
+.hw-answer-section h4 {
     margin-bottom: 10px;
     color: #444;
 }
@@ -611,13 +611,25 @@
 
 /* Анимации */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Адаптивные стили */
@@ -625,35 +637,35 @@
     .schedule-main-container {
         padding: 150px 0;
     }
-    
+
     .container {
         padding: 0 15px;
     }
-    
+
     .buttons-section-2 {
         gap: 10px;
     }
-    
+
     .mode-button {
         padding: 10px 20px;
         font-size: 14px;
     }
-    
+
     .card-header {
         flex-direction: row;
         align-items: center;
         padding: 12px 15px;
     }
-    
+
     .lesson-date-time {
         min-width: 70px;
     }
-    
+
     .attendance-badge {
         padding: 4px 8px;
         font-size: 12px;
     }
-    
+
     .lesson-details {
         grid-template-columns: 1fr;
     }
@@ -663,74 +675,75 @@
     .schedule-main-container {
         padding: 150px 0;
     }
-    
+
     .container {
         padding: 0 10px;
     }
-    
+
     .buttons-section-2 {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .mode-button {
         width: 100%;
         justify-content: center;
     }
-    
+
     .view-options {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .view-option {
         width: 100%;
         justify-content: center;
     }
-    
+
     .card-header {
         flex-wrap: wrap;
     }
-    
+
     .card-main-info {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .lesson-date-time {
         flex-direction: row;
         gap: 10px;
     }
-    
+
     .attendance-badge-container {
         margin-left: 0;
         width: 100%;
         padding-top: 5px;
     }
-    
+
     .attendance-badge {
         width: 100%;
         text-align: center;
     }
-    
+
     .file-input-label {
         width: 100%;
     }
-    
-    .upload-button, .remove-file-button {
+
+    .upload-button,
+    .remove-file-button {
         width: 100%;
     }
-    
+
     .empty-icon {
         font-size: 36px;
     }
-    
+
     .empty-state p {
         font-size: 14px;
     }
 
-    .expand-icon{
+    .expand-icon {
         margin-left: 0;
         padding-top: 10px;
     }
@@ -738,7 +751,7 @@
 
 @media (max-width: 400px) {
 
-    .expand-icon{
+    .expand-icon {
         margin-left: 0;
     }
 }
@@ -798,4 +811,27 @@
 /* Для индивидуальных заданий */
 .hw-type-info .individual-assignment {
     color: #4CAF50;
+}
+
+/* Добаленнные стили 12.05.2025 */
+.file-size-hint {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.homework-card.overdue {
+    border-left: 4px solid #f44336;
+}
+
+.status-badge.overdue {
+    background-color: #ffebee;
+    color: #f44336;
+}
+
+.hw-due-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }

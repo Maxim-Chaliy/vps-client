@@ -39,6 +39,8 @@ const Schedule = () => {
     const [groups, setGroups] = useState([]);
     const [showType, setShowType] = useState('all');
     const studentId = localStorage.getItem('studentId');
+    const MAX_FILE_SIZE_MB = 10;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -95,13 +97,28 @@ const Schedule = () => {
 
                     // Объединяем все домашние задания
                     const allHomework = [...individualHomework, ...groupHomework];
+                    const currentDate = new Date();
 
-                    // Сортируем по дате сдачи
-                    const sortedHomework = allHomework.sort((a, b) => {
-                        const dateA = new Date(a.dueDate);
-                        const dateB = new Date(b.dueDate);
-                        return dateA - dateB;
-                    });
+                    // Разделяем задания на три категории
+                    const overdueHomework = allHomework.filter(hw =>
+                        new Date(hw.dueDate) < currentDate && hw.answer.length === 0
+                    );
+                    const unsentHomework = allHomework.filter(hw =>
+                        new Date(hw.dueDate) >= currentDate && hw.answer.length === 0
+                    );
+                    const sentHomework = allHomework.filter(hw => hw.answer.length > 0);
+
+                    // Сортируем просроченные по степени просроченности (самые старые первыми)
+                    overdueHomework.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+                    // Сортируем неотправленные по дате сдачи (ближайшие первыми)
+                    unsentHomework.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+                    // Сортируем отправленные по дате сдачи (самые новые первыми)
+                    sentHomework.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+
+                    // Объединяем: сначала просроченные, потом неотправленные, затем отправленные
+                    const sortedHomework = [...overdueHomework, ...unsentHomework, ...sentHomework];
 
                     setHomework(sortedHomework);
                 } catch (error) {
@@ -147,7 +164,24 @@ const Schedule = () => {
     };
 
     const handleFileUpload = (event) => {
-        setSelectedFile(event.target.files[0]);
+        const file = event.target.files[0];
+
+        if (!file) {
+            setUploadStatus({ type: 'error', message: 'Файл не выбран' });
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+            setUploadStatus({
+                type: 'error',
+                message: `Файл слишком большой! Максимальный размер: ${MAX_FILE_SIZE_MB} МБ`
+            });
+            setSelectedFile(null);
+            event.target.value = '';
+            return;
+        }
+
+        setSelectedFile(file);
         setUploadStatus(null);
     };
 
@@ -156,8 +190,21 @@ const Schedule = () => {
     };
 
     const handleAddFiles = async () => {
-        if (!selectedFile || !selectedItem) {
-            setUploadStatus({ type: 'error', message: 'Выберите файл и задание' });
+        if (!selectedFile) {
+            setUploadStatus({ type: 'error', message: 'Выберите файл' });
+            return;
+        }
+
+        if (!selectedItem) {
+            setUploadStatus({ type: 'error', message: 'Выберите задание' });
+            return;
+        }
+
+        if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+            setUploadStatus({
+                type: 'error',
+                message: `Файл слишком большой! Максимальный размер: ${MAX_FILE_SIZE_MB} МБ`
+            });
             return;
         }
 
@@ -187,6 +234,7 @@ const Schedule = () => {
                 setTimeout(() => {
                     setUploadStatus(null);
                     setSelectedFile(null);
+                    document.querySelector('.file-input').value = '';
                 }, 3000);
             } else {
                 throw new Error('Ошибка при загрузке файла');
@@ -217,10 +265,9 @@ const Schedule = () => {
 
     const getFileIcon = (file) => {
         if (typeof file !== 'string') {
-            // Если file не является строкой, возвращаем значок по умолчанию
             return <BsFiletypeTxt className="file-icon" />;
         }
-    
+
         const extension = file.split('.').pop().toLowerCase();
         switch (extension) {
             case 'txt': return <BsFiletypeTxt className="file-icon" />;
@@ -232,7 +279,6 @@ const Schedule = () => {
             default: return <BsFiletypeTxt className="file-icon" />;
         }
     };
-    
 
     const renderStatusIcon = (status) => {
         switch (status) {
@@ -343,11 +389,12 @@ const Schedule = () => {
         const isExpanded = expandedItems[hw._id];
         const isSelected = selectedItem === hw._id;
         const isGroupHomework = !!hw.group_id;
-    
+        const isOverdue = new Date(hw.dueDate) < new Date() && hw.answer.length === 0;
+
         return (
             <motion.div
                 key={hw._id}
-                className={`homework-card ${isExpanded ? 'expanded' : ''} ${isSelected ? 'selected' : ''} ${isGroupHomework ? 'group-homework' : 'individual-homework'}`}
+                className={`homework-card ${isExpanded ? 'expanded' : ''} ${isSelected ? 'selected' : ''} ${isGroupHomework ? 'group-homework' : 'individual-homework'} ${isOverdue ? 'overdue' : ''}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
@@ -368,12 +415,18 @@ const Schedule = () => {
                         <span className="hw-due-date">
                             <FiCalendar className="icon" />
                             {formatDate(hw.dueDate)}
+                            {isOverdue}
                         </span>
                         <span className="hw-subject">{hw.subject}</span>
                     </div>
-    
+
                     <div className="hw-status">
-                        {hw.answer.length > 0 ? (
+                        {isOverdue ? (
+                            <span className="status-badge overdue">
+                                <FiClock className="icon" />
+                                Просрочено
+                            </span>
+                        ) : hw.answer.length > 0 ? (
                             <span className="status-badge submitted">
                                 <FiCheckCircle className="icon" />
                                 Отправлено
@@ -384,7 +437,7 @@ const Schedule = () => {
                                 Ожидается
                             </span>
                         )}
-    
+
                         {hw.grade && (
                             <span
                                 className="schedule-grade-badge"
@@ -394,12 +447,12 @@ const Schedule = () => {
                             </span>
                         )}
                     </div>
-    
+
                     <div className="expand-icon">
                         {isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                     </div>
                 </div>
-    
+
                 <AnimatePresence>
                     {isExpanded && (
                         <motion.div
@@ -417,7 +470,7 @@ const Schedule = () => {
                                         'Индивидуальное'}
                                 </p>
                             </div>
-    
+
                             <div className="hw-files-section">
                                 <h4>Файлы задания:</h4>
                                 <div className="files-container">
@@ -436,7 +489,7 @@ const Schedule = () => {
                                     ))}
                                 </div>
                             </div>
-    
+
                             <div className="hw-answer-section">
                                 <h4>Ваш ответ:</h4>
                                 {hw.answer.length > 0 ? (
@@ -459,7 +512,7 @@ const Schedule = () => {
                                     <p className="no-answer">Ответ не отправлен</p>
                                 )}
                             </div>
-    
+
                             <div className="hw-upload-section">
                                 <input
                                     type="radio"
@@ -479,8 +532,6 @@ const Schedule = () => {
             </motion.div>
         );
     };
-    
-    
 
     return (
         <>
@@ -509,7 +560,7 @@ const Schedule = () => {
                                     Домашнее задание
                                 </motion.button>
                             </div>
-    
+
                             {mode === 'lessons' && (
                                 <div className="view-options">
                                     <button
@@ -532,7 +583,7 @@ const Schedule = () => {
                                     </button>
                                 </div>
                             )}
-    
+
                             <div className='margin-top'>
                                 {isLoading ? (
                                     <div className="loading-container">
@@ -572,6 +623,9 @@ const Schedule = () => {
                                                                     className="file-input"
                                                                 />
                                                             </label>
+                                                            <div className="file-size-hint">
+                                                                Максимальный размер файла: {MAX_FILE_SIZE_MB} МБ
+                                                            </div>
                                                             {selectedFile && (
                                                                 <button
                                                                     className="remove-file-button"
@@ -590,7 +644,7 @@ const Schedule = () => {
                                                                 Загрузить
                                                             </motion.button>
                                                         </div>
-    
+
                                                         <AnimatePresence>
                                                             {uploadStatus && (
                                                                 <motion.div
@@ -606,7 +660,7 @@ const Schedule = () => {
                                                             )}
                                                         </AnimatePresence>
                                                     </div>
-    
+
                                                     <div className="cards-container">
                                                         {homework.length > 0 ? (
                                                             homework.map(renderHomeworkCard)
@@ -630,7 +684,6 @@ const Schedule = () => {
             <Footer />
         </>
     );
-    
 };
 
 export default Schedule;
