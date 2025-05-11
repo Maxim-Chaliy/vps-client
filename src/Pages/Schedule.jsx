@@ -47,17 +47,17 @@ const Schedule = () => {
 
                 try {
                     // Загружаем группы студента
-                    const groupsResponse = await fetch(`http://localhost:3001/api/groups/student/${studentId}`);
+                    const groupsResponse = await fetch(`/api/groups/student/${studentId}`);
                     const groupsData = await groupsResponse.json();
                     setGroups(groupsData);
 
                     // Загружаем индивидуальное расписание студента
-                    const individualSchedulesResponse = await fetch(`http://localhost:3001/api/schedules/student/${studentId}`);
+                    const individualSchedulesResponse = await fetch(`/api/schedules/student/${studentId}`);
                     const individualSchedules = await individualSchedulesResponse.json();
 
                     // Загружаем групповые расписания для всех групп студента
                     const groupPromises = groupsData.map(group =>
-                        fetch(`http://localhost:3001/api/schedules/group/${group._id}`).then(res => res.json())
+                        fetch(`/api/schedules/group/${group._id}`).then(res => res.json())
                     );
 
                     const groupSchedulesResults = await Promise.all(groupPromises);
@@ -82,12 +82,12 @@ const Schedule = () => {
                     setSchedules(sortedSchedules);
 
                     // Загружаем домашние задания (индивидуальные и групповые)
-                    const individualHomeworkResponse = await fetch(`http://localhost:3001/api/homework/${studentId}`);
+                    const individualHomeworkResponse = await fetch(`/api/homework/${studentId}`);
                     const individualHomework = await individualHomeworkResponse.json();
 
                     // Загружаем групповые домашние задания для всех групп студента
                     const groupHomeworkPromises = groupsData.map(group =>
-                        fetch(`http://localhost:3001/api/homework/group/${group._id}`).then(res => res.json())
+                        fetch(`/api/homework/group/${group._id}`).then(res => res.json())
                     );
 
                     const groupHomeworkResults = await Promise.all(groupHomeworkPromises);
@@ -169,7 +169,7 @@ const Schedule = () => {
         try {
             setUploadStatus({ type: 'loading', message: 'Загрузка...' });
 
-            const response = await fetch('http://localhost:3001/api/homework/upload-answer', {
+            const response = await fetch('/api/homework/upload-answer', {
                 method: 'POST',
                 body: formData,
             });
@@ -424,7 +424,7 @@ const Schedule = () => {
                                     {hw.files.map((file, idx) => (
                                         <a
                                             key={idx}
-                                            href={`http://localhost:3001/homework/${file}`}
+                                            href={`/homework/${file}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="file-link"
@@ -444,7 +444,7 @@ const Schedule = () => {
                                         {hw.answer.map((ans, idx) => (
                                             <a
                                                 key={idx}
-                                                href={`http://localhost:3001/homework/${ans.file}`}
+                                                href={`/homework/${ans.file}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="file-link"

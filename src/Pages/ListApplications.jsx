@@ -22,7 +22,7 @@ const ListApplication = () => {
     const fetchApplications = async () => {
         try {
             setIsRefreshing(true);
-            const response = await fetch('http://localhost:3001/api/applications');
+            const response = await fetch('/api/applications');
             if (response.ok) {
                 const data = await response.json();
                 setApplications(data.data);
@@ -54,7 +54,7 @@ const ListApplication = () => {
 
     const handleStatusChange = async (id, status) => {
         try {
-            const response = await fetch('http://localhost:3001/api/applications/status', {
+            const response = await fetch('/api/applications/status', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ const ListApplication = () => {
     const handleCommentChange = async (id, comment) => {
         setIsSaving(true);
         try {
-            const response = await fetch('http://localhost:3001/api/applications/comment', {
+            const response = await fetch('/api/applications/comment', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -120,7 +120,7 @@ const ListApplication = () => {
     const confirmDelete = async () => {
         setIsDeleting(true);
         try {
-            const response = await fetch('http://localhost:3001/api/applications', {
+            const response = await fetch('/api/applications', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'

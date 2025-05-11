@@ -16,7 +16,7 @@ export const NotificationProvider = ({ children }) => {
 
     useEffect(() => {
         if (studentId) {
-            fetch(`http://localhost:3001/api/schedules/${studentId}`)
+            fetch(`/api/schedules/${studentId}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log('Loaded schedules:', data); // Временный лог для проверки данных
@@ -67,7 +67,7 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         const checkScheduleChanges = () => {
             if (studentId) {
-                fetch(`http://localhost:3001/api/schedules/${studentId}`)
+                fetch(`/api/schedules/${studentId}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.version !== lastCheckedScheduleVersion) {

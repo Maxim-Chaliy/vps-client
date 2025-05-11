@@ -34,7 +34,7 @@ const Employment = () => {
   const fetchDailySchedule = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/employment/daily?date=${format(currentDate, 'yyyy-MM-dd')}`
+        `/api/employment/daily?date=${format(currentDate, 'yyyy-MM-dd')}`
       );
       const intervals = generateIntervals(response.data.schedules);
       setTimeIntervals(intervals);
@@ -51,7 +51,7 @@ const Employment = () => {
       });
 
       const weekPromises = weekDays.map(day =>
-        axios.get(`http://localhost:3001/api/employment/daily?date=${format(day, 'yyyy-MM-dd')}`)
+        axios.get(`/api/employment/daily?date=${format(day, 'yyyy-MM-dd')}`)
       );
 
       const weekResponses = await Promise.all(weekPromises);
@@ -189,7 +189,7 @@ const Employment = () => {
 
   const cancelLesson = async () => {
     try {
-      await axios.delete(`http://localhost:3001/api/employment/${modal.lesson._id}`);
+      await axios.delete(`/api/employment/${modal.lesson._id}`);
       if (viewMode === "day") {
         fetchDailySchedule();
       } else {
@@ -206,7 +206,7 @@ const Employment = () => {
   const handleReschedule = async () => {
     try {
       const checkResponse = await axios.get(
-        `http://localhost:3001/api/employment/check-availability`,
+        `/api/employment/check-availability`,
         {
           params: {
             date: modal.newDate,
@@ -219,7 +219,7 @@ const Employment = () => {
 
       if (checkResponse.data.isAvailable) {
         await axios.put(
-          `http://localhost:3001/api/employment/${modal.lesson._id}/reschedule`,
+          `/api/employment/${modal.lesson._id}/reschedule`,
           {
             date: modal.newDate,
             time: modal.newTime

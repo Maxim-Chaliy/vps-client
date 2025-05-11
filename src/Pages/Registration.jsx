@@ -131,7 +131,7 @@ const Registration = () => {
         try {
             if (!isEmailSent) {
                 // Отправка данных регистрации
-                const response = await fetch('http://localhost:3001/register', {
+                const response = await fetch('/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ const Registration = () => {
                 });
     
                 // Отправка кода подтверждения
-                const response = await fetch('http://localhost:3001/confirm-email', {
+                const response = await fetch('/confirm-email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

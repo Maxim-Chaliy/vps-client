@@ -23,7 +23,7 @@ const SetMat = () => {
 
     useEffect(() => {
         if (id) {
-            fetch(`http://localhost:3001/api/educmat/${id}`)
+            fetch(`/api/educmat/${id}`)
                 .then(response => response.json())
                 .then(data => {
                     setTitle(data.title);
@@ -119,7 +119,7 @@ const SetMat = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/api/setmat${id ? `/${id}` : ''}`, {
+            const response = await fetch(`/api/setmat${id ? `/${id}` : ''}`, {
                 method: id ? 'PUT' : 'POST',
                 body: formData,
             });

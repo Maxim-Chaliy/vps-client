@@ -17,7 +17,7 @@ const Reviews = () => {
 
     const fetchComments = async (page) => {
         try {
-            const response = await axios.get('http://localhost:3001/api/comments/db', {
+            const response = await axios.get('/api/comments/db', {
                 params: { page, limit: 5 }
             });
             setComments(response.data.comments);

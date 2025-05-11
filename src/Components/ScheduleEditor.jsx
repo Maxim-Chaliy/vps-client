@@ -21,13 +21,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         const fetchData = async () => {
             try {
                 if (selectedUser) {
-                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/student/${selectedUser._id}`);
-                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/${selectedUser._id}`);
+                    const scheduleResponse = await fetch(`/api/schedules/student/${selectedUser._id}`);
+                    const homeworkResponse = await fetch(`/api/homework/${selectedUser._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 } else if (selectedGroup) {
-                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`);
-                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`);
+                    const scheduleResponse = await fetch(`/api/schedules/group/${selectedGroup._id}`);
+                    const homeworkResponse = await fetch(`/api/homework/group/${selectedGroup._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 }
@@ -67,7 +67,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules', {
+            const response = await fetch('/api/schedules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/homework', {
+            const response = await fetch('/api/homework', {
                 method: 'POST',
                 body: formData,
             });
@@ -134,7 +134,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
     const handleAttendanceChange = async (id, attendance) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}/updateAttendance`, {
+            const response = await fetch(`/api/schedules/${id}/updateAttendance`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         try {
             const gradeValueToSave = gradeValue ? parseInt(gradeValue) : null;
 
-            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade/${studentId}`, {
+            const response = await fetch(`/api/homework/${id}/grade/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             };
 
             try {
-                const response = await fetch(`http://localhost:3001/api/schedules/${editing}`, {
+                const response = await fetch(`/api/schedules/${editing}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -257,7 +257,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}`, {
+            const response = await fetch(`/api/schedules/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -281,7 +281,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedItems.length} выбранных записей?`)) return;
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules/deleteMultiple', {
+            const response = await fetch('/api/schedules/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -658,7 +658,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                         <div key={idx} className="file-item">
                                                             {getFileIcon(file)}
                                                             <a
-                                                                href={`http://localhost:3001/homework/${file}`}
+                                                                href={`/homework/${file}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 download
@@ -677,7 +677,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                             <div key={idx} className="file-item">
                                                                 {getFileIcon(answer.file)}
                                                                 <a
-                                                                    href={`http://localhost:3001/homework/${answer.file}`}
+                                                                    href={`/homework/${answer.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download

@@ -20,7 +20,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        await axios.get(`http://localhost:3001/verify-email?token=${token}`);
+        await axios.get(`/verify-email?token=${token}`);
         navigate('/email-verified');
       } catch (err) {
         setError(err.response?.data?.error || 'Ошибка при подтверждении email');
