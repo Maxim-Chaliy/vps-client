@@ -116,7 +116,7 @@ const Header = () => {
             <div className="header-container">
                 <div className="header-content">
                     <div className="logo">
-                        <Link className="logo-link" to="/home" onClick={closeMenu}>
+                        <Link className="logo-link" to="/" onClick={closeMenu}>
                             <div className="logo-container">
                                 <div className="logo-img">
                                     <img src={freeIcon2} alt="Easymath Logo" />
