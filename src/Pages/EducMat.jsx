@@ -15,7 +15,7 @@ const EducMat = () => {
     const optionsPopupRef = useRef(null);
     const modalContentRef = useRef(null);
 
-    const serverUrl = 'http://localhost:3001';
+    const serverUrl = 'https://easymath-online.ru';
     const placeholderImage = `${serverUrl}/uploads/to/placeholder.png`;
 
     const userRole = localStorage.getItem('role');
