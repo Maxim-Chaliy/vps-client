@@ -1,3 +1,5 @@
+/* editing.css */
+
 .editing-main {
     min-height: calc(100vh - 120px);
     padding: 150px 0;
@@ -7,16 +9,6 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-}
-
-.blocks-flex {
-    display: flex;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    min-height: 700px;
-    max-height: 700px;
 }
 
 .sidebar-icons {
@@ -104,7 +96,6 @@
 
 .section-header {
     padding: 15px;
-    /* background-color: #e6b800; */
     border-bottom: 1px solid #d9a800;
 }
 
@@ -236,6 +227,9 @@
     .editing-search-container {
         max-width: 100%;
     }
+    .user-list-scroll{
+        max-height: 310px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -267,5 +261,9 @@
     .icon-90deg {
         transform: rotate(90deg);
     } 
+
+    .user-list-scroll{
+        max-height: 260px;
+    }
 }
 /*КОНЕЦ Скрывает панель список студентов */

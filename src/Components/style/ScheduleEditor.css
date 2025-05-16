@@ -1,3 +1,5 @@
+/* scheduleeditor.css */
+
 .schedule-editor-container {
     background-color: #fff;
     border-radius: 10px;
@@ -5,13 +7,15 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-height: 764px;
+    max-height: 2000px;
     overflow: hidden;
+    width: 100%;
 }
 
 .editor-header {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
@@ -23,7 +27,6 @@
     min-width: 0;
     overflow: hidden;
     white-space: normal;
-    /* Всегда разрешаем перенос */
     word-break: break-word;
 }
 
@@ -38,7 +41,7 @@
     gap: 10px;
 }
 
-.mode-button {
+.mode-button-scheduleeditor {
     padding: 8px 16px;
     border-radius: 20px;
     border: 1px solid #ddd;
@@ -48,11 +51,11 @@
     font-size: 14px;
 }
 
-.mode-button:hover {
+.mode-button-scheduleeditor:hover {
     background-color: #eee;
 }
 
-.mode-button.active {
+.mode-button-scheduleeditor.active {
     background-color: #FCCD3A;
     border-color: #FCCD3A;
     color: #333;
@@ -143,6 +146,7 @@
 }
 
 .schedule-table-container {
+    width: 100%;
     overflow-x: auto;
     max-height: 500px;
     overflow-y: auto;
@@ -150,15 +154,17 @@
 
 .schedule-table {
     width: 100%;
+    min-width: 800px;
     border-collapse: collapse;
     font-size: 14px;
 }
 
 .schedule-table th,
 .schedule-table td {
-    padding: 12px 15px;
+    padding: 12px 5px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    white-space: nowrap;
 }
 
 .schedule-table th {
@@ -235,7 +241,6 @@
 }
 
 .attendance-toggle {
-    /* position: relative; */
     display: inline-block;
     cursor: pointer;
 }
@@ -487,6 +492,12 @@
     color: #888;
 }
 
+@media (max-width: 1000px) {
+    .group-students-container {
+        flex-direction: column;
+    }
+}
+
 @media (max-width: 768px) {
     .add-lesson-form {
         flex-direction: column;
@@ -504,7 +515,7 @@
 
     .schedule-table th,
     .schedule-table td {
-        padding: 8px 10px;
+        padding: 8px 5px;
         font-size: 13px;
     }
 
@@ -525,6 +536,29 @@
     .edit-card-actions {
         justify-content: center;
     }
+
+    .schedule-table th:nth-child(3),
+    .schedule-table td:nth-child(3) {
+        width: auto;
+    }
+
+    .edit-form-group {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .editor-header {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mode-switcher {
+        padding-top: 10px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
 }
 
 /* Обновленные стили для таблицы с новыми колонками */
@@ -538,21 +572,6 @@
 #durationInput {
     width: 100%;
 }
-
-/* Адаптивные стили для мобильных устройств */
-@media (max-width: 768px) {
-
-    .schedule-table th:nth-child(3),
-    .schedule-table td:nth-child(3) {
-        width: auto;
-    }
-
-    .edit-form-group {
-        min-width: 100%;
-    }
-}
-
-
 
 /* ________________СТИЛИ ДЛЯ ГРУПП________________*/
 
@@ -669,7 +688,6 @@
     text-align: center;
 }
 
-
 /* Стили для модального окна в GroupEditor */
 
 /* Модальное окно посещаемости */
@@ -770,8 +788,6 @@
     background-color: #138496;
 }
 
-
-
 /* Стили для столбца оценки */
 
 .grade-edit-container {
@@ -803,7 +819,7 @@
 }
 
 .action-button {
-    /* background: none; */
+    background: none;
     border: none;
     cursor: pointer;
     font-size: 16px;
@@ -885,7 +901,7 @@
     margin-bottom: 20px;
 }
 
-.homework-files h4, 
+.homework-files h4,
 .students-responses h4 {
     margin-bottom: 10px;
     color: #333;
@@ -975,11 +991,30 @@
     font-weight: 500;
 }
 
-.grade-5 { background-color: #4caf50; color: white; }
-.grade-4 { background-color: #8bc34a; color: white; }
-.grade-3 { background-color: #ffc107; color: #333; }
-.grade-2 { background-color: #ff9800; color: white; }
-.grade-1 { background-color: #f44336; color: white; }
+.grade-5 {
+    background-color: #4caf50;
+    color: white;
+}
+
+.grade-4 {
+    background-color: #8bc34a;
+    color: white;
+}
+
+.grade-3 {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.grade-2 {
+    background-color: #ff9800;
+    color: white;
+}
+
+.grade-1 {
+    background-color: #f44336;
+    color: white;
+}
 
 .no-grade {
     color: #999;
@@ -1016,11 +1051,339 @@
     color: #333;
 }
 
-.save-button { color: #4caf50; }
-.save-button:hover { background-color: #e8f5e9; }
+.save-button {
+    color: #4caf50;
+}
 
-.cancel-button { color: #f44336; }
-.cancel-button:hover { background-color: #ffebee; }
+.save-button:hover {
+    background-color: #e8f5e9;
+}
 
-.edit-button { color: #2196f3; }
-.edit-button:hover { background-color: #e3f2fd; }
+.cancel-button {
+    color: #f44336;
+}
+
+.cancel-button:hover {
+    background-color: #ffebee;
+}
+
+.edit-button {
+    color: #2196f3;
+}
+
+.edit-button:hover {
+    background-color: #e3f2fd;
+}
+
+/* editing.css */
+
+.editing-main {
+    min-height: calc(100vh - 120px);
+    padding: 150px 0;
+}
+
+.editing-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.blocks-flex {
+    display: flex;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-height: 700px;
+    max-height: 700px;
+}
+
+.sidebar-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 15px;
+    background-color: #2d2d2d;
+    position: relative;
+}
+
+.icon-container {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.icon-container:hover {
+    background-color: #3d3d3d;
+}
+
+.icon-container.active {
+    background-color: #FCCD3A;
+}
+
+.sidebar-icon {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+}
+
+.icon-container.active .sidebar-icon {
+    filter: none;
+}
+
+.icon-tooltip {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    margin-left: 10px;
+    z-index: 10;
+}
+
+.icon-container:hover .icon-tooltip {
+    opacity: 1;
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 35px 8px 15px;
+    border: 1px solid #d9a800;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+    padding-left: 45px;
+}
+
+.search-input:focus {
+    border-color: #b38f00;
+}
+
+.search-icon {
+    position: absolute;
+    right: 10px;
+    top: 46%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-item:hover {
+    background-color: #f8f8f8;
+    transform: translateX(2px);
+}
+
+.user-item.selected {
+    background-color: #333;
+    color: white;
+}
+
+.user-item.selected .user-name {
+    color: white;
+}
+
+.user-item.selected .user-role-badge {
+    background-color: #555;
+    color: white;
+}
+
+.user-item.selected .user-role-badge.student {
+    background-color: #555;
+    color: white;
+}
+
+.user-name {
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.user-role-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background-color: #eee;
+    color: #555;
+    white-space: nowrap;
+}
+
+.user-role-badge.student {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.error-message {
+    color: #dc3545;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+@media (max-width: 1200px) {
+    .blocks-flex{
+        min-height: 1200px;
+    }
+
+    .content-area {
+        flex-direction: column;
+    }
+
+
+}
+
+@media (max-width: 768px) {
+    .blocks-flex {
+        flex-direction: column;
+        min-height: 1500px;
+    }
+
+    .sidebar-icons {
+        flex-direction: row;
+        padding: 10px;
+        justify-content: center;
+    }
+
+    .icon-tooltip {
+        display: none;
+    }
+}
+
+/*НАЧАЛО Скрывает панель список студентов */
+.toggle-container .sidebar-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+/* Для мобильных устройств можно скрывать панель по умолчанию */
+@media (max-width: 768px) {
+    .icon-90deg {
+        transform: rotate(90deg);
+    }
+}
+/*КОНЕЦ Скрывает панель список студентов */
+
+
+
+
+
+
+
+
+
+/* Добавляем в ScheduleEditor.css */
+
+/* Стили для поиска */
+.group-search-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.group-search-input {
+    width: 100%;
+    padding: 8px 15px 8px 35px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.group-search-input:focus {
+    border-color: #FCCD3A;
+}
+
+.group-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+/* Ограничиваем высоту списков студентов и добавляем прокрутку */
+.group-students-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 211px; /* Примерно 5 записей с отступами */
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Стили для полосы прокрутки */
+.group-students-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.group-students-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.group-students-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.group-students-list::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .group-students-container {
+        flex-direction: column;
+    }
+    
+    .group-students-section {
+        margin-bottom: 20px;
+    }
+    
+    .group-students-list {
+        max-height: 200px;
+    }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "../Components/style/ScheduleEditor.css";
-import { FiEdit2, FiTrash2, FiCheck, FiX, FiPlus, FiMinus, FiUsers } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiCheck, FiX, FiPlus, FiMinus, FiUsers, FiSearch } from "react-icons/fi";
 import { BsFiletypeTxt, BsFiletypeDocx, BsFiletypeDoc, BsFiletypePdf, BsFiletypeXlsx } from "react-icons/bs";
 import { PiMicrosoftPowerpointLogoThin } from "react-icons/pi";
 import { FaRegCheckCircle, FaRegTimesCircle, FaUserCheck, FaUserTimes } from "react-icons/fa";
@@ -28,50 +28,52 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     });
     const [editingGrades, setEditingGrades] = useState({});
     const [studentGrades, setStudentGrades] = useState({});
+    const [groupStudentsSearch, setGroupStudentsSearch] = useState('');
+    const [availableStudentsSearch, setAvailableStudentsSearch] = useState('');
 
     useEffect(() => {
         if (selectedGroup) {
             setLoading(true);
             setError(null);
-    
+
             const loadData = async () => {
                 try {
                     // Загрузка студентов группы
                     const studentsResponse = await fetch(`/api/groups/${selectedGroup._id}/students`);
                     if (!studentsResponse.ok) throw new Error('Ошибка загрузки студентов группы');
                     const groupStudentsData = await studentsResponse.json();
-    
+
                     // Загрузка всех студентов
                     const allStudentsResponse = await fetch('/api/users/students');
                     if (!allStudentsResponse.ok) throw new Error('Ошибка загрузки всех студентов');
                     const allStudentsData = await allStudentsResponse.json();
-    
+
                     // Фильтрация доступных студентов
                     const groupStudentIds = groupStudentsData.map(student => student._id);
                     const availableStudentsData = allStudentsData.filter(
                         student => !groupStudentIds.includes(student._id)
                     );
-    
+
                     setGroupStudents(groupStudentsData);
                     setAvailableStudents(availableStudentsData);
-    
+
                     // Загрузка расписания и домашних заданий
                     const [scheduleRes, homeworkRes] = await Promise.all([
                         fetch(`/api/schedules/group/${selectedGroup._id}`),
                         fetch(`/api/homework/group/${selectedGroup._id}`)
                     ]);
-    
+
                     if (!scheduleRes.ok) console.error('Ошибка загрузки расписания');
                     if (!homeworkRes.ok) console.error('Ошибка загрузки домашних заданий');
-    
+
                     const scheduleData = await scheduleRes.json().catch(() => []);
                     const homeworkData = await homeworkRes.json().catch(() => []);
-    
-                    console.log('Homework Data:', homeworkData); // Временный лог для проверки данных
-    
+
+                    console.log('Homework Data:', homeworkData);
+
                     setSchedule(scheduleData);
                     setHomework(homeworkData);
-    
+
                 } catch (error) {
                     console.error('Ошибка загрузки данных:', error);
                     setError(error.message);
@@ -79,11 +81,43 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                     setLoading(false);
                 }
             };
-    
+
             loadData();
         }
     }, [selectedGroup]);
-    
+
+    // Функция для нормализации поискового запроса
+    const normalizeSearchTerm = (term) => {
+        return term.toLowerCase().trim().replace(/\s+/g, ' ');
+    };
+
+    // Функция для проверки совпадения студента с поисковым запросом
+    const studentMatchesSearch = (student, searchTerm) => {
+        if (!searchTerm) return true;
+        
+        const normalizedSearch = normalizeSearchTerm(searchTerm);
+        const studentFullName = normalizeSearchTerm(
+            `${student.surname} ${student.name} ${student.patronymic || ''}`
+        );
+        
+        // Разбиваем поисковый запрос на отдельные слова
+        const searchWords = normalizedSearch.split(' ');
+        
+        // Проверяем, что все слова запроса содержатся в ФИО студента
+        return searchWords.every(word => 
+            studentFullName.includes(word)
+        );
+    };
+
+    // Фильтрация студентов в группе
+    const filteredGroupStudents = groupStudents.filter(student => 
+        studentMatchesSearch(student, groupStudentsSearch)
+    );
+
+    // Фильтрация доступных студентов
+    const filteredAvailableStudents = availableStudents.filter(student => 
+        studentMatchesSearch(student, availableStudentsSearch)
+    );
 
     const handleEditStudentGrade = (homeworkId, studentId, currentGrade) => {
         setEditingGrades(prev => ({
@@ -121,7 +155,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                     hw._id === updatedHomework._id ? updatedHomework : hw
                 ));
                 setEditingGrades(prev => {
-                    const newState = {...prev};
+                    const newState = { ...prev };
                     delete newState[homeworkId];
                     return newState;
                 });
@@ -136,7 +170,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
     const handleCancelGradeEdit = (homeworkId) => {
         setEditingGrades(prev => {
-            const newState = {...prev};
+            const newState = { ...prev };
             delete newState[homeworkId];
             return newState;
         });
@@ -617,10 +651,9 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
     const getFileIcon = (file) => {
         if (!file) {
-            // Возвращаем значок по умолчанию или сообщение об ошибке
             return <BsFiletypeTxt className="file-icon" />;
         }
-    
+
         const extension = file.split('.').pop().toLowerCase();
         switch (extension) {
             case 'txt': return <BsFiletypeTxt className="file-icon" />;
@@ -632,7 +665,6 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             default: return <BsFiletypeTxt className="file-icon" />;
         }
     };
-    
 
     const formatCombinedDateTime = (item) => {
         const date = formatDate(item.date);
@@ -673,14 +705,14 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                         ))}
                     </div>
                 </div>
-    
+
                 <div className="students-responses">
                     <h4>Ответы студентов:</h4>
                     {groupStudents.map(student => {
                         const studentGrade = item.grades?.[student._id] || null;
                         const studentAnswer = item.answer.find(ans => ans.student_id === student._id);
                         const isEditing = editingGrades[item._id] === student._id;
-    
+
                         return (
                             <div key={student._id} className="student-response">
                                 <div className="student-info">
@@ -688,7 +720,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                         {student.surname} {student.name[0]}.{student.patronymic && `${student.patronymic[0]}.`}
                                     </span>
                                 </div>
-                                
+
                                 <div className="student-answer">
                                     {studentAnswer ? (
                                         <div className="answer-file">
@@ -707,7 +739,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                         <span className="no-answer">Нет ответа</span>
                                     )}
                                 </div>
-                                
+
                                 <div className="student-grade">
                                     {isEditing ? (
                                         <div className="grade-edit-container">
@@ -785,19 +817,19 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 </h3>
                 <div className='mode-switcher'>
                     <button
-                        className={`mode-button ${mode === 'students' ? 'active' : ''}`}
+                        className={`mode-button-scheduleeditor ${mode === 'students' ? 'active' : ''}`}
                         onClick={() => setMode('students')}
                     >
                         Студенты
                     </button>
                     <button
-                        className={`mode-button ${mode === 'schedule' ? 'active' : ''}`}
+                        className={`mode-button-scheduleeditor ${mode === 'schedule' ? 'active' : ''}`}
                         onClick={() => setMode('schedule')}
                     >
                         Расписание
                     </button>
                     <button
-                        className={`mode-button ${mode === 'homework' ? 'active' : ''}`}
+                        className={`mode-button-scheduleeditor ${mode === 'homework' ? 'active' : ''}`}
                         onClick={() => setMode('homework')}
                     >
                         Домашнее задание
@@ -831,12 +863,22 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             </div>
 
             {mode === 'students' ? (
-                <div className="group-students-container">
+<div className="group-students-container">
                     <div className="students-section">
                         <h4>Студенты в группе ({groupStudents.length})</h4>
-                        <div className="students-list">
-                            {groupStudents.length > 0 ? (
-                                groupStudents.map(student => (
+                        <div className="group-search-container">
+                            <FiSearch className="group-search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Поиск студентов..."
+                                value={groupStudentsSearch}
+                                onChange={(e) => setGroupStudentsSearch(e.target.value)}
+                                className="group-search-input"
+                            />
+                        </div>
+                        <div className="group-students-list">
+                            {filteredGroupStudents.length > 0 ? (
+                                filteredGroupStudents.map(student => (
                                     <div key={student._id} className="student-item">
                                         <span className="student-name">
                                             {student.surname} {student.name} {student.patronymic}
@@ -858,9 +900,19 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
                     <div className="students-section">
                         <h4>Доступные студенты ({availableStudents.length})</h4>
-                        <div className="students-list">
-                            {availableStudents.length > 0 ? (
-                                availableStudents.map(student => (
+                        <div className="group-search-container">
+                            <FiSearch className="group-search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Поиск студентов..."
+                                value={availableStudentsSearch}
+                                onChange={(e) => setAvailableStudentsSearch(e.target.value)}
+                                className="group-search-input"
+                            />
+                        </div>
+                        <div className="group-students-list">
+                            {filteredAvailableStudents.length > 0 ? (
+                                filteredAvailableStudents.map(student => (
                                     <div key={student._id} className="student-item">
                                         <span className="student-name">
                                             {student.surname} {student.name} {student.patronymic}
@@ -1146,46 +1198,6 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                         <tr key={item._id}>
                                             <td>{item.day}</td>
                                             <td>{formatDate(item.dueDate)}</td>
-                                            {/* <td>
-                                                <div className="files-list">
-                                                    {item.files.map((file, idx) => (
-                                                        <div key={idx} className="file-item">
-                                                            {getFileIcon(file)}
-                                                            <a
-                                                                href={`/homework/${file}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                download
-                                                                className="file-link"
-                                                            >
-                                                                {file}
-                                                            </a>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </td> */}
-                                            {/* <td>
-                                                {item.answer.length > 0 ? (
-                                                    <div className="files-list">
-                                                        {item.answer.map((ans, idx) => (
-                                                            <div key={idx} className="file-item">
-                                                                {getFileIcon(ans.file)}
-                                                                <a
-                                                                    href={`/homework/${ans.file}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    download
-                                                                    className="file-link"
-                                                                >
-                                                                    {ans.file}
-                                                                </a>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <span className="no-answer">Нет ответа</span>
-                                                )}
-                                            </td> */}
                                             <td>
                                                 {renderStudentGrades(item)}
                                             </td>

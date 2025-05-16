@@ -370,13 +370,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 </h3>
                 <div className='mode-switcher'>
                     <button
-                        className={`mode-button ${mode === 'lessons' ? 'active' : ''}`}
+                        className={`mode-button-scheduleeditor ${mode === 'lessons' ? 'active' : ''}`}
                         onClick={() => setMode('lessons')}
                     >
                         Занятия
                     </button>
                     <button
-                        className={`mode-button ${mode === 'homework' ? 'active' : ''}`}
+                        className={`mode-button-scheduleeditor ${mode === 'homework' ? 'active' : ''}`}
                         onClick={() => setMode('homework')}
                     >
                         Домашнее задание
