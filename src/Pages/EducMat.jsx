@@ -14,7 +14,7 @@ const EducMat = () => {
     const [showOptions, setShowOptions] = useState(null);
     const optionsPopupRef = useRef(null);
     const modalContentRef = useRef(null);
-    const placeholderImage = `/uploads/to/placeholder.png`;
+    const placeholderImage = `~/server-easymath/uploads/to/placeholder.png`;
 
     const userRole = localStorage.getItem('role');
     const fetchMaterials = async () => {
@@ -206,7 +206,7 @@ const EducMat = () => {
                                                 <div className="img-block-material">
                                                     <img
                                                         src={material.image && material.image[0] ?
-                                                            `server-easymath/uploads/images/${material.image[0]}` :
+                                                            `~/server-easymath/uploads/images/${material.image[0]}` :
                                                             placeholderImage}
                                                         alt={material.title}
                                                         className="responsive-image"
@@ -278,7 +278,7 @@ const EducMat = () => {
                                 <div className="educmat-modal-img">
                                     <img
                                         src={selectedMaterial.image && selectedMaterial.image[0] ?
-                                            `/server-easymath/uploads/images/${selectedMaterial.image[0]}` :
+                                            `~/server-easymath/uploads/images/${selectedMaterial.image[0]}` :
                                             placeholderImage}
                                         alt={selectedMaterial.title}
                                         className="modal-image"
@@ -307,7 +307,7 @@ const EducMat = () => {
                                                 {selectedMaterial.file.map((fileName, index) => (
                                                     <li className="educmat-modal-li" key={index}>
                                                         <a
-                                                            href={`/uploads/materials/${fileName}`}
+                                                            href={`~/server-easymath/uploads/materials/${fileName}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="file-link"
