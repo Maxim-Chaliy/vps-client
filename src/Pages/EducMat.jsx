@@ -17,7 +17,6 @@ const EducMat = () => {
     const placeholderImage = `/uploads/to/placeholder.png`;
 
     const userRole = localStorage.getItem('role');
-
     const fetchMaterials = async () => {
         try {
             const response = await fetch(`/api/educmat`);
@@ -207,7 +206,7 @@ const EducMat = () => {
                                                 <div className="img-block-material">
                                                     <img
                                                         src={material.image && material.image[0] ?
-                                                            `/uploads/images/${material.image[0]}` :
+                                                            `https://easymath-online.ru/uploads/images/${material.image[0]}` :
                                                             placeholderImage}
                                                         alt={material.title}
                                                         className="responsive-image"
@@ -279,7 +278,7 @@ const EducMat = () => {
                                 <div className="educmat-modal-img">
                                     <img
                                         src={selectedMaterial.image && selectedMaterial.image[0] ?
-                                            `/uploads/images/${selectedMaterial.image[0]}` :
+                                            `https://easymath-online.ru/uploads/images/${selectedMaterial.image[0]}` :
                                             placeholderImage}
                                         alt={selectedMaterial.title}
                                         className="modal-image"
