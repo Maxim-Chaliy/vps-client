@@ -14,13 +14,14 @@ const EducMat = () => {
     const [showOptions, setShowOptions] = useState(null);
     const optionsPopupRef = useRef(null);
     const modalContentRef = useRef(null);
-    const placeholderImage = `~/server-easymath/uploads/to/placeholder.png`;
+    const placeholderImage = `/uploads/to/placeholder.png`;
 
     const userRole = localStorage.getItem('role');
     const fetchMaterials = async () => {
         try {
             const response = await fetch(`/api/educmat`);
             const data = await response.json();
+            console.log('Fetched materials:', data);
             setMaterials(data);
             filterMaterials(data);
         } catch (error) {
@@ -206,10 +207,14 @@ const EducMat = () => {
                                                 <div className="img-block-material">
                                                     <img
                                                         src={material.image && material.image[0] ?
-                                                            `~/server-easymath/uploads/images/${material.image[0]}` :
+                                                            `/uploads/images/${material.image[0]}` :
                                                             placeholderImage}
                                                         alt={material.title}
                                                         className="responsive-image"
+                                                        onError={(e) => {
+                                                            console.error('Error loading image:', e);
+                                                            e.target.src = placeholderImage;
+                                                        }}
                                                     />
                                                     <div className="image-overlay">
                                                         <span>Просмотреть</span>
@@ -278,7 +283,7 @@ const EducMat = () => {
                                 <div className="educmat-modal-img">
                                     <img
                                         src={selectedMaterial.image && selectedMaterial.image[0] ?
-                                            `~/server-easymath/uploads/images/${selectedMaterial.image[0]}` :
+                                            `/uploads/images/${selectedMaterial.image[0]}` :
                                             placeholderImage}
                                         alt={selectedMaterial.title}
                                         className="modal-image"
@@ -307,7 +312,7 @@ const EducMat = () => {
                                                 {selectedMaterial.file.map((fileName, index) => (
                                                     <li className="educmat-modal-li" key={index}>
                                                         <a
-                                                            href={`~/server-easymath/uploads/materials/${fileName}`}
+                                                            href={`/uploads/materials/${fileName}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="file-link"
