@@ -1,8 +1,10 @@
 .employment-container {
+    width: 100%;
     max-width: 1200px;
+    padding: 150px 20px 150px;
     margin: 0 auto;
-    padding: 120px 20px 20px;
     font-family: 'Arial', sans-serif;
+    box-sizing: border-box; /* Добавьте это свойство */
 }
 
 .h1-my-shcedule {
@@ -48,6 +50,8 @@
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    margin: auto;
+    max-width: min-content;
 }
 
 .date-navigation {
@@ -259,12 +263,12 @@
 }
 
 .week-interval {
-    margin: 2px;
     border-radius: 3px;
     padding: 4px;
     font-size: 12px;
     min-height: 36px;
     box-shadow: none; /* Убираем тень */
+    height: 100%;
 }
 
 .week-interval.booked {
@@ -275,6 +279,7 @@
 .week-lesson-info {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     height: 100%;
     padding: 2px;
 }
@@ -416,7 +421,12 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
     .employment-container {
-        padding: 80px 10px 10px;
+        padding: 150px 10px 150px;
+    }
+
+    .day-view{
+        margin: none;
+        max-width: none;
     }
 
     .time-interval {
@@ -528,10 +538,6 @@
 
     }
 
-    .week-interval {
-        margin: 1px;
-    }
-
     .week-student-name {
         display: none;
     }
@@ -566,4 +572,3 @@
         font-size: 13px;
     }
 }
-

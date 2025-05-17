@@ -94,28 +94,28 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     // Функция для проверки совпадения студента с поисковым запросом
     const studentMatchesSearch = (student, searchTerm) => {
         if (!searchTerm) return true;
-        
+
         const normalizedSearch = normalizeSearchTerm(searchTerm);
         const studentFullName = normalizeSearchTerm(
             `${student.surname} ${student.name} ${student.patronymic || ''}`
         );
-        
+
         // Разбиваем поисковый запрос на отдельные слова
         const searchWords = normalizedSearch.split(' ');
-        
+
         // Проверяем, что все слова запроса содержатся в ФИО студента
-        return searchWords.every(word => 
+        return searchWords.every(word =>
             studentFullName.includes(word)
         );
     };
 
     // Фильтрация студентов в группе
-    const filteredGroupStudents = groupStudents.filter(student => 
+    const filteredGroupStudents = groupStudents.filter(student =>
         studentMatchesSearch(student, groupStudentsSearch)
     );
 
     // Фильтрация доступных студентов
-    const filteredAvailableStudents = availableStudents.filter(student => 
+    const filteredAvailableStudents = availableStudents.filter(student =>
         studentMatchesSearch(student, availableStudentsSearch)
     );
 
@@ -314,15 +314,47 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             return;
         }
 
-        const dateObj = new Date(dateInput);
-        const dayOfWeek = getShortDayOfWeek(dateObj);
+        const newDate = new Date(dateInput);
+        const newStartTime = timeInput;
+        const newDuration = parseInt(durationInput) || 60;
+        const newEndTime = calculateEndTime(newStartTime, newDuration);
+
+        // Проверяем пересечение с ВСЕМИ существующими занятиями (и групповыми, и индивидуальными)
+        const hasConflict = schedule.some(item => {
+            // Проверяем, что дата совпадает
+            const itemDate = new Date(item.date);
+            if (itemDate.toDateString() !== newDate.toDateString()) {
+                return false;
+            }
+
+            // Преобразуем время в минуты для удобства сравнения
+            const toMinutes = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            const newStart = toMinutes(newStartTime);
+            const newEnd = toMinutes(newEndTime);
+            const existStart = toMinutes(item.time);
+            const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
+
+            // Проверяем пересечение временных интервалов
+            return (newStart < existEnd && newEnd > existStart);
+        });
+
+        if (hasConflict) {
+            alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+            return;
+        }
+
+        const dayOfWeek = getShortDayOfWeek(newDate);
 
         const newScheduleItem = {
             group_id: selectedGroup._id,
             day: dayOfWeek,
-            date: dateObj,
-            time: timeInput,
-            duration: parseInt(durationInput) || 60,
+            date: newDate,
+            time: newStartTime,
+            duration: newDuration,
             subject: subjectInput,
             description: descriptionInput || '',
             attendance: null
@@ -337,19 +369,23 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 body: JSON.stringify(newScheduleItem),
             });
 
-            if (response.ok) {
-                const savedScheduleItem = await response.json();
-                setSchedule([...schedule, savedScheduleItem]);
-                document.getElementById('dateInput').value = '';
-                document.getElementById('timeInput').value = '';
-                document.getElementById('durationInput').value = '60';
-                document.getElementById('descriptionInput').value = '';
-            } else {
-                throw new Error('Ошибка при добавлении занятия в расписание');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка при добавлении занятия в расписание');
             }
+
+            const savedScheduleItem = await response.json();
+            setSchedule([...schedule, savedScheduleItem]);
+
+            // Очищаем форму
+            document.getElementById('dateInput').value = '';
+            document.getElementById('timeInput').value = '';
+            document.getElementById('durationInput').value = '60';
+            document.getElementById('exampleSelect').value = '';
+            document.getElementById('descriptionInput').value = '';
         } catch (error) {
             console.error('Ошибка при добавлении занятия в расписание:', error);
-            alert('Не удалось добавить занятие');
+            alert(error.message || 'Не удалось добавить занятие');
         }
     };
 
@@ -497,6 +533,35 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 duration: parseInt(editScheduleValues.duration) || 60
             };
 
+            // Проверка пересечения временных интервалов (кроме самого редактируемого занятия)
+            const hasConflict = schedule.some(item => {
+                if (item._id === editingSchedule) return false;
+
+                const itemDate = new Date(item.date);
+                const updatedDate = new Date(updatedItem.date);
+                if (itemDate.toDateString() !== updatedDate.toDateString()) {
+                    return false;
+                }
+
+                // Используем ту же логику сравнения, что и в handleAddToSchedule
+                const toMinutes = (timeStr) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return hours * 60 + minutes;
+                };
+
+                const newStart = toMinutes(updatedItem.time);
+                const newEnd = toMinutes(calculateEndTime(updatedItem.time, updatedItem.duration));
+                const existStart = toMinutes(item.time);
+                const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
+
+                return (newStart < existEnd && newEnd > existStart);
+            });
+
+            if (hasConflict) {
+                alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/schedules/${editingSchedule}`, {
                     method: 'PUT',
@@ -506,21 +571,21 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                     body: JSON.stringify(updatedItem),
                 });
 
-                if (response.ok) {
-                    const updatedScheduleItem = await response.json();
-                    setSchedule(schedule.map(item => item._id === editingSchedule ? updatedScheduleItem : item));
-                    setEditingSchedule(null);
-                    setEditScheduleValues({});
-                } else {
-                    throw new Error('Ошибка при сохранении изменений');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Ошибка при сохранении изменений');
                 }
+
+                const updatedScheduleItem = await response.json();
+                setSchedule(schedule.map(item => item._id === editingSchedule ? updatedScheduleItem : item));
+                setEditingSchedule(null);
+                setEditScheduleValues({});
             } catch (error) {
                 console.error('Ошибка при сохранении изменений:', error);
-                alert('Не удалось сохранить изменения');
+                alert(error.message || 'Не удалось сохранить изменения');
             }
         }
     };
-
     const handleCancelSchedule = () => {
         setEditingSchedule(null);
         setEditScheduleValues({});
@@ -863,7 +928,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             </div>
 
             {mode === 'students' ? (
-<div className="group-students-container">
+                <div className="group-students-container">
                     <div className="students-section">
                         <h4>Студенты в группе ({groupStudents.length})</h4>
                         <div className="group-search-container">

@@ -14,15 +14,13 @@ const EducMat = () => {
     const [showOptions, setShowOptions] = useState(null);
     const optionsPopupRef = useRef(null);
     const modalContentRef = useRef(null);
-
-    const serverUrl = 'https://easymath-online.ru';
-    const placeholderImage = `${serverUrl}/uploads/to/placeholder.png`;
+    const placeholderImage = `/uploads/to/placeholder.png`;
 
     const userRole = localStorage.getItem('role');
 
     const fetchMaterials = async () => {
         try {
-            const response = await fetch(`${serverUrl}/api/educmat`);
+            const response = await fetch(`/api/educmat`);
             const data = await response.json();
             setMaterials(data);
             filterMaterials(data);
@@ -87,7 +85,7 @@ const EducMat = () => {
 
     const handleDeleteClick = async (materialId) => {
         try {
-            const response = await fetch(`${serverUrl}/api/educmat/${materialId}`, {
+            const response = await fetch(`/api/educmat/${materialId}`, {
                 method: 'DELETE',
             });
 
@@ -209,7 +207,7 @@ const EducMat = () => {
                                                 <div className="img-block-material">
                                                     <img
                                                         src={material.image && material.image[0] ?
-                                                            `${serverUrl}/uploads/images/${material.image[0]}` :
+                                                            `/uploads/images/${material.image[0]}` :
                                                             placeholderImage}
                                                         alt={material.title}
                                                         className="responsive-image"
@@ -281,7 +279,7 @@ const EducMat = () => {
                                 <div className="educmat-modal-img">
                                     <img
                                         src={selectedMaterial.image && selectedMaterial.image[0] ?
-                                            `${serverUrl}/uploads/images/${selectedMaterial.image[0]}` :
+                                            `/uploads/images/${selectedMaterial.image[0]}` :
                                             placeholderImage}
                                         alt={selectedMaterial.title}
                                         className="modal-image"
@@ -310,7 +308,7 @@ const EducMat = () => {
                                                 {selectedMaterial.file.map((fileName, index) => (
                                                     <li className="educmat-modal-li" key={index}>
                                                         <a
-                                                            href={`${serverUrl}/uploads/materials/${fileName}`}
+                                                            href={`/uploads/materials/${fileName}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="file-link"

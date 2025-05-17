@@ -51,16 +51,49 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             return;
         }
 
-        const dateObj = new Date(dateInput);
-        const dayOfWeek = getShortDayOfWeek(dateObj);
+        // Преобразуем введенные данные в удобный формат для проверки
+        const newDate = new Date(dateInput);
+        const newStartTime = timeInput;
+        const newDuration = parseInt(durationInput) || 60;
+        const newEndTime = calculateEndTime(newStartTime, newDuration);
+
+        // Проверяем пересечение с существующими занятиями (и групповыми, и индивидуальными)
+        const hasConflict = schedule.some(item => {
+            // Проверяем, что дата совпадает
+            const itemDate = new Date(item.date);
+            if (itemDate.toDateString() !== newDate.toDateString()) {
+                return false;
+            }
+
+            // Преобразуем время в минуты для удобства сравнения
+            const toMinutes = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            const newStart = toMinutes(newStartTime);
+            const newEnd = toMinutes(newEndTime);
+            const existStart = toMinutes(item.time);
+            const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
+
+            // Проверяем пересечение временных интервалов
+            return (newStart < existEnd && newEnd > existStart);
+        });
+
+        if (hasConflict) {
+            alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+            return;
+        }
+
+        const dayOfWeek = getShortDayOfWeek(newDate);
 
         const newScheduleItem = {
             student_id: selectedUser ? selectedUser._id : null,
             group_id: selectedGroup ? selectedGroup._id : null,
             day: dayOfWeek,
-            date: dateObj,
-            time: timeInput,
-            duration: parseInt(durationInput) || 60,
+            date: newDate,
+            time: newStartTime,
+            duration: newDuration,
             subject: subjectInput,
             description: descriptionInput || '',
             attendance: false
@@ -223,6 +256,36 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 day: getShortDayOfWeek(new Date(editValues.date)),
                 duration: parseInt(editValues.duration) || 60
             };
+
+            // Проверка пересечения с ВСЕМИ существующими занятиями (и групповыми, и индивидуальными)
+            const hasConflict = schedule.some(item => {
+                if (item._id === editing) return false; // Пропускаем текущее редактируемое занятие
+
+                const itemDate = new Date(item.date);
+                const updatedDate = new Date(updatedItem.date);
+                if (itemDate.toDateString() !== updatedDate.toDateString()) {
+                    return false;
+                }
+
+                // Преобразуем время в минуты для удобства сравнения
+                const toMinutes = (timeStr) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return hours * 60 + minutes;
+                };
+
+                const newStart = toMinutes(updatedItem.time);
+                const newEnd = toMinutes(calculateEndTime(updatedItem.time, updatedItem.duration));
+                const existStart = toMinutes(item.time);
+                const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
+
+                // Проверяем пересечение временных интервалов
+                return (newStart < existEnd && newEnd > existStart);
+            });
+
+            if (hasConflict) {
+                alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+                return;
+            }
 
             try {
                 const response = await fetch(`/api/schedules/${editing}`, {

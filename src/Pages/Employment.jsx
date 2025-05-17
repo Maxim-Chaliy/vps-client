@@ -14,7 +14,7 @@ const Employment = () => {
   const [viewMode, setViewMode] = useState("day");
   const [timeIntervals, setTimeIntervals] = useState([]);
   const [weekSchedule, setWeekSchedule] = useState([]);
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date()));
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [modal, setModal] = useState({
     show: false,
     type: '',
@@ -139,7 +139,7 @@ const Employment = () => {
   };
 
   const minutesToTime = (totalMinutes) => {
-    const hours = Math.floor(totalMinutes / 60);
+    const hours = Math.floor(totalMinutes / 60) % 24; // Use modulo to wrap around after 24 hours
     const minutes = totalMinutes % 60;
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   };
@@ -165,7 +165,7 @@ const Employment = () => {
   };
 
   const handleWeekDateChange = (e) => {
-    setCurrentWeekStart(startOfWeek(new Date(e.target.value)));
+    setCurrentWeekStart(startOfWeek(new Date(e.target.value), { weekStartsOn: 1 }));
   };
 
   const getFullName = (student) => {
@@ -306,9 +306,9 @@ const Employment = () => {
                           <div className={`week-interval ${hourInfo.type}`}>
                             <div className="week-lesson-info">
                               <div className="week-student-name">
-                                {hourInfo.lesson.student_id ?
-                                  getFullName(hourInfo.lesson.student_id) :
-                                  hourInfo.lesson.group_id.name}
+                                {hourInfo.lesson.student_id
+                                  ? getFullName(hourInfo.lesson.student_id)
+                                  : hourInfo.lesson.group_id?.name || 'Unknown'}
                               </div>
                               <div className="week-subject">
                                 {hourInfo.lesson.subject}
@@ -406,8 +406,8 @@ const Employment = () => {
                   <div className="interval-content">
                     {interval.type === "booked" ? (
                       <>
-                        <div className="student-name" title={interval.lesson.student_id ? getFullName(interval.lesson.student_id) : interval.lesson.group_id.name}>
-                          {interval.lesson.student_id ? getFullName(interval.lesson.student_id) : interval.lesson.group_id.name}
+                        <div className="student-name" title={interval.lesson.student_id ? getFullName(interval.lesson.student_id) : interval.lesson.group_id?.name || 'Unknown'}>
+                          {interval.lesson.student_id ? getFullName(interval.lesson.student_id) : interval.lesson.group_id?.name || 'Unknown'}
                         </div>
                         <div className="subject" title={interval.lesson.subject}>
                           {interval.lesson.subject}
@@ -472,7 +472,7 @@ const Employment = () => {
 
               <div className="modal-lesson-info">
                 <p><strong>Текущее время:</strong> {modal.lesson.time} - {modal.lesson.endTime}</p>
-                <p><strong>Студент:</strong> {modal.lesson.student_id ? getFullName(modal.lesson.student_id) : modal.lesson.group_id.name}</p>
+                <p><strong>Студент:</strong> {modal.lesson.student_id ? getFullName(modal.lesson.student_id) : modal.lesson.group_id?.name || 'Unknown'}</p>
                 <p><strong>Предмет:</strong> {modal.lesson.subject}</p>
                 <p><strong>Длительность:</strong> {modal.lesson.duration} мин.</p>
               </div>
