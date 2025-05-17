@@ -21,7 +21,6 @@ const EducMat = () => {
         try {
             const response = await fetch(`/api/educmat`);
             const data = await response.json();
-            console.log('Fetched materials:', data);
             setMaterials(data);
             filterMaterials(data);
         } catch (error) {
@@ -211,10 +210,6 @@ const EducMat = () => {
                                                             placeholderImage}
                                                         alt={material.title}
                                                         className="responsive-image"
-                                                        onError={(e) => {
-                                                            console.error('Error loading image:', e);
-                                                            e.target.src = placeholderImage;
-                                                        }}
                                                     />
                                                     <div className="image-overlay">
                                                         <span>Просмотреть</span>
@@ -271,7 +266,6 @@ const EducMat = () => {
                     )}
                 </div>
             </main>
-
             {selectedMaterial && (
                 <div className="educmat-modal-overlay">
                     <div className="educmat-modal">
