@@ -112,13 +112,16 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 document.getElementById('durationInput').value = '60';
                 document.getElementById('descriptionInput').value = '';
             } else {
-                throw new Error('Ошибка при добавлении занятия в расписание');
+                const errorData = await response.json();
+                alert(errorData.error || 'Ошибка при добавлении занятия в расписание');
             }
         } catch (error) {
             console.error('Ошибка при добавлении занятия в расписание:', error);
-            alert('Не удалось добавить занятие');
+            alert(error.message || 'Не удалось добавить занятие');
         }
     };
+
+
 
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
