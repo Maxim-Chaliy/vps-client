@@ -12,6 +12,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
     const [editing, setEditing] = useState(null);
     const [editValues, setEditValues] = useState({});
     const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedHomeworkItems, setSelectedHomeworkItems] = useState([]);
     const [mode, setMode] = useState('lessons');
     const [isAddingHomework, setIsAddingHomework] = useState(false);
     const [editingGrade, setEditingGrade] = useState(null);
@@ -51,21 +52,17 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             return;
         }
 
-        // Преобразуем введенные данные в удобный формат для проверки
         const newDate = new Date(dateInput);
         const newStartTime = timeInput;
         const newDuration = parseInt(durationInput) || 60;
         const newEndTime = calculateEndTime(newStartTime, newDuration);
 
-        // Проверяем пересечение с существующими занятиями (и групповыми, и индивидуальными)
         const hasConflict = schedule.some(item => {
-            // Проверяем, что дата совпадает
             const itemDate = new Date(item.date);
             if (itemDate.toDateString() !== newDate.toDateString()) {
                 return false;
             }
 
-            // Преобразуем время в минуты для удобства сравнения
             const toMinutes = (timeStr) => {
                 const [hours, minutes] = timeStr.split(':').map(Number);
                 return hours * 60 + minutes;
@@ -76,7 +73,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             const existStart = toMinutes(item.time);
             const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
 
-            // Проверяем пересечение временных интервалов
             return (newStart < existEnd && newEnd > existStart);
         });
 
@@ -257,9 +253,8 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 duration: parseInt(editValues.duration) || 60
             };
 
-            // Проверка пересечения с ВСЕМИ существующими занятиями (и групповыми, и индивидуальными)
             const hasConflict = schedule.some(item => {
-                if (item._id === editing) return false; // Пропускаем текущее редактируемое занятие
+                if (item._id === editing) return false;
 
                 const itemDate = new Date(item.date);
                 const updatedDate = new Date(updatedItem.date);
@@ -267,7 +262,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                     return false;
                 }
 
-                // Преобразуем время в минуты для удобства сравнения
                 const toMinutes = (timeStr) => {
                     const [hours, minutes] = timeStr.split(':').map(Number);
                     return hours * 60 + minutes;
@@ -278,7 +272,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 const existStart = toMinutes(item.time);
                 const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
 
-                // Проверяем пересечение временных интервалов
                 return (newStart < existEnd && newEnd > existStart);
             });
 
@@ -366,6 +359,63 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
     const handleSelectItem = (id) => {
         setSelectedItems(prevSelectedItems =>
+            prevSelectedItems.includes(id)
+                ? prevSelectedItems.filter(itemId => itemId !== id)
+                : [...prevSelectedItems, id]
+        );
+    };
+
+    const handleDeleteHomework = async (id) => {
+        if (!window.confirm('Вы уверены, что хотите удалить это домашнее задание?')) return;
+
+        try {
+            const response = await fetch(`/api/homework/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                setHomework(homework.filter(item => item._id !== id));
+                setSelectedHomeworkItems(selectedHomeworkItems.filter(itemId => itemId !== id));
+            } else {
+                throw new Error('Ошибка при удалении домашнего задания');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении домашнего задания:', error);
+            alert('Не удалось удалить домашнее задание');
+        }
+    };
+
+
+    const handleDeleteSelectedHomework = async () => {
+        if (selectedHomeworkItems.length === 0) return;
+        if (!window.confirm(`Вы уверены, что хотите удалить ${selectedHomeworkItems.length} выбранных заданий?`)) return;
+
+        try {
+            const response = await fetch('/api/homework/deleteMultiple', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ids: selectedHomeworkItems }),
+            });
+
+            if (response.ok) {
+                setHomework(homework.filter(item => !selectedHomeworkItems.includes(item._id)));
+                setSelectedHomeworkItems([]);
+            } else {
+                throw new Error('Ошибка при удалении заданий');
+            }
+        } catch (error) {
+            console.error('Ошибка при удалении заданий:', error);
+            alert('Не удалось удалить выбранные задания');
+        }
+    };
+
+    const handleSelectHomeworkItem = (id) => {
+        setSelectedHomeworkItems(prevSelectedItems =>
             prevSelectedItems.includes(id)
                 ? prevSelectedItems.filter(itemId => itemId !== id)
                 : [...prevSelectedItems, id]
@@ -559,13 +609,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                     <div className="row-actions">
                                                         <button
                                                             onClick={() => handleEdit(item._id)}
-                                                            className="action-button edit-button"
+                                                            className="scheduleeditor-action-button edit-button"
                                                         >
                                                             <FiEdit2 />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(item._id)}
-                                                            className="action-button delete-button"
+                                                            className="scheduleeditor-action-button delete-button"
                                                         >
                                                             <FiTrash2 />
                                                         </button>
@@ -633,13 +683,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                                 <div className="edit-card-actions">
                                                                     <button
                                                                         onClick={handleSave}
-                                                                        className="action-button save-button"
+                                                                        className="scheduleeditor-action-button save-button"
                                                                     >
                                                                         <FiCheck /> Сохранить
                                                                     </button>
                                                                     <button
                                                                         onClick={handleCancel}
-                                                                        className="action-button cancel-button"
+                                                                        className="scheduleeditor-action-button cancel-button"
                                                                     >
                                                                         <FiX /> Отменить
                                                                     </button>
@@ -669,6 +719,15 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                         >
                             {isAddingHomework ? 'Отменить' : 'Добавить задание'}
                         </button>
+
+                        {selectedHomeworkItems.length > 0 && (
+                            <button
+                                onClick={handleDeleteSelectedHomework}
+                                className="delete-selected-button"
+                            >
+                                <FiTrash2 /> Удалить выбранные ({selectedHomeworkItems.length})
+                            </button>
+                        )}
                     </div>
 
                     {isAddingHomework && (
@@ -702,17 +761,27 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                         <table className="homework-table">
                             <thead>
                                 <tr>
+                                    <th style={{ width: '40px' }}></th>
                                     <th>День</th>
                                     <th>Выполнить до</th>
                                     <th>Файлы задания</th>
                                     <th>Ответ</th>
                                     <th>Оценка</th>
+                                    <th style={{ width: '80px' }}>Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {homework.length > 0 ? (
                                     homework.map((item) => (
                                         <tr key={item._id}>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedHomeworkItems.includes(item._id)}
+                                                    onChange={() => handleSelectHomeworkItem(item._id)}
+                                                    className="row-checkbox"
+                                                />
+                                            </td>
                                             <td>{item.day}</td>
                                             <td>{formatDate(item.dueDate)}</td>
                                             <td>
@@ -769,13 +838,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                         <div className="grade-edit-actions">
                                                             <button
                                                                 onClick={() => handleSaveGrade(item._id, selectedUser._id)}
-                                                                className="action-button save-button"
+                                                                className="scheduleeditor-action-button save-button"
                                                             >
                                                                 <FiCheck />
                                                             </button>
                                                             <button
                                                                 onClick={handleCancelGradeEdit}
-                                                                className="action-button cancel-button"
+                                                                className="scheduleeditor-action-button cancel-button"
                                                             >
                                                                 <FiX />
                                                             </button>
@@ -790,21 +859,30 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                         ) : (
                                                             <span className="no-grade">-</span>
                                                         )}
-                                                        <button
-                                                            onClick={() => handleEditGrade(item._id, selectedUser._id, item.grades?.[selectedUser._id])}
-                                                            className="action-button edit-button"
-                                                        >
-                                                            <FiEdit2 />
-                                                        </button>
+                                                        {selectedUser && (
+                                                            <button
+                                                                onClick={() => handleEditGrade(item._id, selectedUser._id, item.grades?.[selectedUser._id])}
+                                                                className="scheduleeditor-action-button edit-button"
+                                                            >
+                                                                <FiEdit2 />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </td>
-
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDeleteHomework(item._id)}
+                                                    className="scheduleeditor-action-button delete-button"
+                                                >
+                                                    <FiTrash2 />
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr className="no-data-row">
-                                        <td colSpan="5">Нет данных о домашних заданиях</td>
+                                        <td colSpan="7">Нет данных о домашних заданиях</td>
                                     </tr>
                                 )}
                             </tbody>
