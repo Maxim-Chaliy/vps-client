@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import '../Components/style/home.css';
 import logo from "../img/Group8.png";
 import rectengale from "../img/Rectangle10.png";
@@ -11,11 +12,11 @@ const Home = () => {
   useEffect(() => {
     const handleScroll = () => {
       const elements = document.querySelectorAll('.fade-in');
-      
+
       elements.forEach(element => {
         const elementTop = element.getBoundingClientRect().top;
         const windowHeight = window.innerHeight;
-        
+
         if (elementTop < windowHeight - 100) {
           element.classList.add('visible');
         }
@@ -32,6 +33,35 @@ const Home = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Подготовка к ЕГЭ на высокие баллы</title>
+        <meta name="description" content="Подготовим к ЕГЭ 2025 на высокий балл, поможем выбрать профессию мечты и поступить в вуз на бюджет" />
+        <meta name="keywords" content="ЕГЭ, подготовка, высокие баллы, поступление, вуз, бюджет" />
+        <meta property="og:title" content="Подготовка к ЕГЭ на высокие баллы" />
+        <meta property="og:description" content="Подготовим к ЕГЭ 2025 на высокий балл, поможем выбрать профессию мечты и поступить в вуз на бюджет" />
+        <meta property="og:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Подготовка к ЕГЭ на высокие баллы" />
+        <meta name="twitter:description" content="Подготовим к ЕГЭ 2025 на высокий балл, поможем выбрать профессию мечты и поступить в вуз на бюджет" />
+        <meta name="twitter:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "EducationalOrganization",
+              "name": "EasyMath",
+              "description": "Подготовим к ЕГЭ 2025 на высокий балл, поможем выбрать профессию мечты и поступить в вуз на бюджет",
+              "url": "https://easymath-online.ru/",
+              "logo": "https://easymath-online.ru/path-to-your-logo.png",
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+123456789",
+                "contactType": "customer service"
+              }
+            }
+          `}
+        </script>
+      </Helmet>
       <Header />
       <main className="main-content">
         <section className="hero-section">
@@ -66,7 +96,7 @@ const Home = () => {
               Подготовка к ЕГЭ на курсах – не просто решение тестов<br />
               Ученики сдают на 80+ благодаря комплексному подходу к обучению
             </h2>
-            
+
             <div className="features-grid">
               <div className="feature-card fade-in">
                 <div className="feature-header">

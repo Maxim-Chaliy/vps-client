@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
@@ -132,6 +133,29 @@ const ApplicationForm = () => {
 
     return (
         <>
+            <Helmet>
+                <title>Форма заявки на курсы подготовки к ЕГЭ</title>
+                <meta name="description" content="Заполните форму заявки для записи на курсы подготовки к ЕГЭ. Мы свяжемся с вами в ближайшее время." />
+                <meta name="keywords" content="ЕГЭ, подготовка, курсы, заявка, форма" />
+                <meta property="og:title" content="Форма заявки на курсы подготовки к ЕГЭ" />
+                <meta property="og:description" content="Заполните форму заявки для записи на курсы подготовки к ЕГЭ. Мы свяжемся с вами в ближайшее время." />
+                <meta property="og:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Форма заявки на курсы подготовки к ЕГЭ" />
+                <meta name="twitter:description" content="Заполните форму заявки для записи на курсы подготовки к ЕГЭ. Мы свяжемся с вами в ближайшее время." />
+                <meta name="twitter:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+                <script type="application/ld+json">
+                    {`
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Форма заявки на курсы подготовки к ЕГЭ",
+                            "description": "Заполните форму заявки для записи на курсы подготовки к ЕГЭ. Мы свяжемся с вами в ближайшее время.",
+                            "url": "https://easymath-online.ru/appform"
+                        }
+                    `}
+                </script>
+            </Helmet>
             <Header />
             <main className="appform-main-container">
                 <div className='appform-container'>

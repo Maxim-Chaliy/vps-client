@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Helmet } from 'react-helmet';
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 import "../Components/style/educmat.css";
@@ -117,6 +118,29 @@ const EducMat = () => {
 
     return (
         <>
+            <Helmet>
+                <title>Учебные материалы для подготовки к ЕГЭ</title>
+                <meta name="description" content="Учебные материалы для подготовки к ЕГЭ. Найдите материалы по алгебре, геометрии и другим предметам." />
+                <meta name="keywords" content="учебные материалы, подготовка к ЕГЭ, алгебра, геометрия, курсы" />
+                <meta property="og:title" content="Учебные материалы для подготовки к ЕГЭ" />
+                <meta property="og:description" content="Учебные материалы для подготовки к ЕГЭ. Найдите материалы по алгебре, геометрии и другим предметам." />
+                <meta property="og:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Учебные материалы для подготовки к ЕГЭ" />
+                <meta name="twitter:description" content="Учебные материалы для подготовки к ЕГЭ. Найдите материалы по алгебре, геометрии и другим предметам." />
+                <meta name="twitter:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
+                <script type="application/ld+json">
+                    {`
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "WebPage",
+                            "name": "Учебные материалы для подготовки к ЕГЭ",
+                            "description": "Учебные материалы для подготовки к ЕГЭ. Найдите материалы по алгебре, геометрии и другим предметам.",
+                            "url": "https://easymath-online.ru/educmat"
+                        }
+                    `}
+                </script>
+            </Helmet>
             <Header />
             <main className="educmat-main">
                 <div className="conteiner">

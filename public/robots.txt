@@ -1,3 +1,9 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Disallow: /controlpanel
+Disallow: /setmat
+Disallow: /editing
+Disallow: /listapp
+Disallow: /employment
+Disallow: /settings
+Disallow: /schedule
