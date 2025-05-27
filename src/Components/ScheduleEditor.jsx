@@ -125,10 +125,12 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
     const handleSaveGrade = async (id) => {
         try {
-            console.log('Начало сохранения оценки для записи с ID:', id);
-            console.log('Отправляемая оценка:', editValues.grade);
+            // Проверка данных перед отправкой
+            if (!id || editValues.grade === undefined) {
+                alert('Не указана оценка или ID записи');
+                return;
+            }
 
-            // Убедитесь, что id передается как строка
             const response = await fetch(`/api/schedules/${id}/updateGrade`, {
                 method: 'PUT',
                 headers: {
@@ -137,26 +139,31 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 body: JSON.stringify({ grade: editValues.grade }),
             });
 
-            console.log('Ответ сервера:', response);
-
-            if (response.ok) {
-                const updatedScheduleItem = await response.json();
-                console.log('Успешно обновлено:', updatedScheduleItem);
-
-                setSchedule(schedule.map(item => item._id === id ? updatedScheduleItem : item));
-                setEditing(null);
-                setEditValues({});
-            } else {
-                const errorData = await response.json();
-                console.error('Ошибка от сервера:', errorData);
-                throw new Error(errorData.error || 'Ошибка при сохранении оценки');
+            // Проверка типа ответа
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const errorText = await response.text();
+                throw new Error(`Ожидался JSON, но получен: ${errorText.substring(0, 100)}...`);
             }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка сервера');
+            }
+
+            // Обновление состояния
+            setSchedule(schedule.map(item =>
+                item._id === id ? { ...item, grade: data.grade } : item
+            ));
+            setEditing(null);
+            setEditValues({});
         } catch (error) {
-            console.error('Ошибка при сохранении оценки:', error);
-            alert(error.message || 'Не удалось сохранить оценку');
+            console.error('Ошибка сохранения оценки:', error);
+            alert(`Не удалось сохранить оценку: ${error.message}`);
         }
     };
-    
+
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
         const filesInput = document.getElementById('filesInput').files;
