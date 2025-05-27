@@ -1406,3 +1406,5 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 };
 
 export default GroupEditor;
+
+//проверка

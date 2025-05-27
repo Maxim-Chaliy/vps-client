@@ -1001,3 +1001,5 @@ function formatDateForInput(dateString) {
 }
 
 export default ScheduleEditor;
+
+// Проверка

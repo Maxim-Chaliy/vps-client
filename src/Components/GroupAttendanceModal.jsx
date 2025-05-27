@@ -157,3 +157,5 @@ const GroupAttendanceModal = ({
 };
 
 export default GroupAttendanceModal;
+
+//Проверка
