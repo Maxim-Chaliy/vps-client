@@ -205,40 +205,72 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         }
     };
 
-    const handleSaveAttendance = async (attendanceData) => {
+    const handleSaveAttendance = async (data) => {
         try {
             const { scheduleItem } = attendanceModal;
-            let url = `/api/schedules/${scheduleItem._id}/`;
 
-            if (scheduleItem.group_id) {
-                url += 'updateGroupAttendance';
-            } else {
-                url += 'updateAttendance';
-            }
+            // 1. Сохраняем посещаемость
+            let attendanceUrl = `/api/schedules/${scheduleItem._id}/`;
+            attendanceUrl += scheduleItem.group_id ? 'updateGroupAttendance' : 'updateAttendance';
 
-            const response = await fetch(url, {
+            const attendanceResponse = await fetch(attendanceUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    attendance: attendanceData,
+                    attendance: data.attendance,
                     ...(scheduleItem.student_id && { studentId: scheduleItem.student_id })
                 }),
             });
 
-            if (response.ok) {
-                const updatedItem = await response.json();
-                setSchedule(schedule.map(item =>
-                    item._id === updatedItem._id ? updatedItem : item
-                ));
-                setAttendanceModal({ open: false, scheduleItem: null, students: [] });
-            } else {
+            if (!attendanceResponse.ok) {
                 throw new Error('Ошибка сохранения посещаемости');
             }
+
+            // 2. Если есть оценки, сохраняем их
+            if (data.grades && Object.keys(data.grades).length > 0) {
+                let gradesUrl;
+                let gradesBody;
+
+                if (scheduleItem.group_id) {
+                    gradesUrl = `/api/schedules/${scheduleItem._id}/grades`;
+                    gradesBody = { grades: data.grades };
+                } else {
+                    const studentId = Object.keys(data.grades)[0];
+                    gradesUrl = `/api/schedules/${scheduleItem._id}/grade`;
+                    gradesBody = { grade: data.grades[studentId] };
+                }
+
+                const gradesResponse = await fetch(gradesUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(gradesBody),
+                });
+
+                if (!gradesResponse.ok) {
+                    throw new Error('Ошибка сохранения оценок');
+                }
+            }
+
+            // 3. Получаем обновленные данные с сервера
+            const updatedResponse = await fetch(`/api/schedules/${scheduleItem._id}`);
+            if (!updatedResponse.ok) {
+                throw new Error('Ошибка получения обновленных данных');
+            }
+            const updatedItem = await updatedResponse.json();
+
+            // 4. Обновляем состояние
+            setSchedule(schedule.map(item =>
+                item._id === updatedItem._id ? updatedItem : item
+            ));
+
+            setAttendanceModal({ open: false, scheduleItem: null, students: [] });
         } catch (error) {
             console.error('Ошибка:', error);
-            setError('Не удалось сохранить посещаемость');
+            setError('Не удалось сохранить данные');
         }
     };
 

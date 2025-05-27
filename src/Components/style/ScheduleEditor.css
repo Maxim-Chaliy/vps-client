@@ -743,6 +743,12 @@
     flex-grow: 1;
 }
 
+.attendance-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .modal-actions {
     display: flex;
     justify-content: flex-end;

@@ -111,21 +111,6 @@
     width: 100%;
 }
 
-.search-input {
-    width: 100%;
-    padding: 8px 35px 8px 15px;
-    border: 1px solid #d9a800;
-    border-radius: 20px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.3s;
-    padding-left: 45px;
-}
-
-.search-input:focus {
-    border-color: #b38f00;
-}
-
 .search-icon {
     position: absolute;
     right: 10px;
@@ -189,7 +174,8 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
-    white-space: normal; /* Всегда разрешаем перенос */
+    white-space: normal;
+    /* Всегда разрешаем перенос */
     word-break: break-word;
 }
 
@@ -215,19 +201,41 @@
     margin: 10px 0;
 }
 
+
+.create-group-button {
+    background-color: #ffffff;
+    color: #333;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.create-group-button:hover {
+    background-color: #333;
+    color: #ffffff;
+}
+
+
 @media (max-width: 1200px) {
-    .blocks-flex{
+    .blocks-flex {
         min-height: 1200px;
     }
 
     .content-area {
         flex-direction: column;
     }
-    
+
     .editing-search-container {
         max-width: 100%;
     }
-    .user-list-scroll{
+
+    .user-list-scroll {
         max-height: 310px;
     }
 }
@@ -237,13 +245,13 @@
         flex-direction: column;
         min-height: 1500px;
     }
-    
+
     .sidebar-icons {
         flex-direction: row;
         padding: 10px;
         justify-content: center;
     }
-    
+
     .icon-tooltip {
         display: none;
     }
@@ -260,10 +268,11 @@
 @media (max-width: 768px) {
     .icon-90deg {
         transform: rotate(90deg);
-    } 
+    }
 
-    .user-list-scroll{
+    .user-list-scroll {
         max-height: 260px;
     }
 }
+
 /*КОНЕЦ Скрывает панель список студентов */
