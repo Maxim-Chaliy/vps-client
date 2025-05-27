@@ -131,7 +131,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                 return;
             }
 
-            const response = await fetch(`/api/schedules/${id}/updateGrade`, {
+            const response = await fetch(`https://easymath-online.ru/api/schedules/${id}/updateGrade`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
