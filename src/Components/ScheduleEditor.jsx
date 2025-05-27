@@ -102,7 +102,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         console.log('Sending new schedule item:', newScheduleItem);
 
         try {
-            const response = await fetch('/api/schedules', {
+            const response = await fetch('http://localhost:3001/api/schedules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,6 +114,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
             if (response.ok) {
                 const savedScheduleItem = await response.json();
+                console.log('Saved schedule item:', savedScheduleItem);
                 setSchedule([...schedule, savedScheduleItem]);
                 document.getElementById('dateInput').value = '';
                 document.getElementById('timeInput').value = '';
@@ -129,7 +130,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             alert(error.message || 'Не удалось добавить занятие');
         }
     };
-
 
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
