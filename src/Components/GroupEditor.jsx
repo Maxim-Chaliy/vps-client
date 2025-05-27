@@ -228,26 +228,16 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 throw new Error('Ошибка сохранения посещаемости');
             }
 
-            // 2. Если есть оценки, сохраняем их
+            // 2. Если есть оценки, сохраняем их отдельно
             if (data.grades && Object.keys(data.grades).length > 0) {
-                let gradesUrl;
-                let gradesBody;
-
-                if (scheduleItem.group_id) {
-                    gradesUrl = `/api/schedules/${scheduleItem._id}/grades`;
-                    gradesBody = { grades: data.grades };
-                } else {
-                    const studentId = Object.keys(data.grades)[0];
-                    gradesUrl = `/api/schedules/${scheduleItem._id}/grade`;
-                    gradesBody = { grade: data.grades[studentId] };
-                }
-
-                const gradesResponse = await fetch(gradesUrl, {
+                const gradesResponse = await fetch(`/api/schedules/${scheduleItem._id}/updateGroupGrades`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(gradesBody),
+                    body: JSON.stringify({
+                        grades: data.grades
+                    }),
                 });
 
                 if (!gradesResponse.ok) {
@@ -255,14 +245,14 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 }
             }
 
-            // 3. Получаем обновленные данные с сервера
-            const updatedResponse = await fetch(`/api/schedules/${scheduleItem._id}`);
-            if (!updatedResponse.ok) {
-                throw new Error('Ошибка получения обновленных данных');
-            }
-            const updatedItem = await updatedResponse.json();
+            // 3. Обновляем состояние
+            const updatedItem = await attendanceResponse.json();
 
-            // 4. Обновляем состояние
+            // Добавляем оценки к обновленному элементу
+            if (data.grades) {
+                updatedItem.grades = data.grades;
+            }
+
             setSchedule(schedule.map(item =>
                 item._id === updatedItem._id ? updatedItem : item
             ));

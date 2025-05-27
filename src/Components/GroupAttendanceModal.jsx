@@ -9,36 +9,18 @@ const GroupAttendanceModal = ({
     onSave
 }) => {
     const [attendanceData, setAttendanceData] = React.useState({});
-    const [error, setError] = React.useState(null);
 
     // Инициализация состояния посещаемости и оценок
     React.useEffect(() => {
         if (scheduleItem) {
             const initialData = {};
 
-            if (scheduleItem.group_id) {
-                // Для групповых занятий
-                students.forEach(student => {
-                    // Обрабатываем как Map, так и обычный объект
-                    let grade = null;
-                    if (scheduleItem.grades instanceof Map) {
-                        grade = scheduleItem.grades.get(student._id.toString()) || null;
-                    } else if (scheduleItem.grades && typeof scheduleItem.grades === 'object') {
-                        grade = scheduleItem.grades[student._id.toString()] || null;
-                    }
-
-                    initialData[student._id] = {
-                        attended: scheduleItem.attendance?.[student._id] || false,
-                        grade: grade
-                    };
-                });
-            } else if (scheduleItem.student_id) {
-                // Для индивидуальных занятий
-                initialData[scheduleItem.student_id] = {
-                    attended: scheduleItem.attendance || false,
-                    grade: scheduleItem.grade || null
+            students.forEach(student => {
+                initialData[student._id] = {
+                    attended: scheduleItem.attendance?.[student._id] || false,
+                    grade: scheduleItem.grades?.[student._id] || null
                 };
-            }
+            });
 
             setAttendanceData(initialData);
         }
@@ -157,5 +139,3 @@ const GroupAttendanceModal = ({
 };
 
 export default GroupAttendanceModal;
-
-//Проверка
