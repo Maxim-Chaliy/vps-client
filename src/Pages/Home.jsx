@@ -7,6 +7,7 @@ import Group9 from "../img/Group9.png";
 import Check from "../img/check.png";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
+import { Link, useNavigate } from "react-router-dom";
 
 const Home = () => {
   useEffect(() => {
