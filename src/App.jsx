@@ -34,12 +34,13 @@ const App = () => {
         <Route path="/verify-email" element={<VerifyEmail/>} />
         <Route path="/forgot-password" element={<ForgotPassword/>} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/educmat" element={<EducMat/>} />
 
         {/* Защищенные маршруты для авторизованных пользователей */}
         <Route element={<PrivateRoute />}>
           <Route path="/schedule" element={<Schedule/>} />
           {/* <Route path="/appform" element={<AppForm/>} /> */}
-          <Route path="/educmat" element={<EducMat/>} />
+          
 
           {/* Защищенные маршруты для админов */}
           <Route element={<AdminRoute />}>

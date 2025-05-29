@@ -77,7 +77,7 @@ const Home = () => {
                   Подготовим к ЕГЭ 2025 на высокий балл, поможем выбрать профессию мечты и поступить в вуз на бюджет
                 </p>
                 <div className="hero-actions">
-                  <a href="/online-repetitor/EGE.html" className="cta-button">НАЧАТЬ ПОДГОТОВКУ</a>
+                  <Link to="/registration"  className="cta-button">НАЧАТЬ ПОДГОТОВКУ</Link>
                   <img src={Group9} alt="Декоративный элемент" className="hero-decoration decorative-element" />
                 </div>
               </div>
