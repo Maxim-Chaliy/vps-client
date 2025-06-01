@@ -179,9 +179,14 @@ const Editing = () => {
                     fetch(url)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
+                                console.error(`Error fetching ${url}: HTTP error! status: ${response.status}`);
+                                return { count: 0, percentage: 0, totalHours: 0, subjects: [] }; // Возвращаем пустые данные в случае ошибки
                             }
                             return response.json();
+                        })
+                        .catch(error => {
+                            console.error(`Error fetching ${url}:`, error);
+                            return { count: 0, percentage: 0, totalHours: 0, subjects: [] }; // Возвращаем пустые данные в случае ошибки
                         })
                 )
             );
@@ -200,6 +205,7 @@ const Editing = () => {
             console.error('Ошибка при загрузке статистики:', error);
         }
     };
+
 
 
 
