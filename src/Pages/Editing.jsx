@@ -160,55 +160,65 @@ const Editing = () => {
 
     const fetchStats = async () => {
         try {
+            const response = await fetch('/api/schedules/stats');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const allStats = await response.json();
+
             const firstDay = new Date(selectedYear, selectedMonth, 1);
             const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
 
-            console.log('Fetching stats with dates:', firstDay, lastDay);
+            // Фильтрация данных на клиенте
+            const filteredStats = allStats.filter(stat => {
+                const statDate = new Date(stat.date);
+                return statDate >= firstDay && statDate <= lastDay;
+            });
 
-            const urls = [
-                `/api/schedules/stats?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
-                `/api/schedules/stats/individual?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
-                `/api/schedules/stats/group?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
-                `/api/schedules/stats/attendance?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
-                `/api/schedules/stats/subjects?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
-                `/api/schedules/stats/total-hours?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`
-            ];
+            // Подсчет статистики на основе отфильтрованных данных
+            let totalSessions = 0;
+            let attendedSessions = 0;
 
-            const responses = await Promise.all(
-                urls.map(url =>
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) {
-                                console.error(`Error fetching ${url}: HTTP error! status: ${response.status}`);
-                                return { count: 0, percentage: 0, totalHours: 0, subjects: [] }; // Возвращаем пустые данные в случае ошибки
-                            }
-                            return response.json();
-                        })
-                        .catch(error => {
-                            console.error(`Error fetching ${url}:`, error);
-                            return { count: 0, percentage: 0, totalHours: 0, subjects: [] }; // Возвращаем пустые данные в случае ошибки
-                        })
-                )
-            );
+            filteredStats.forEach(stat => {
+                if (stat.student_id) {
+                    // Индивидуальное занятие
+                    totalSessions++;
+                    if (stat.attendance === true) {
+                        attendedSessions++;
+                    }
+                } else if (stat.group_id && stat.attendance && typeof stat.attendance === 'object') {
+                    // Групповое занятие
+                    const students = Object.keys(stat.attendance);
+                    totalSessions += students.length;
+                    attendedSessions += students.filter(studentId => stat.attendance[studentId] === true).length;
+                }
+            });
 
-            const [total, individual, group, attendance, subjects, totalHours] = responses;
+            const attendancePercentage = totalSessions > 0 ? (attendedSessions / totalSessions) * 100 : 0;
+
+            // Подсчет часов
+            const totalHours = filteredStats.reduce((sum, stat) => sum + stat.duration, 0) / 60;
+
+            // Подсчет по предметам
+            const subjects = filteredStats.reduce((acc, stat) => {
+                const subject = stat.subject;
+                acc[subject] = (acc[subject] || 0) + 1;
+                return acc;
+            }, {});
 
             setStats({
-                total: total.count || 0,
-                individual: individual.count || 0,
-                group: group.count || 0,
-                attendance: attendance.percentage || 0,
-                subjects: subjects || [],
-                totalHours: totalHours.totalHours || 0
+                total: filteredStats.length,
+                individual: filteredStats.filter(stat => stat.student_id !== null).length,
+                group: filteredStats.filter(stat => stat.group_id !== null).length,
+                attendance: attendancePercentage,
+                subjects: Object.entries(subjects).map(([subject, count]) => ({ _id: subject, count })),
+                totalHours
             });
         } catch (error) {
             console.error('Ошибка при загрузке статистики:', error);
         }
     };
-
-
-
-
 
     useEffect(() => {
         fetchStats();
