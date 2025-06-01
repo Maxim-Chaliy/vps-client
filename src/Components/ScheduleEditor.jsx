@@ -96,7 +96,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             grade: null
         };
 
-
         try {
             const response = await fetch('/api/schedules', {
                 method: 'POST',
@@ -125,30 +124,21 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
     const handleSaveGrade = async (id) => {
         try {
-            console.log('Начало сохранения оценки для записи с ID:', id);
-            console.log('Отправляемая оценка:', editValues.grade);
-
-            // Убедитесь, что id передается как строка
             const response = await fetch(`/api/schedules/${id}/updateGrade`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ grade: editValues.grade }),
+                body: JSON.stringify({ grade: gradeValue }),
             });
-
-            console.log('Ответ сервера:', response);
 
             if (response.ok) {
                 const updatedScheduleItem = await response.json();
-                console.log('Успешно обновлено:', updatedScheduleItem);
-
                 setSchedule(schedule.map(item => item._id === id ? updatedScheduleItem : item));
-                setEditing(null);
-                setEditValues({});
+                setEditingGrade(null);
+                setGradeValue('');
             } else {
                 const errorData = await response.json();
-                console.error('Ошибка от сервера:', errorData);
                 throw new Error(errorData.error || 'Ошибка при сохранении оценки');
             }
         } catch (error) {
@@ -156,7 +146,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
             alert(error.message || 'Не удалось сохранить оценку');
         }
     };
-    
+
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
         const filesInput = document.getElementById('filesInput').files;
@@ -629,31 +619,61 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                                                     </label>
                                                 </td>
                                                 <td>
-                                                    {editing === item._id ? (
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            max="5"
-                                                            value={editValues.grade || ''}
-                                                            onChange={(e) => handleInputChange('grade', e.target.value)}
-                                                            className="grade-input"
-                                                        />
-                                                    ) : (
-                                                        item.grade ? (
-                                                            <span className={`grade-badge grade-${item.grade}`}>
-                                                                {item.grade}
-                                                            </span>
+                                                    <div className='grade-edit-container'>
+                                                        {editingGrade === item._id ? (
+                                                            <>
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    max="5"
+                                                                    value={gradeValue}
+                                                                    onChange={(e) => setGradeValue(e.target.value)}
+                                                                    className="grade-input"
+                                                                />
+                                                                <button
+                                                                    onClick={() => handleSaveGrade(item._id)}
+                                                                    className="scheduleeditor-action-button save-button"
+                                                                >
+                                                                    <FiCheck />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingGrade(null);
+                                                                        setGradeValue('');
+                                                                    }}
+                                                                    className="scheduleeditor-action-button cancel-button"
+                                                                >
+                                                                    <FiX />
+                                                                </button>
+                                                            </>
                                                         ) : (
-                                                            <span>-</span>
-                                                        )
-                                                    )}
+                                                            <>
+                                                                {item.grade ? (
+                                                                    <span className={`grade-badge grade-${item.grade}`}>
+                                                                        {item.grade}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span>-</span>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingGrade(item._id);
+                                                                        setGradeValue(item.grade || '');
+                                                                    }}
+                                                                    className="scheduleeditor-action-button edit-button"
+                                                                >
+                                                                    <FiEdit2 />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div className="row-actions">
                                                         {editing === item._id ? (
                                                             <>
                                                                 <button
-                                                                    onClick={() => handleSaveGrade(item._id.toString())}
+                                                                    onClick={handleSave}
                                                                     className="scheduleeditor-action-button save-button"
                                                                 >
                                                                     <FiCheck />

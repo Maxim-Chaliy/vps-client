@@ -17,12 +17,21 @@ const Editing = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeImage, setActiveImage] = useState(1);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedGroup, setSelectedGroup] = useState(null); // Убедитесь, что эта функция определена
+    const [selectedGroup, setSelectedGroup] = useState(null);
     const [schedule, setSchedule] = useState([]);
     const [activeComponent, setActiveComponent] = useState('UserInfo');
     const [sectionTitle, setSectionTitle] = useState("Пользователи");
     const [selectedStudentId, setSelectedStudentId] = useState(null);
     const [showSearchContainer, setShowSearchContainer] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+    const months = [
+        "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    ];
+
+    const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
 
     useEffect(() => {
         const savedActiveImage = localStorage.getItem('activeImage');
@@ -138,6 +147,66 @@ const Editing = () => {
             }
         }
     };
+
+    const [stats, setStats] = useState({
+        total: 0,
+        individual: 0,
+        group: 0,
+        attendance: 0,
+        subjects: [], // Инициализация как пустой массив
+        totalHours: 0
+    });
+
+
+    const fetchStats = async () => {
+        try {
+            const firstDay = new Date(selectedYear, selectedMonth, 1);
+            const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
+
+            console.log('Fetching stats with dates:', firstDay, lastDay);
+
+            const urls = [
+                `/api/schedules/stats?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
+                `/api/schedules/stats/individual?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
+                `/api/schedules/stats/group?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
+                `/api/schedules/stats/attendance?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
+                `/api/schedules/stats/subjects?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`,
+                `/api/schedules/stats/total-hours?start=${firstDay.toISOString()}&end=${lastDay.toISOString()}`
+            ];
+
+            const responses = await Promise.all(
+                urls.map(url =>
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                )
+            );
+
+            const [total, individual, group, attendance, subjects, totalHours] = responses;
+
+            setStats({
+                total: total.count || 0,
+                individual: individual.count || 0,
+                group: group.count || 0,
+                attendance: attendance.percentage || 0,
+                subjects: subjects || [],
+                totalHours: totalHours.totalHours || 0
+            });
+        } catch (error) {
+            console.error('Ошибка при загрузке статистики:', error);
+        }
+    };
+
+
+
+
+    useEffect(() => {
+        fetchStats();
+    }, [selectedMonth, selectedYear]);
 
     const handleCreateGroup = async () => {
         const groupName = prompt("Введите название группы:");
@@ -321,13 +390,61 @@ const Editing = () => {
                             {activeImage === 3 && (
                                 <GroupEditor
                                     selectedGroup={selectedGroup}
-                                    setSelectedGroup={setSelectedGroup} // Убедитесь, что эта функция передается
+                                    setSelectedGroup={setSelectedGroup}
                                     groups={groups}
                                     setGroups={setGroups}
                                     users={users}
                                     setUsers={setUsers}
                                 />
                             )}
+                        </div>
+                    </div>
+                    <div className="stats-container">
+                        <div className="stats-card">
+                            <div className="stats-controls">
+                                <select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
+                                    {months.map((month, index) => (
+                                        <option key={index} value={index}>{month}</option>
+                                    ))}
+                                </select>
+                                <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
+                                    {years.map((year) => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
+                                </select>
+                                <button onClick={fetchStats} className="refresh-button">
+                                    Обновить
+                                </button>
+                            </div>
+                            <h3>Статистика занятий за {months[selectedMonth]} {selectedYear}</h3>
+                            <div className="stats-grid">
+                                <div className="stat-item">
+                                    <span className="stat-value">{stats.total}</span>
+                                    <span className="stat-label">Всего занятий</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-value">{stats.individual}</span>
+                                    <span className="stat-label">Индивидуальных</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-value">{stats.group}</span>
+                                    <span className="stat-label">Групповых</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-value">{Math.round(stats.attendance)}%</span>
+                                    <span className="stat-label">Средняя посещаемость</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-value">{stats.totalHours}</span>
+                                    <span className="stat-label">Общее количество часов</span>
+                                </div>
+                                {stats.subjects && [...stats.subjects].sort((a, b) => a._id.localeCompare(b._id)).map((subject, index) => (
+                                    <div key={index} className="stat-item">
+                                        <span className="stat-value">{subject.count}</span>
+                                        <span className="stat-label">{subject._id}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -338,5 +455,3 @@ const Editing = () => {
 }
 
 export default Editing;
-
-//проверка
