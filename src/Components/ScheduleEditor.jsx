@@ -40,87 +40,93 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         fetchData();
     }, [selectedUser, selectedGroup]);
 
-    const handleAddToSchedule = async () => {
-        const dateInput = document.getElementById('dateInput').value;
-        const timeInput = document.getElementById('timeInput').value;
-        const durationInput = document.getElementById('durationInput').value;
-        const subjectInput = document.getElementById('exampleSelect').value;
-        const descriptionInput = document.getElementById('descriptionInput').value;
+const handleAddToSchedule = async () => {
+    const dateInput = document.getElementById('dateInput').value;
+    const timeInput = document.getElementById('timeInput').value;
+    const durationInput = document.getElementById('durationInput').value;
+    const subjectInput = document.getElementById('exampleSelect').value;
+    const descriptionInput = document.getElementById('descriptionInput').value;
 
-        if (!dateInput || !timeInput || !durationInput || !subjectInput) {
-            alert('Пожалуйста, заполните все обязательные поля');
-            return;
+    if (!dateInput || !timeInput || !durationInput || !subjectInput) {
+        alert('Пожалуйста, заполните все обязательные поля');
+        return;
+    }
+
+    const newDate = new Date(dateInput);
+    const newStartTime = timeInput;
+    const newDuration = parseInt(durationInput) || 60;
+    const newEndTime = calculateEndTime(newStartTime, newDuration);
+
+    const hasConflict = schedule.some(item => {
+        const itemDate = new Date(item.date);
+        if (itemDate.toDateString() !== newDate.toDateString()) {
+            return false;
         }
 
-        const newDate = new Date(dateInput);
-        const newStartTime = timeInput;
-        const newDuration = parseInt(durationInput) || 60;
-        const newEndTime = calculateEndTime(newStartTime, newDuration);
-
-        const hasConflict = schedule.some(item => {
-            const itemDate = new Date(item.date);
-            if (itemDate.toDateString() !== newDate.toDateString()) {
-                return false;
-            }
-
-            const toMinutes = (timeStr) => {
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                return hours * 60 + minutes;
-            };
-
-            const newStart = toMinutes(newStartTime);
-            const newEnd = toMinutes(newEndTime);
-            const existStart = toMinutes(item.time);
-            const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
-
-            return (newStart < existEnd && newEnd > existStart);
-        });
-
-        if (hasConflict) {
-            alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
-            return;
-        }
-
-        const dayOfWeek = getShortDayOfWeek(newDate);
-
-        const newScheduleItem = {
-            student_id: selectedUser ? selectedUser._id : null,
-            group_id: selectedGroup ? selectedGroup._id : null,
-            day: dayOfWeek,
-            date: newDate,
-            time: newStartTime,
-            duration: newDuration,
-            subject: subjectInput,
-            description: descriptionInput || '',
-            attendance: false,
-            grade: null
+        const toMinutes = (timeStr) => {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
         };
 
-        try {
-            const response = await fetch('/api/schedules', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newScheduleItem),
-            });
+        const newStart = toMinutes(newStartTime);
+        const newEnd = toMinutes(newEndTime);
+        const existStart = toMinutes(item.time);
+        const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
 
-            if (response.ok) {
-                const savedScheduleItem = await response.json();
-                setSchedule([...schedule, savedScheduleItem]);
-                document.getElementById('dateInput').value = '';
-                document.getElementById('timeInput').value = '';
-                document.getElementById('durationInput').value = '60';
-                document.getElementById('descriptionInput').value = '';
-            } else {
-                const errorData = await response.json();
-                alert(errorData.error || 'Ошибка при добавлении занятия в расписание');
-            }
-        } catch (error) {
-            console.error('Ошибка при добавлении занятия в расписание:', error);
-            alert(error.message || 'Не удалось добавить занятие');
-        }
+        return (newStart < existEnd && newEnd > existStart);
+    });
+
+    if (hasConflict) {
+        alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+        return;
+    }
+
+    const dayOfWeek = getShortDayOfWeek(newDate);
+
+    const newScheduleItem = {
+        student_id: selectedUser ? selectedUser._id : null,
+        group_id: selectedGroup ? selectedGroup._id : null,
+        day: dayOfWeek,
+        date: newDate,
+        time: newStartTime,
+        duration: newDuration,
+        subject: subjectInput,
+        description: descriptionInput || '',
+        attendance: false,
+        grade: null
     };
+
+    try {
+        const response = await fetch('/api/schedules', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newScheduleItem),
+        });
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(`Ожидался JSON, но получен: ${text}`);
+        }
+
+        if (response.ok) {
+            const savedScheduleItem = await response.json();
+            setSchedule([...schedule, savedScheduleItem]);
+            document.getElementById('dateInput').value = '';
+            document.getElementById('timeInput').value = '';
+            document.getElementById('durationInput').value = '60';
+            document.getElementById('descriptionInput').value = '';
+        } else {
+            const errorData = await response.json();
+            alert(errorData.error || 'Ошибка при добавлении занятия в расписание');
+        }
+    } catch (error) {
+        console.error('Ошибка при добавлении занятия в расписание:', error);
+        alert(error.message || 'Не удалось добавить занятие');
+    }
+};
 
     const handleSaveGrade = async (id) => {
         try {
