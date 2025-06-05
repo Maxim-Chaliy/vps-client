@@ -30,6 +30,10 @@ const UserInfo = ({ selectedUser, handleAddToStudents }) => {
                                 <span className="detail-value">{selectedUser.patronymic || '—'}</span>
                             </div>
                             <div className="detail-row">
+                                <span className="detail-label">Email:</span>
+                                <span className="detail-value">{selectedUser.email}</span>
+                            </div>
+                            <div className="detail-row">
                                 <span className="detail-label">Статус:</span>
                                 <span className="detail-value role-badge">
                                     {selectedUser.role === 'student' ? 'Студент' : 'Пользователь'}
@@ -39,7 +43,7 @@ const UserInfo = ({ selectedUser, handleAddToStudents }) => {
                     </div>
                     {selectedUser.role !== 'student' && (
                         <div className="actions">
-                            <button 
+                            <button
                                 className="promote-button"
                                 onClick={handleAddToStudents}
                             >

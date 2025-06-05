@@ -20,12 +20,13 @@ import AdminRoute from './Components/AdminRoute';
 import PrivateRoute from './Components/PrivateRoute';
 import ForgotPassword from './Pages/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword';
-
+import ConfirmEmail from './Pages/ConfirmEmail';
 const App = () => {
   return (
     <Router>
       <ScrollTop />
       <Routes>
+        {/* <Route path="/" element={<Navigate to="/home"/>}/> */}
         <Route path="/" element={<Home />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/registration" element={<Registration/>} />
@@ -35,11 +36,12 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword/>} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/educmat" element={<EducMat/>} />
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
 
         {/* Защищенные маршруты для авторизованных пользователей */}
         <Route element={<PrivateRoute />}>
           <Route path="/schedule" element={<Schedule/>} />
-          {/* <Route path="/appform" element={<AppForm/>} /> */}
+          <Route path="/appform" element={<AppForm/>} />
           
 
           {/* Защищенные маршруты для админов */}

@@ -35,21 +35,21 @@ const Authorization = () => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-    
+
         // Валидация обязательных полей
         if (!formData.username || !formData.password) {
             setError('Пожалуйста, заполните все поля');
             setIsLoading(false);
             return;
         }
-    
+
         // Проверка reCAPTCHA
         if (!recaptchaToken) {
             setError('Пожалуйста, подтвердите, что вы не робот');
             setIsLoading(false);
             return;
         }
-    
+
         try {
             const response = await fetch('/login', {
                 method: 'POST',
@@ -57,18 +57,19 @@ const Authorization = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    ...formData,
+                    username: formData.username,
+                    password: formData.password,
                     recaptchaToken
                 })
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('studentId', data.user.id); // Сохранение studentId
-                localStorage.setItem('role', data.user.role); // Сохранение роли пользователя
-    
+                localStorage.setItem('studentId', data.user.id);
+                localStorage.setItem('role', data.user.role);
+
                 if (data.user.role === 'admin') {
                     navigate('/controlpanel');
                 } else {
@@ -76,21 +77,24 @@ const Authorization = () => {
                 }
                 window.location.reload();
             } else {
-                setError(data.message || 'Ошибка при авторизации');
-                recaptchaRef.current.reset();
+                // Устанавливаем сообщение об ошибке, возвращенное сервером
+                setError(data.error || 'Ошибка авторизации');
+                if (recaptchaRef.current) {
+                    recaptchaRef.current.reset();
+                }
                 setRecaptchaToken(null);
             }
         } catch (error) {
             console.error('Ошибка при отправке данных:', error);
             setError('Ошибка соединения с сервером');
-            recaptchaRef.current.reset();
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
             setRecaptchaToken(null);
         } finally {
             setIsLoading(false);
         }
     };
-    
-    
 
     return (
         <>

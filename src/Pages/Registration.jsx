@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
@@ -14,30 +14,32 @@ const Registration = () => {
         email: '',
         username: '',
         password: '',
-        repeatpassword: '',
-        confirmationCode: '' // Новое поле для кода подтверждения
+        repeatpassword: ''
     });
     const [errors, setErrors] = useState({});
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [submitError, setSubmitError] = useState('');
-    const [isEmailSent, setIsEmailSent] = useState(false); // Флаг для отслеживания отправки email
     const recaptchaRef = useRef();
     const navigate = useNavigate();
 
-    // Валидация полей при изменении
     const validateField = (name, value) => {
         let error = '';
 
-        switch(name) {
+        switch (name) {
             case 'name':
             case 'surname':
-                if (!value.trim()) error = 'Обязательное поле';
-                else if (!/^[а-яА-ЯёЁa-zA-Z\-]+$/.test(value)) error = 'Только буквы и дефисы';
+            case 'patronymic':
+                if (value && !/^[а-яА-ЯёЁa-zA-Z\-]+$/.test(value)) {
+                    error = 'Только буквы и дефисы';
+                }
                 break;
             case 'email':
-                if (!value) error = 'Обязательное поле';
-                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Некорректный email';
+                if (!value) {
+                    error = 'Обязательное поле';
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    error = 'Некорректный email';
+                }
                 break;
             case 'username':
                 if (!value) error = 'Обязательное поле';
@@ -51,9 +53,6 @@ const Registration = () => {
             case 'repeatpassword':
                 if (value !== formData.password) error = 'Пароли не совпадают';
                 break;
-            case 'confirmationCode':
-                if (!value) error = 'Обязательное поле';
-                break;
             default:
                 break;
         }
@@ -64,20 +63,17 @@ const Registration = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Обновляем данные формы
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
 
-        // Валидируем поле и обновляем ошибки
         const error = validateField(name, value);
         setErrors(prev => ({
             ...prev,
             [name]: error
         }));
 
-        // Сбрасываем общую ошибку при изменении
         setSubmitError('');
     };
 
@@ -90,16 +86,29 @@ const Registration = () => {
         setSubmitError('');
     };
 
-    // Проверка всей формы перед отправкой
+    const resetRecaptcha = () => {
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+        setRecaptchaToken(null);
+    };
+
+    useEffect(() => {
+        if (submitError) {
+            const timer = setTimeout(() => {
+                setSubmitError('');
+                resetRecaptcha();
+            }, 3000); // 3 секунды
+
+            return () => clearTimeout(timer);
+        }
+    }, [submitError]);
+
     const validateForm = () => {
         const newErrors = {};
         let isValid = true;
 
-        // Проверяем обязательные поля
         const requiredFields = ['name', 'surname', 'email', 'username', 'password', 'repeatpassword'];
-        if (isEmailSent) {
-            requiredFields.push('confirmationCode');
-        }
         requiredFields.forEach(field => {
             const error = validateField(field, formData[field]);
             if (error) {
@@ -108,7 +117,6 @@ const Registration = () => {
             }
         });
 
-        // Проверяем reCAPTCHA
         if (!recaptchaToken) {
             newErrors.recaptcha = 'Подтвердите, что вы не робот';
             isValid = false;
@@ -118,92 +126,56 @@ const Registration = () => {
         return isValid;
     };
 
+    const hasErrors = () => {
+        return Object.values(errors).some(error => error) || !recaptchaToken;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setSubmitError('');
-    
+
         if (!validateForm()) {
             setIsLoading(false);
             return;
         }
-    
+
         try {
-            if (!isEmailSent) {
-                // Отправка данных регистрации
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: formData.name,
-                        surname: formData.surname,
-                        patronymic: formData.patronymic,
-                        email: formData.email,
-                        username: formData.username,
-                        password: formData.password,
-                        recaptchaToken
-                    })
-                });
-    
-                const data = await response.json();
-    
-                if (!response.ok) {
-                    throw new Error(data.message || `Ошибка сервера: ${response.status}`);
-                }
-    
-                alert('Регистрация прошла успешно! Проверьте ваш email для получения кода подтверждения.');
-                setIsEmailSent(true); // Устанавливаем флаг, что email отправлен
-            } else {
-                // Логирование данных перед отправкой
-                console.log('Sending confirmation code:', {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    surname: formData.surname,
+                    patronymic: formData.patronymic,
                     email: formData.email,
-                    confirmationCode: formData.confirmationCode
-                });
-    
-                // Отправка кода подтверждения
-                const response = await fetch('/confirm-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: formData.email,
-                        confirmationCode: formData.confirmationCode
-                    })
-                });
-    
-                const data = await response.json();
-    
-                if (!response.ok) {
+                    username: formData.username,
+                    password: formData.password,
+                    recaptchaToken
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    setSubmitError(data.error || 'Ошибка при регистрации');
+                } else {
                     throw new Error(data.message || `Ошибка сервера: ${response.status}`);
                 }
-    
-                alert('Email подтвержден успешно! Теперь вы можете войти.');
+            } else {
+                alert('Регистрация прошла успешно! Ссылка для подтверждения отправлена на ваш email.');
                 navigate('/authorization');
             }
         } catch (error) {
             console.error('Registration error:', error);
             setSubmitError(error.message);
-    
-            if (recaptchaRef.current) {
-                recaptchaRef.current.reset();
-            }
-            setRecaptchaToken(null);
         } finally {
             setIsLoading(false);
         }
-    };
-    
-    
-    
-
-    // Проверка, есть ли ошибки в форме
-    const hasErrors = () => {
-        return Object.values(errors).some(error => error) || !recaptchaToken;
     };
 
     return (
@@ -320,22 +292,6 @@ const Registration = () => {
                                     {errors.repeatpassword && <span className="field-error">{errors.repeatpassword}</span>}
                                 </div>
 
-                                {isEmailSent && (
-                                    <div className='reg-field-group'>
-                                        <label className='reg-label'>Код подтверждения*</label>
-                                        <input
-                                            className={`reg-input ${errors.confirmationCode ? 'input-error' : ''}`}
-                                            type="text"
-                                            placeholder='Введите код подтверждения'
-                                            name="confirmationCode"
-                                            value={formData.confirmationCode}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        {errors.confirmationCode && <span className="field-error">{errors.confirmationCode}</span>}
-                                    </div>
-                                )}
-
                                 <div className='reg-field-group'>
                                     <ReCAPTCHA
                                         ref={recaptchaRef}
@@ -361,7 +317,7 @@ const Registration = () => {
                                     {isLoading ? (
                                         <span className="loading-text">Регистрация...</span>
                                     ) : (
-                                        <span>{isEmailSent ? 'Подтвердить Email' : 'Зарегистрироваться'}</span>
+                                        <span>Зарегистрироваться</span>
                                     )}
                                 </button>
 
