@@ -450,12 +450,18 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         if (window.confirm(`Вы уверены, что хотите удалить группу "${selectedGroup.name}"?`)) {
             try {
                 setLoading(true);
+                console.log(`Попытка удаления группы с ID: ${selectedGroup._id}`);
+
                 const response = await fetch(`/api/groups/${selectedGroup._id}`, {
                     method: 'DELETE',
                 });
 
+                console.log(`Ответ сервера: ${response.status} ${response.statusText}`);
+
                 if (!response.ok) {
-                    throw new Error('Ошибка при удалении группы');
+                    const errorData = await response.json();
+                    console.error('Ошибка при удалении группы:', errorData);
+                    throw new Error(errorData.message || 'Ошибка при удалении группы');
                 }
 
                 setGroups(groups.filter(g => g._id !== selectedGroup._id));
@@ -468,6 +474,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             }
         }
     };
+
 
     const handleAddStudent = async (studentId) => {
         try {

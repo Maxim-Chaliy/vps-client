@@ -87,6 +87,20 @@ const Editing = () => {
             });
     }, []);
 
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('/api/users');
+            if (!response.ok) {
+                throw new Error('Ошибка при получении пользователей');
+            }
+            const data = await response.json();
+            setUsers(data);
+        } catch (error) {
+            console.error('Ошибка при получении пользователей:', error);
+            setError(error.message);
+        }
+    };
+
     useEffect(() => {
         localStorage.setItem('activeImage', JSON.stringify(activeImage));
         localStorage.setItem('searchQuery', searchQuery);
@@ -401,6 +415,10 @@ const Editing = () => {
                                 <ScheduleEditor
                                     schedule={schedule}
                                     selectedUser={selectedUser}
+                                    setUsers={setUsers}
+                                    setSelectedUser={setSelectedUser}
+                                    setGroups={setGroups} // Передаем setGroups как пропс
+                                    refreshStudents={fetchUsers}
                                 />
                             )}
                             {activeImage === 3 && (

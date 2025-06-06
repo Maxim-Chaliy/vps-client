@@ -6,7 +6,7 @@ import { PiMicrosoftPowerpointLogoThin } from "react-icons/pi";
 import { FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 
-const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
+const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers, setSelectedUser, setGroups }) => {
     const [schedule, setSchedule] = useState([]);
     const [homework, setHomework] = useState([]);
     const [editing, setEditing] = useState(null);
@@ -17,6 +17,9 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
     const [isAddingHomework, setIsAddingHomework] = useState(false);
     const [editingGrade, setEditingGrade] = useState(null);
     const [gradeValue, setGradeValue] = useState('');
+    const [showDemoteModal, setShowDemoteModal] = useState(false);
+    const [deleteRecords, setDeleteRecords] = useState(false);
+    const [isDemoting, setIsDemoting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,6 +42,97 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
 
         fetchData();
     }, [selectedUser, selectedGroup]);
+
+    const handleDemoteStudent = async () => {
+        if (!selectedUser) return;
+
+        setIsDemoting(true);
+        try {
+            // Удаляем студента из всех групп
+            const groupsResponse = await fetch(`/api/groups/student/${selectedUser._id}`);
+            if (!groupsResponse.ok) {
+                throw new Error('Не удалось получить группы студента');
+            }
+
+            const groups = await groupsResponse.json();
+
+            for (const group of groups) {
+                const removeResponse = await fetch(`/api/groups/${group._id}/removeStudent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ studentId: selectedUser._id }),
+                });
+
+                if (!removeResponse.ok) {
+                    console.error(`Не удалось удалить студента из группы ${group._id}`);
+                }
+            }
+
+            // Изменяем роль пользователя
+            const updateResponse = await fetch(`/api/users/${selectedUser._id}/updateRole`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ role: 'user' }),
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('Не удалось изменить роль пользователя');
+            }
+
+            // Удаляем связанные записи, если выбрано
+            if (deleteRecords) {
+                await fetch('/api/schedules/deleteByStudent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ student_id: selectedUser._id }),
+                });
+
+                await fetch('/api/homework/deleteByStudent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ student_id: selectedUser._id }),
+                });
+            }
+
+            setShowDemoteModal(false);
+            setDeleteRecords(false);
+            alert('Студент успешно переведен в обычные пользователи');
+
+            // Обновляем список пользователей
+            const usersResponse = await fetch('/api/users');
+            if (usersResponse.ok) {
+                const updatedUsers = await usersResponse.json();
+                setUsers(updatedUsers);
+            }
+
+            // Обновляем список групп
+            const groupsResponseAfterUpdate = await fetch('/api/groups');
+            if (groupsResponseAfterUpdate.ok) {
+                const updatedGroups = await groupsResponseAfterUpdate.json();
+                setGroups(updatedGroups);
+            }
+
+            // Сбрасываем выбор студента и очищаем данные
+            setSelectedUser(null);
+            setSchedule([]);
+            setHomework([]);
+
+            if (refreshStudents) refreshStudents();
+        } catch (error) {
+            console.error('Ошибка при переводе студента:', error);
+            alert('Ошибка: ' + error.message);
+        } finally {
+            setIsDemoting(false);
+        }
+    };
 
     const handleAddToSchedule = async () => {
         const dateInput = document.getElementById('dateInput').value;
@@ -492,10 +586,20 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
     return (
         <div className="schedule-editor-container">
             <div className="editor-header">
-                <h3 className='name-division'>
-                    {selectedUser ? `${selectedUser.surname} ${selectedUser.name} ${selectedUser.patronymic}` : 'Выберите студента'}
-                    {selectedGroup && ` - ${selectedGroup.name}`}
-                </h3>
+                <div className="name-and-actions">
+                    <h3 className='name-division'>
+                        {selectedUser ? `${selectedUser.surname} ${selectedUser.name} ${selectedUser.patronymic}` : 'Выберите студента'}
+                        {selectedGroup && ` - ${selectedGroup.name}`}
+                    </h3>
+                    {selectedUser && (
+                        <button
+                            className="demote-student-button"
+                            onClick={() => setShowDemoteModal(true)}
+                        >
+                            Убрать из студентов
+                        </button>
+                    )}
+                </div>
                 <div className='mode-switcher'>
                     <button
                         className={`mode-button-scheduleeditor ${mode === 'lessons' ? 'active' : ''}`}
@@ -511,6 +615,45 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                     </button>
                 </div>
             </div>
+
+            {showDemoteModal && (
+                <div className="modal-overlay">
+                    <div className="demote-modal">
+                        <h3>Подтверждение действия</h3>
+                        <p>Вы точно хотите перевести {selectedUser.surname} {selectedUser.name} в обычные пользователи?</p>
+
+                        <div className="delete-records-option">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={deleteRecords}
+                                    onChange={(e) => setDeleteRecords(e.target.checked)}
+                                />
+                                Удалить все связанные записи (расписание и ДЗ)
+                            </label>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button
+                                onClick={() => {
+                                    setShowDemoteModal(false);
+                                    setDeleteRecords(false);
+                                }}
+                                disabled={isDemoting}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                onClick={handleDemoteStudent}
+                                disabled={isDemoting}
+                                className="confirm-button"
+                            >
+                                {isDemoting ? 'Выполняется...' : 'Подтвердить'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {mode === 'lessons' ? (
                 <>
@@ -800,7 +943,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
                             </button>
                         )}
                     </div>
-
                     {isAddingHomework && (
                         <div className="add-homework-form">
                             <div className="form-group">
