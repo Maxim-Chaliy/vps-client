@@ -82,7 +82,7 @@
     margin-bottom: 5px;
 }
 
-.form-input {
+.scheduleeditor-form-input {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -90,7 +90,7 @@
     transition: border-color 0.3s;
 }
 
-.form-input:focus {
+.scheduleeditor-form-input:focus {
     outline: none;
     border-color: #FCCD3A;
 }
@@ -455,15 +455,9 @@
     background-color: #f5f5f5;
 }
 
-.files-list {
+.scheduleeditor-files-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
     gap: 8px;
 }
 
@@ -472,13 +466,13 @@
     color: #555;
 }
 
-.file-link {
+.scheduleeditor-file-link {
     color: #333;
     text-decoration: none;
     transition: color 0.3s;
 }
 
-.file-link:hover {
+.scheduleeditor-file-link:hover {
     color: #FCCD3A;
     text-decoration: underline;
 }
@@ -855,12 +849,6 @@
     font-size: 14px;
 }
 
-.grade-display {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 .no-grade {
     color: #999;
     min-width: 20px;
@@ -902,28 +890,13 @@
     font-size: 15px;
 }
 
-.files-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.file-item {
+.scheduleeditor-file-item {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
     background-color: #f5f5f5;
     border-radius: 4px;
-}
-
-.file-link {
-    color: #333;
-    text-decoration: none;
-}
-
-.file-link:hover {
-    color: #0066cc;
 }
 
 .student-response {
@@ -964,12 +937,6 @@
 
 .student-grade {
     min-width: 120px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.grade-display {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1049,13 +1016,6 @@
     background-color: #ffebee;
 }
 
-/* editing.css */
-
-.editing-main {
-    min-height: calc(100vh - 120px);
-    padding: 150px 0;
-}
-
 .editing-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -1064,22 +1024,13 @@
 
 .blocks-flex {
     display: flex;
+    /* flex-direction: column; */
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     min-height: 700px;
     max-height: 700px;
-}
-
-.sidebar-icons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 20px 15px;
-    background-color: #2d2d2d;
-    position: relative;
 }
 
 .icon-container {
@@ -1132,11 +1083,6 @@
 
 .icon-container:hover .icon-tooltip {
     opacity: 1;
-}
-
-.content-area {
-    flex: 1;
-    display: flex;
 }
 
 .search-input {
@@ -1239,29 +1185,6 @@
 @media (max-width: 1200px) {
     .blocks-flex{
         min-height: 1200px;
-    }
-
-    .content-area {
-        flex-direction: column;
-    }
-
-
-}
-
-@media (max-width: 768px) {
-    .blocks-flex {
-        flex-direction: column;
-        min-height: 1500px;
-    }
-
-    .sidebar-icons {
-        flex-direction: row;
-        padding: 10px;
-        justify-content: center;
-    }
-
-    .icon-tooltip {
-        display: none;
     }
 }
 

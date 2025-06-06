@@ -19,6 +19,7 @@
     padding: 20px 15px;
     background-color: #2d2d2d;
     position: relative;
+    flex-shrink: 0; /* Запрещаем сжиматься */
 }
 
 .icon-container {
@@ -74,10 +75,10 @@
 }
 
 .content-area {
-    flex: 1;
+    flex: 1; /* Занимает всё оставшееся пространство */
     display: flex;
-    /* padding: 20px;
-    gap: 20px; */
+    min-width: 0; /* Важно! Позволяет контенту сжиматься */
+    overflow: hidden; /* Скрываем выходящий контент */
 }
 
 .editing-search-container {
@@ -221,7 +222,6 @@
     color: #ffffff;
 }
 
-
 @media (max-width: 1200px) {
     .blocks-flex {
         min-height: 1200px;
@@ -255,6 +255,32 @@
     .icon-tooltip {
         display: none;
     }
+    
+        .icon-90deg {
+        transform: rotate(90deg);
+    }
+
+    .user-list-scroll {
+        max-height: 260px;
+    }
+
+        .stats-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-controls select,
+    .refresh-button {
+        width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
 }
 
 /*НАЧАЛО Скрывает панель список студентов */
@@ -262,17 +288,6 @@
     width: 20px;
     height: 20px;
     stroke-width: 2;
-}
-
-/* Для мобильных устройств можно скрывать панель по умолчанию */
-@media (max-width: 768px) {
-    .icon-90deg {
-        transform: rotate(90deg);
-    }
-
-    .user-list-scroll {
-        max-height: 260px;
-    }
 }
 
 /*КОНЕЦ Скрывает панель список студентов */
@@ -386,22 +401,3 @@
 }
 
 /* Адаптивные стили */
-@media (max-width: 768px) {
-    .stats-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .stats-controls select,
-    .refresh-button {
-        width: 100%;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-    
-    .stat-value {
-        font-size: 1.5rem;
-    }
-}

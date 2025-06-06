@@ -40,93 +40,87 @@ const ScheduleEditor = ({ selectedUser, selectedGroup }) => {
         fetchData();
     }, [selectedUser, selectedGroup]);
 
-const handleAddToSchedule = async () => {
-    const dateInput = document.getElementById('dateInput').value;
-    const timeInput = document.getElementById('timeInput').value;
-    const durationInput = document.getElementById('durationInput').value;
-    const subjectInput = document.getElementById('exampleSelect').value;
-    const descriptionInput = document.getElementById('descriptionInput').value;
+    const handleAddToSchedule = async () => {
+        const dateInput = document.getElementById('dateInput').value;
+        const timeInput = document.getElementById('timeInput').value;
+        const durationInput = document.getElementById('durationInput').value;
+        const subjectInput = document.getElementById('exampleSelect').value;
+        const descriptionInput = document.getElementById('descriptionInput').value;
 
-    if (!dateInput || !timeInput || !durationInput || !subjectInput) {
-        alert('Пожалуйста, заполните все обязательные поля');
-        return;
-    }
-
-    const newDate = new Date(dateInput);
-    const newStartTime = timeInput;
-    const newDuration = parseInt(durationInput) || 60;
-    const newEndTime = calculateEndTime(newStartTime, newDuration);
-
-    const hasConflict = schedule.some(item => {
-        const itemDate = new Date(item.date);
-        if (itemDate.toDateString() !== newDate.toDateString()) {
-            return false;
+        if (!dateInput || !timeInput || !durationInput || !subjectInput) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
         }
 
-        const toMinutes = (timeStr) => {
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            return hours * 60 + minutes;
-        };
+        const newDate = new Date(dateInput);
+        const newStartTime = timeInput;
+        const newDuration = parseInt(durationInput) || 60;
+        const newEndTime = calculateEndTime(newStartTime, newDuration);
 
-        const newStart = toMinutes(newStartTime);
-        const newEnd = toMinutes(newEndTime);
-        const existStart = toMinutes(item.time);
-        const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
+        const hasConflict = schedule.some(item => {
+            const itemDate = new Date(item.date);
+            if (itemDate.toDateString() !== newDate.toDateString()) {
+                return false;
+            }
 
-        return (newStart < existEnd && newEnd > existStart);
-    });
+            const toMinutes = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
 
-    if (hasConflict) {
-        alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
-        return;
-    }
+            const newStart = toMinutes(newStartTime);
+            const newEnd = toMinutes(newEndTime);
+            const existStart = toMinutes(item.time);
+            const existEnd = toMinutes(calculateEndTime(item.time, item.duration));
 
-    const dayOfWeek = getShortDayOfWeek(newDate);
-
-    const newScheduleItem = {
-        student_id: selectedUser ? selectedUser._id : null,
-        group_id: selectedGroup ? selectedGroup._id : null,
-        day: dayOfWeek,
-        date: newDate,
-        time: newStartTime,
-        duration: newDuration,
-        subject: subjectInput,
-        description: descriptionInput || '',
-        attendance: false,
-        grade: null
-    };
-
-    try {
-        const response = await fetch('/api/schedules', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newScheduleItem),
+            return (newStart < existEnd && newEnd > existStart);
         });
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            throw new Error(`Ожидался JSON, но получен: ${text}`);
+        if (hasConflict) {
+            alert('Ошибка: В выбранное время уже есть занятие. Пожалуйста, выберите другое время.');
+            return;
         }
 
-        if (response.ok) {
-            const savedScheduleItem = await response.json();
-            setSchedule([...schedule, savedScheduleItem]);
-            document.getElementById('dateInput').value = '';
-            document.getElementById('timeInput').value = '';
-            document.getElementById('durationInput').value = '60';
-            document.getElementById('descriptionInput').value = '';
-        } else {
-            const errorData = await response.json();
-            alert(errorData.error || 'Ошибка при добавлении занятия в расписание');
+        const dayOfWeek = getShortDayOfWeek(newDate);
+
+        const newScheduleItem = {
+            student_id: selectedUser ? selectedUser._id : null,
+            group_id: selectedGroup ? selectedGroup._id : null,
+            day: dayOfWeek,
+            date: newDate,
+            time: newStartTime,
+            duration: newDuration,
+            subject: subjectInput,
+            description: descriptionInput || '',
+            attendance: false,
+            grade: null
+        };
+
+        try {
+            const response = await fetch('/api/schedules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newScheduleItem),
+            });
+
+            if (response.ok) {
+                const savedScheduleItem = await response.json();
+                setSchedule([...schedule, savedScheduleItem]);
+                document.getElementById('dateInput').value = '';
+                document.getElementById('timeInput').value = '';
+                document.getElementById('durationInput').value = '60';
+                document.getElementById('descriptionInput').value = '';
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error || 'Ошибка при добавлении занятия в расписание');
+            }
+        } catch (error) {
+            console.error('Ошибка при добавлении занятия в расписание:', error);
+            alert(error.message || 'Не удалось добавить занятие');
         }
-    } catch (error) {
-        console.error('Ошибка при добавлении занятия в расписание:', error);
-        alert(error.message || 'Не удалось добавить занятие');
-    }
-};
+    };
 
     const handleSaveGrade = async (id) => {
         try {
@@ -156,6 +150,7 @@ const handleAddToSchedule = async () => {
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
         const filesInput = document.getElementById('filesInput').files;
+        const commentInput = document.getElementById('commentInput').value;
 
         if (!dueDateInput || filesInput.length === 0) {
             alert('Пожалуйста, укажите дату выполнения и прикрепите файлы');
@@ -167,6 +162,7 @@ const handleAddToSchedule = async () => {
         if (selectedGroup) formData.append('group_id', selectedGroup._id);
         formData.append('day', getShortDayOfWeek(new Date(dueDateInput)));
         formData.append('dueDate', dueDateInput);
+        formData.append('comment', commentInput);
 
         for (let i = 0; i < filesInput.length; i++) {
             formData.append('files', filesInput[i]);
@@ -188,6 +184,7 @@ const handleAddToSchedule = async () => {
             setIsAddingHomework(false);
             document.getElementById('dueDateInput').value = '';
             document.getElementById('filesInput').value = '';
+            document.getElementById('commentInput').value = '';
         } catch (error) {
             console.error('Ошибка при добавлении домашнего задания:', error);
             alert(error.message || 'Не удалось добавить домашнее задание');
@@ -520,18 +517,18 @@ const handleAddToSchedule = async () => {
                     <div className="add-lesson-form">
                         <div className="form-group">
                             <label htmlFor="dateInput">Дата</label>
-                            <input type="date" id="dateInput" className="form-input" />
+                            <input type="date" id="dateInput" className="scheduleeditor-form-input" />
                         </div>
                         <div className="form-group">
                             <label htmlFor="timeInput">Время начала</label>
-                            <input type="time" id="timeInput" className="form-input" />
+                            <input type="time" id="timeInput" className="scheduleeditor-form-input" />
                         </div>
                         <div className="form-group">
                             <label htmlFor="durationInput">Продолжительность (мин)</label>
                             <input
                                 type="number"
                                 id="durationInput"
-                                className="form-input"
+                                className="scheduleeditor-form-input"
                                 min="30"
                                 step="30"
                                 defaultValue="60"
@@ -539,7 +536,7 @@ const handleAddToSchedule = async () => {
                         </div>
                         <div className="form-group">
                             <label htmlFor="exampleSelect">Предмет</label>
-                            <select id="exampleSelect" className="form-input">
+                            <select id="exampleSelect" className="scheduleeditor-form-input">
                                 <option value="">Выберите предмет</option>
                                 <option value="Алгебра">Алгебра</option>
                                 <option value="Геометрия">Геометрия</option>
@@ -553,7 +550,7 @@ const handleAddToSchedule = async () => {
                             <input
                                 type="text"
                                 id="descriptionInput"
-                                className="form-input"
+                                className="scheduleeditor-form-input"
                                 placeholder="Дополнительная информация"
                             />
                         </div>
@@ -808,7 +805,11 @@ const handleAddToSchedule = async () => {
                         <div className="add-homework-form">
                             <div className="form-group">
                                 <label htmlFor="dueDateInput">Дата выполнения</label>
-                                <input type="date" id="dueDateInput" className="form-input" />
+                                <input type="date" id="dueDateInput" className="scheduleeditor-form-input" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="commentInput">Комментарий</label>
+                                <input type="text" id="commentInput" className="scheduleeditor-form-input" placeholder="Введите комментарий" />
                             </div>
                             <div className="form-group file-group">
                                 <label htmlFor="filesInput">Файлы задания</label>
@@ -839,6 +840,7 @@ const handleAddToSchedule = async () => {
                                     <th>День</th>
                                     <th>Выполнить до</th>
                                     <th>Файлы задания</th>
+                                    <th>Комментарий</th>
                                     <th>Ответ</th>
                                     <th>Оценка</th>
                                     <th style={{ width: '80px' }}>Действия</th>
@@ -859,16 +861,16 @@ const handleAddToSchedule = async () => {
                                             <td>{item.day}</td>
                                             <td>{formatDate(item.dueDate)}</td>
                                             <td>
-                                                <div className="files-list">
+                                                <div className="scheduleeditor-files-list">
                                                     {item.files.map((file, idx) => (
-                                                        <div key={idx} className="file-item">
+                                                        <div key={idx} className="scheduleeditor-file-item">
                                                             {getFileIcon(file)}
                                                             <a
                                                                 href={`/homework/${file}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 download
-                                                                className="file-link"
+                                                                className="scheduleeditor-file-link"
                                                             >
                                                                 {file}
                                                             </a>
@@ -876,18 +878,19 @@ const handleAddToSchedule = async () => {
                                                     ))}
                                                 </div>
                                             </td>
+                                            <td>{item.comment || '-'}</td>
                                             <td>
                                                 {item.answer && item.answer.length > 0 ? (
-                                                    <div className="files-list">
+                                                    <div className="scheduleeditor-files-list">
                                                         {item.answer.map((answer, idx) => (
-                                                            <div key={idx} className="file-item">
+                                                            <div key={idx} className="scheduleeditor-file-item">
                                                                 {getFileIcon(answer.file)}
                                                                 <a
                                                                     href={`/homework/${answer.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download
-                                                                    className="file-link"
+                                                                    className="scheduleeditor-file-link"
                                                                 >
                                                                     {answer.file}
                                                                 </a>
@@ -929,7 +932,7 @@ const handleAddToSchedule = async () => {
                                                     </div>
                                                 ) : (
                                                     <div className="grade-display">
-                                                        {item.grades?.[selectedUser._id] ? (
+                                                        {item.grades?.[selectedUser?._id] ? (
                                                             <span className={`grade-badge grade-${item.grades[selectedUser._id]}`}>
                                                                 {item.grades[selectedUser._id]}
                                                             </span>
