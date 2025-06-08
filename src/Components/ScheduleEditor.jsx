@@ -30,13 +30,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         const fetchData = async () => {
             try {
                 if (selectedUser) {
-                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/student/${selectedUser._id}`);
-                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/${selectedUser._id}`);
+                    const scheduleResponse = await fetch(`/api/schedules/student/${selectedUser._id}`);
+                    const homeworkResponse = await fetch(`/api/homework/${selectedUser._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 } else if (selectedGroup) {
-                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`);
-                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`);
+                    const scheduleResponse = await fetch(`/api/schedules/group/${selectedGroup._id}`);
+                    const homeworkResponse = await fetch(`/api/homework/group/${selectedGroup._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 }
@@ -91,7 +91,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
         setIsDemoting(true);
         try {
-            const groupsResponse = await fetch(`http://localhost:3001/api/groups/student/${selectedUser._id}`);
+            const groupsResponse = await fetch(`/api/groups/student/${selectedUser._id}`);
             if (!groupsResponse.ok) {
                 throw new Error('Не удалось получить группы ученика');
             }
@@ -99,7 +99,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             const groups = await groupsResponse.json();
 
             for (const group of groups) {
-                const removeResponse = await fetch(`http://localhost:3001/api/groups/${group._id}/removeStudent`, {
+                const removeResponse = await fetch(`/api/groups/${group._id}/removeStudent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                 }
             }
 
-            const updateResponse = await fetch(`http://localhost:3001/api/users/${selectedUser._id}/updateRole`, {
+            const updateResponse = await fetch(`/api/users/${selectedUser._id}/updateRole`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             }
 
             if (deleteRecords) {
-                await fetch('http://localhost:3001/api/schedules/deleteByStudent', {
+                await fetch('/api/schedules/deleteByStudent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                     body: JSON.stringify({ student_id: selectedUser._id }),
                 });
 
-                await fetch('http://localhost:3001/api/homework/deleteByStudent', {
+                await fetch('/api/homework/deleteByStudent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -146,13 +146,13 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             setDeleteRecords(false);
             alert('Ученик успешно переведен в обычные пользователи');
 
-            const usersResponse = await fetch('http://localhost:3001/api/users');
+            const usersResponse = await fetch('/api/users');
             if (usersResponse.ok) {
                 const updatedUsers = await usersResponse.json();
                 setUsers(updatedUsers);
             }
 
-            const groupsResponseAfterUpdate = await fetch('http://localhost:3001/api/groups');
+            const groupsResponseAfterUpdate = await fetch('/api/groups');
             if (groupsResponseAfterUpdate.ok) {
                 const updatedGroups = await groupsResponseAfterUpdate.json();
                 setGroups(updatedGroups);
@@ -372,7 +372,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules', {
+            const response = await fetch('/api/schedules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -399,7 +399,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
     const handleSaveGrade = async (id) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}/updateGrade`, {
+            const response = await fetch(`/api/schedules/${id}/updateGrade`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -446,7 +446,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/homework', {
+            const response = await fetch('/api/homework', {
                 method: 'POST',
                 body: formData,
             });
@@ -471,7 +471,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
     const handleAttendanceChange = async (id, attendance) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}/updateAttendance`, {
+            const response = await fetch(`/api/schedules/${id}/updateAttendance`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -494,7 +494,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         try {
             const gradeValueToSave = gradeValue ? parseInt(gradeValue) : null;
 
-            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade/${studentId}`, {
+            const response = await fetch(`/api/homework/${id}/grade/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -575,7 +575,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             }
 
             try {
-                const response = await fetch(`http://localhost:3001/api/schedules/${editing}`, {
+                const response = await fetch(`/api/schedules/${editing}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -607,7 +607,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}`, {
+            const response = await fetch(`/api/schedules/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -631,7 +631,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedItems.length} выбранных записей?`)) return;
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules/deleteMultiple', {
+            const response = await fetch('/api/schedules/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -663,7 +663,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm('Вы уверены, что хотите удалить это домашнее задание?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/homework/${id}`, {
+            const response = await fetch(`/api/homework/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -687,7 +687,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedHomeworkItems.length} выбранных заданий?`)) return;
 
         try {
-            const response = await fetch('http://localhost:3001/api/homework/deleteMultiple', {
+            const response = await fetch('/api/homework/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1213,7 +1213,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                                         <div key={idx} className="scheduleeditor-file-item">
                                                             {getFileIcon(file)}
                                                             <a
-                                                                href={`http://localhost:3001/homework/${file}`}
+                                                                href={`/homework/${file}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 download
@@ -1233,7 +1233,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                                             <div key={idx} className="scheduleeditor-file-item">
                                                                 {getFileIcon(answer.file)}
                                                                 <a
-                                                                    href={`http://localhost:3001/homework/${answer.file}`}
+                                                                    href={`/homework/${answer.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download

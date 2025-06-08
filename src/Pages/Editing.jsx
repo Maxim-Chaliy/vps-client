@@ -54,7 +54,7 @@ const Editing = () => {
         if (savedSelectedStudentId) setSelectedStudentId(savedSelectedStudentId);
         if (savedShowSearchContainer) setShowSearchContainer(JSON.parse(savedShowSearchContainer));
 
-        fetch('http://localhost:3001/api/users')
+        fetch('/api/users')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Ошибка при получении пользователей');
@@ -70,7 +70,7 @@ const Editing = () => {
                 setError(error.message);
             });
 
-        fetch('http://localhost:3001/api/groups')
+        fetch('/api/groups')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Ошибка при получении групп');
@@ -89,7 +89,7 @@ const Editing = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/users');
+            const response = await fetch('/api/users');
             if (!response.ok) {
                 throw new Error('Ошибка при получении пользователей');
             }
@@ -140,7 +140,7 @@ const Editing = () => {
     const handleAddToStudents = async () => {
         if (selectedUser) {
             try {
-                const response = await fetch(`http://localhost:3001/api/users/${selectedUser._id}/updateRole`, {
+                const response = await fetch(`/api/users/${selectedUser._id}/updateRole`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const Editing = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/schedules/stats');
+            const response = await fetch('/api/schedules/stats');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -250,7 +250,7 @@ const Editing = () => {
         const groupName = prompt("Введите название группы:");
         if (groupName) {
             try {
-                const response = await fetch('http://localhost:3001/api/groups', {
+                const response = await fetch('/api/groups', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

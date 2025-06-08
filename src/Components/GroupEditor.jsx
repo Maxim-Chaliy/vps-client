@@ -44,11 +44,11 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
             const loadData = async () => {
                 try {
-                    const studentsResponse = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/students`);
+                    const studentsResponse = await fetch(`/api/groups/${selectedGroup._id}/students`);
                     if (!studentsResponse.ok) throw new Error('Ошибка загрузки учеников группы');
                     const groupStudentsData = await studentsResponse.json();
 
-                    const allStudentsResponse = await fetch('http://localhost:3001/api/users/students');
+                    const allStudentsResponse = await fetch('/api/users/students');
                     if (!allStudentsResponse.ok) throw new Error('Ошибка загрузки всех учеников');
                     const allStudentsData = await allStudentsResponse.json();
 
@@ -61,8 +61,8 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                     setAvailableStudents(availableStudentsData);
 
                     const [scheduleRes, homeworkRes] = await Promise.all([
-                        fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`),
-                        fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`)
+                        fetch(`/api/schedules/group/${selectedGroup._id}`),
+                        fetch(`/api/homework/group/${selectedGroup._id}`)
                     ]);
 
                     if (!scheduleRes.ok) console.error('Ошибка загрузки расписания');
@@ -308,10 +308,10 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             let endpoint, body;
 
             if (isHomework) {
-                endpoint = `http://localhost:3001/api/homework/${itemId}/grade/${studentId}`;
+                endpoint = `/api/homework/${itemId}/grade/${studentId}`;
                 body = { grade: gradeValue };
             } else {
-                endpoint = `http://localhost:3001/api/schedules/${itemId}/updateGroupGrades`;
+                endpoint = `/api/schedules/${itemId}/updateGroupGrades`;
                 body = { grades: { [studentId]: gradeValue } };
             }
 
@@ -368,12 +368,12 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             let students = [];
 
             if (scheduleItem.group_id) {
-                const response = await fetch(`http://localhost:3001/api/groups/${scheduleItem.group_id}/students`);
+                const response = await fetch(`/api/groups/${scheduleItem.group_id}/students`);
                 if (response.ok) {
                     students = await response.json();
                 }
             } else if (scheduleItem.student_id) {
-                const response = await fetch(`http://localhost:3001/api/users/${scheduleItem.student_id}`);
+                const response = await fetch(`/api/users/${scheduleItem.student_id}`);
                 if (response.ok) {
                     const student = await response.json();
                     students = [student];
@@ -394,7 +394,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleSaveAttendance = async (data) => {
         try {
             const { scheduleItem } = attendanceModal;
-            let attendanceUrl = `http://localhost:3001/api/schedules/${scheduleItem._id}/`;
+            let attendanceUrl = `/api/schedules/${scheduleItem._id}/`;
             attendanceUrl += scheduleItem.group_id ? 'updateGroupAttendance' : 'updateAttendance';
 
             const requestData = {
@@ -417,7 +417,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
             if (data.grades && Object.keys(data.grades).length > 0) {
                 const gradesResponse = await fetch(
-                    `http://localhost:3001/api/schedules/${scheduleItem._id}/updateGroupGrades`,
+                    `/api/schedules/${scheduleItem._id}/updateGroupGrades`,
                     {
                         method: 'PUT',
                         headers: {
@@ -591,7 +591,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                             <div key={idx} className="file-item">
                                 {getFileIcon(file)}
                                 <a
-                                    href={`http://localhost:3001/homework/${file}`}
+                                    href={`/homework/${file}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     download
@@ -624,7 +624,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                                         <div className="answer-file">
                                             {getFileIcon(studentAnswer.file)}
                                             <a
-                                                href={`http://localhost:3001/homework/${studentAnswer.file}`}
+                                                href={`/homework/${studentAnswer.file}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -690,7 +690,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
 
     const handleToggleIndividualAttendance = async (scheduleId, attendance) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${scheduleId}/updateAttendance`, {
+            const response = await fetch(`/api/schedules/${scheduleId}/updateAttendance`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -767,7 +767,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules', {
+            const response = await fetch('/api/schedules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -804,7 +804,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleSaveGroup = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}`, {
+            const response = await fetch(`/api/groups/${selectedGroup._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -834,7 +834,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
                 setLoading(true);
                 console.log(`Попытка удаления группы с ID: ${selectedGroup._id}`);
 
-                const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}`, {
+                const response = await fetch(`/api/groups/${selectedGroup._id}`, {
                     method: 'DELETE',
                 });
 
@@ -860,7 +860,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleAddStudent = async (studentId) => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/addStudent`, {
+            const response = await fetch(`/api/groups/${selectedGroup._id}/addStudent`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -890,7 +890,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
     const handleRemoveStudent = async (studentId) => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/groups/${selectedGroup._id}/removeStudent`, {
+            const response = await fetch(`/api/groups/${selectedGroup._id}/removeStudent`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -972,7 +972,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
             }
 
             try {
-                const response = await fetch(`http://localhost:3001/api/schedules/${editingSchedule}`, {
+                const response = await fetch(`/api/schedules/${editingSchedule}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1005,7 +1005,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/schedules/${id}`, {
+            const response = await fetch(`/api/schedules/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1029,7 +1029,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedScheduleItems.length} выбранных записей?`)) return;
 
         try {
-            const response = await fetch('http://localhost:3001/api/schedules/deleteMultiple', {
+            const response = await fetch('/api/schedules/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1080,7 +1080,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/homework', {
+            const response = await fetch('/api/homework', {
                 method: 'POST',
                 body: formData,
             });
@@ -1114,7 +1114,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         if (!window.confirm('Вы уверены, что хотите удалить это домашнее задание?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/homework/${id}`, {
+            const response = await fetch(`/api/homework/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1138,7 +1138,7 @@ const GroupEditor = ({ selectedGroup, setSelectedGroup, groups, setGroups }) => 
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedHomeworkItems.length} выбранных заданий?`)) return;
 
         try {
-            const response = await fetch('http://localhost:3001/api/homework/deleteMultiple', {
+            const response = await fetch('/api/homework/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
