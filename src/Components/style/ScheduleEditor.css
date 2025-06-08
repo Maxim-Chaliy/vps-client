@@ -7,7 +7,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-height: 2000px;
+    /* max-height: calc(100vh - 100px); */
     overflow: hidden;
     width: 100%;
 }
@@ -148,7 +148,7 @@
 .schedule-table-container {
     width: 100%;
     overflow-x: auto;
-    max-height: 500px;
+    /* max-height: 500px; */
     overflow-y: auto;
 }
 
@@ -269,6 +269,7 @@
 
 .attendance-icon {
     font-size: 18px;
+    height: 18px;
 }
 
 .attendance-icon.present {
@@ -428,7 +429,7 @@
 
 .homework-table-container {
     overflow-x: auto;
-    max-height: 500px;
+    /* max-height: 500px; */
     overflow-y: auto;
 }
 
@@ -1183,7 +1184,7 @@
 }
 
 @media (max-width: 1200px) {
-    .blocks-flex{
+    .blocks-flex {
         min-height: 1200px;
     }
 }
@@ -1201,17 +1202,7 @@
         transform: rotate(90deg);
     }
 }
-/*КОНЕЦ Скрывает панель список студентов */
 
-
-
-
-
-
-
-
-
-/* Добавляем в ScheduleEditor.css */
 
 /* Стили для поиска */
 .group-search-container {
@@ -1246,7 +1237,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 211px; /* Примерно 5 записей с отступами */
+    max-height: 211px;
+    /* Примерно 5 записей с отступами */
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -1275,11 +1267,11 @@
     .group-students-container {
         flex-direction: column;
     }
-    
+
     .group-students-section {
         margin-bottom: 20px;
     }
-    
+
     .group-students-list {
         max-height: 200px;
     }
@@ -1389,4 +1381,538 @@
 
 .modal-actions .confirm-button:hover:not(:disabled) {
     background-color: #ff5252;
+}
+
+/* ЖУРНАЛ УСПЕВАИМОСТИ */
+/* Journal Styles */
+.journal-container {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.journal-table-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.journal-container h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-controls .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-controls label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.filter-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.filter-input:focus {
+    border-color: #FCCD3A;
+    outline: none;
+}
+
+.journal-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.journal-table th {
+    background-color: #f5f7fa;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #444;
+    border-bottom: 2px solid #e1e5eb;
+}
+
+.journal-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e1e5eb;
+    color: #555;
+}
+
+.journal-table tr:last-child td {
+    border-bottom: none;
+}
+
+.journal-table tr:hover {
+    background-color: #f9fafc;
+}
+
+/* Attendance icons in journal */
+.attendance-icon {
+    font-size: 18px;
+}
+
+.attendance-icon.present {
+    color: #28a745;
+}
+
+.attendance-icon.absent {
+    color: #dc3545;
+}
+
+/* Grade badges in journal */
+.grade-badge {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 14px;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filter-controls .form-group {
+        min-width: 100%;
+    }
+
+    .journal-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Average Grade Styles */
+.average-grade {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid #4a90e2;
+    margin-bottom: 15px;
+}
+
+.average-grade h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.average-grade h4::before {
+    content: "★";
+    margin-right: 8px;
+    color: #ffc107;
+    font-size: 1.4rem;
+}
+
+/* Grade-specific colors for average */
+.average-grade.grade-1 {
+    border-left-color: #dc3545;
+}
+
+.average-grade.grade-2 {
+    border-left-color: #fd7e14;
+}
+
+.average-grade.grade-3 {
+    border-left-color: #ffc107;
+}
+
+.average-grade.grade-4 {
+    border-left-color: #8bc34a;
+}
+
+.average-grade.grade-5 {
+    border-left-color: #4caf50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .average-grade {
+        padding: 10px;
+    }
+
+    .average-grade h4 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Добавьте эти стили в ваш ScheduleEditor.css */
+
+.statistics {
+    margin-bottom: 15px;
+}
+
+.statistics h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.journal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.stat-title {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 3px;
+}
+
+.journal-stat-value {
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Убираем цветовые акценты для карточек */
+.stat-card {
+    border-left: none;
+}
+
+/* Индикатор посещаемости */
+.attendance-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 3px;
+}
+
+.attendance-bar {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #e9ecef;
+    flex-grow: 1;
+    margin-right: 8px;
+}
+
+.attendance-progress {
+    height: 100%;
+    background-color: #1cc88a;
+    border-radius: 3px;
+}
+
+.attendance-percent {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+/* Цветовые акценты для разных карточек */
+.stat-card:nth-child(1) {
+    border-left: 4px solid #4e73df;
+}
+
+.stat-card:nth-child(2) {
+    border-left: 4px solid #1cc88a;
+}
+
+.stat-card:nth-child(3) {
+    border-left: 4px solid #36b9cc;
+}
+
+.stat-card:nth-child(4) {
+    border-left: 4px solid #f6c23e;
+}
+
+.stat-card:nth-child(5) {
+    border-left: 4px solid #e74a3b;
+}
+
+/* Индикатор посещаемости */
+.attendance-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.attendance-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    flex-grow: 1;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.attendance-progress {
+    height: 100%;
+    background-color: #1cc88a;
+    border-radius: 4px;
+}
+
+.attendance-percent {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+}
+
+.statistics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-statistics-button {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.toggle-statistics-button:hover {
+    background-color: #f5f5f5;
+}
+
+
+
+
+
+
+
+/* Добавьте эти стили в ваш ScheduleEditor.css */
+
+/* Общие стили для таблиц с фиксированными заголовками */
+.homework-table-container,
+.journal-table-container {
+  position: relative;
+  overflow: auto;
+}
+
+.homework-table,
+.journal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Фиксированные заголовки для таблицы домашних заданий */
+.homework-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9f9f9;
+}
+
+/* Фиксированные заголовки для таблицы журнала */
+.journal-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f5f7fa;
+}
+
+/* Дополнительные стили для лучшего отображения */
+.homework-table th,
+.homework-table td,
+.journal-table th,
+.journal-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.homework-table th,
+.journal-table th {
+  font-weight: 500;
+  color: #555;
+}
+
+/* Тень под заголовками при прокрутке */
+.homework-table thead::after,
+.journal-table thead::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #eee;
+  bottom: -1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Для таблицы домашних заданий */
+.homework-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9f9f9;
+}
+
+/* Для таблицы журнала */
+.journal-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f5f7fa;
+}
+
+/* Улучшенные стили для таблиц с фиксированными заголовками */
+.homework-table-container {
+  overflow: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.journal-table-container {
+  overflow: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.homework-table thead tr th {
+  position: sticky;
+  top: 0;
+  background-color: #f9f9f9;
+  z-index: 1;
+}
+
+.journal-table thead tr th {
+  position: sticky;
+  top: 0;
+  background-color: #f5f7fa;
+  z-index: 1;
+}
+
+/* Добавляем тень под заголовками при прокрутке */
+.homework-table thead tr th::after,
+.journal-table thead tr th::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background-color: #eee;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Улучшаем видимость заголовков */
+.homework-table th,
+.journal-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 500;
+  color: #555;
+  border-bottom: 2px solid #e1e5eb;
+}
+
+/* Закрепляем заголовки в таблице домашних заданий */
+.homework-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f9f9f9;
+  z-index: 10;
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* Закрепляем заголовки в таблице журнала */
+.journal-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f5f7fa;
+  z-index: 10;
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* ЭКСПОРТ В PDF */
+
+.export-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.export-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.pdf-button {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.pdf-button:hover {
+    background-color: #ff5252;
+}
+
+.excel-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.excel-button:hover {
+    background-color: #3d8b40;
+}
+
+.grade-attendance-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }

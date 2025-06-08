@@ -54,7 +54,7 @@ const Editing = () => {
         if (savedSelectedStudentId) setSelectedStudentId(savedSelectedStudentId);
         if (savedShowSearchContainer) setShowSearchContainer(JSON.parse(savedShowSearchContainer));
 
-        fetch('/api/users')
+        fetch('http://localhost:3001/api/users')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Ошибка при получении пользователей');
@@ -70,7 +70,7 @@ const Editing = () => {
                 setError(error.message);
             });
 
-        fetch('/api/groups')
+        fetch('http://localhost:3001/api/groups')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Ошибка при получении групп');
@@ -89,7 +89,7 @@ const Editing = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('/api/users');
+            const response = await fetch('http://localhost:3001/api/users');
             if (!response.ok) {
                 throw new Error('Ошибка при получении пользователей');
             }
@@ -123,7 +123,7 @@ const Editing = () => {
         setSelectedUser(null);
         setSelectedGroup(null);
         setSelectedStudentId(null);
-        setSectionTitle(imageId === 1 ? 'Пользователи' : imageId === 2 ? 'Студенты' : 'Группы');
+        setSectionTitle(imageId === 1 ? 'Пользователи' : imageId === 2 ? 'Ученики' : 'Группы');
     };
 
     const handleUserClick = (user) => {
@@ -140,7 +140,7 @@ const Editing = () => {
     const handleAddToStudents = async () => {
         if (selectedUser) {
             try {
-                const response = await fetch(`/api/users/${selectedUser._id}/updateRole`, {
+                const response = await fetch(`http://localhost:3001/api/users/${selectedUser._id}/updateRole`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const Editing = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('/api/schedules/stats');
+            const response = await fetch('http://localhost:3001/api/schedules/stats');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -192,24 +192,32 @@ const Editing = () => {
 
             // Подсчет статистики на основе отфильтрованных данных
             let totalSessions = 0;
+            let individualSessions = 0;
+            let groupSessions = 0;
             let attendedSessions = 0;
+            let totalPossibleAttendance = 0;
 
             filteredStats.forEach(stat => {
                 if (stat.student_id) {
                     // Индивидуальное занятие
-                    totalSessions++;
+                    individualSessions++;
+                    totalPossibleAttendance++;
                     if (stat.attendance === true) {
                         attendedSessions++;
                     }
                 } else if (stat.group_id && stat.attendance && typeof stat.attendance === 'object') {
                     // Групповое занятие
+                    groupSessions++;
                     const students = Object.keys(stat.attendance);
-                    totalSessions += students.length;
+                    totalPossibleAttendance += students.length;
                     attendedSessions += students.filter(studentId => stat.attendance[studentId] === true).length;
                 }
             });
 
-            const attendancePercentage = totalSessions > 0 ? (attendedSessions / totalSessions) * 100 : 0;
+            totalSessions = individualSessions + groupSessions;
+
+            // Подсчет средней посещаемости
+            const attendancePercentage = totalPossibleAttendance > 0 ? (attendedSessions / totalPossibleAttendance) * 100 : 0;
 
             // Подсчет часов
             const totalHours = filteredStats.reduce((sum, stat) => sum + stat.duration, 0) / 60;
@@ -222,9 +230,9 @@ const Editing = () => {
             }, {});
 
             setStats({
-                total: filteredStats.length,
-                individual: filteredStats.filter(stat => stat.student_id !== null).length,
-                group: filteredStats.filter(stat => stat.group_id !== null).length,
+                total: totalSessions,
+                individual: individualSessions,
+                group: groupSessions,
                 attendance: attendancePercentage,
                 subjects: Object.entries(subjects).map(([subject, count]) => ({ _id: subject, count })),
                 totalHours
@@ -242,7 +250,7 @@ const Editing = () => {
         const groupName = prompt("Введите название группы:");
         if (groupName) {
             try {
-                const response = await fetch('/api/groups', {
+                const response = await fetch('http://localhost:3001/api/groups', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -305,10 +313,10 @@ const Editing = () => {
                             <div
                                 className={`icon-container ${activeImage === 2 ? 'active' : ''}`}
                                 onClick={() => handleImageClick(2)}
-                                title="Студенты"
+                                title="Ученики"
                             >
-                                <img className="sidebar-icon" src={iconGraduation} alt="Студенты" />
-                                <span className="icon-tooltip">Студенты</span>
+                                <img className="sidebar-icon" src={iconGraduation} alt="Ученики" />
+                                <span className="icon-tooltip">Ученики</span>
                             </div>
                             <div
                                 className={`icon-container ${activeImage === 3 ? 'active' : ''}`}
@@ -378,7 +386,7 @@ const Editing = () => {
                                                     >
                                                         <span className="user-name">{group.name}</span>
                                                         <span className="user-role-badge">
-                                                            {group.students?.length || 0} студентов
+                                                            {group.students?.length || 0} учеников
                                                         </span>
                                                     </li>
                                                 ))}
@@ -398,7 +406,7 @@ const Editing = () => {
                                                             <span className="user-role-badge">Пользователь</span>
                                                         )}
                                                         {activeImage === 2 && (
-                                                            <span className="user-role-badge student">Студент</span>
+                                                            <span className="user-role-badge student">Ученик</span>
                                                         )}
                                                     </li>
                                                 ))}

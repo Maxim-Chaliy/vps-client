@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from "../Components/Header";
@@ -35,11 +36,11 @@ const ControlPanel = () => {
             description: "Просмотр отзывов студентов и их родителей"
         },
         {
-            title: "Занятость дня",
+            title: "Просмотр расписания",
             path: "/employment",
             icon: "👨‍🏫",
             color: "#9C27B0",
-            description: "Просмотр занятости на день/неделю"
+            description: "Просмотр расписания на день/неделю"
         },
         {
             title: "Социальные сети",

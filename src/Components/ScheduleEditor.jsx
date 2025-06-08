@@ -5,6 +5,7 @@ import { BsFiletypeTxt, BsFiletypeDocx, BsFiletypeDoc, BsFiletypePdf, BsFiletype
 import { PiMicrosoftPowerpointLogoThin } from "react-icons/pi";
 import { FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
+import * as XLSX from 'xlsx';
 
 const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers, setSelectedUser, setGroups }) => {
     const [schedule, setSchedule] = useState([]);
@@ -20,18 +21,22 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
     const [showDemoteModal, setShowDemoteModal] = useState(false);
     const [deleteRecords, setDeleteRecords] = useState(false);
     const [isDemoting, setIsDemoting] = useState(false);
+    const [filterSubject, setFilterSubject] = useState('');
+    const [filterYear, setFilterYear] = useState(new Date().getFullYear());
+    const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
+    const [showStatistics, setShowStatistics] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (selectedUser) {
-                    const scheduleResponse = await fetch(`/api/schedules/student/${selectedUser._id}`);
-                    const homeworkResponse = await fetch(`/api/homework/${selectedUser._id}`);
+                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/student/${selectedUser._id}`);
+                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/${selectedUser._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 } else if (selectedGroup) {
-                    const scheduleResponse = await fetch(`/api/schedules/group/${selectedGroup._id}`);
-                    const homeworkResponse = await fetch(`/api/homework/group/${selectedGroup._id}`);
+                    const scheduleResponse = await fetch(`http://localhost:3001/api/schedules/group/${selectedGroup._id}`);
+                    const homeworkResponse = await fetch(`http://localhost:3001/api/homework/group/${selectedGroup._id}`);
                     setSchedule(await scheduleResponse.json());
                     setHomework(await homeworkResponse.json());
                 }
@@ -43,21 +48,58 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         fetchData();
     }, [selectedUser, selectedGroup]);
 
+    const calculateAverageGrade = () => {
+        const filteredSchedule = schedule.filter(item => {
+            const itemDate = new Date(item.date);
+            const itemYear = itemDate.getFullYear();
+            const itemMonth = itemDate.getMonth() + 1;
+            return (
+                (!filterSubject || item.subject === filterSubject) &&
+                itemYear === filterYear &&
+                itemMonth === filterMonth
+            );
+        });
+
+        const filteredHomework = homework.filter(item => {
+            const itemDate = new Date(item.dueDate);
+            const itemYear = itemDate.getFullYear();
+            const itemMonth = itemDate.getMonth() + 1;
+            return (
+                (!filterSubject || item.subject === filterSubject) &&
+                itemYear === filterYear &&
+                itemMonth === filterMonth
+            );
+        });
+
+        const scheduleGrades = filteredSchedule.map(item => item.grade).filter(grade => grade !== null && grade !== 0);
+        const homeworkGrades = filteredHomework.map(item => item.grades?.[selectedUser?._id]).filter(grade => grade !== undefined && grade !== 0);
+
+        const allGrades = [...scheduleGrades, ...homeworkGrades];
+
+        if (allGrades.length === 0) {
+            return null;
+        }
+
+        const sum = allGrades.reduce((acc, grade) => acc + grade, 0);
+        const averageGrade = sum / allGrades.length;
+
+        return averageGrade.toFixed(2);
+    };
+
     const handleDemoteStudent = async () => {
         if (!selectedUser) return;
 
         setIsDemoting(true);
         try {
-            // Удаляем студента из всех групп
-            const groupsResponse = await fetch(`/api/groups/student/${selectedUser._id}`);
+            const groupsResponse = await fetch(`http://localhost:3001/api/groups/student/${selectedUser._id}`);
             if (!groupsResponse.ok) {
-                throw new Error('Не удалось получить группы студента');
+                throw new Error('Не удалось получить группы ученика');
             }
 
             const groups = await groupsResponse.json();
 
             for (const group of groups) {
-                const removeResponse = await fetch(`/api/groups/${group._id}/removeStudent`, {
+                const removeResponse = await fetch(`http://localhost:3001/api/groups/${group._id}/removeStudent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -66,12 +108,11 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                 });
 
                 if (!removeResponse.ok) {
-                    console.error(`Не удалось удалить студента из группы ${group._id}`);
+                    console.error(`Не удалось удалить ученика из группы ${group._id}`);
                 }
             }
 
-            // Изменяем роль пользователя
-            const updateResponse = await fetch(`/api/users/${selectedUser._id}/updateRole`, {
+            const updateResponse = await fetch(`http://localhost:3001/api/users/${selectedUser._id}/updateRole`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,9 +124,8 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                 throw new Error('Не удалось изменить роль пользователя');
             }
 
-            // Удаляем связанные записи, если выбрано
             if (deleteRecords) {
-                await fetch('/api/schedules/deleteByStudent', {
+                await fetch('http://localhost:3001/api/schedules/deleteByStudent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -93,7 +133,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                     body: JSON.stringify({ student_id: selectedUser._id }),
                 });
 
-                await fetch('/api/homework/deleteByStudent', {
+                await fetch('http://localhost:3001/api/homework/deleteByStudent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -104,34 +144,175 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
             setShowDemoteModal(false);
             setDeleteRecords(false);
-            alert('Студент успешно переведен в обычные пользователи');
+            alert('Ученик успешно переведен в обычные пользователи');
 
-            // Обновляем список пользователей
-            const usersResponse = await fetch('/api/users');
+            const usersResponse = await fetch('http://localhost:3001/api/users');
             if (usersResponse.ok) {
                 const updatedUsers = await usersResponse.json();
                 setUsers(updatedUsers);
             }
 
-            // Обновляем список групп
-            const groupsResponseAfterUpdate = await fetch('/api/groups');
+            const groupsResponseAfterUpdate = await fetch('http://localhost:3001/api/groups');
             if (groupsResponseAfterUpdate.ok) {
                 const updatedGroups = await groupsResponseAfterUpdate.json();
                 setGroups(updatedGroups);
             }
 
-            // Сбрасываем выбор студента и очищаем данные
             setSelectedUser(null);
             setSchedule([]);
             setHomework([]);
 
             if (refreshStudents) refreshStudents();
         } catch (error) {
-            console.error('Ошибка при переводе студента:', error);
+            console.error('Ошибка при переводе ученика:', error);
             alert('Ошибка: ' + error.message);
         } finally {
             setIsDemoting(false);
         }
+    };
+
+    const exportToExcel = () => {
+        const studentName = selectedUser ? `${selectedUser.surname}_${selectedUser.name}_${selectedUser.patronymic}` : 'Student';
+        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+        const selectedMonthName = monthNames[filterMonth - 1];
+        const period = `${selectedMonthName}_${filterYear}`;
+
+        const filteredData = [...schedule, ...homework]
+            .filter(item => {
+                const itemDate = new Date(item.date || item.dueDate);
+                const itemYear = itemDate.getFullYear();
+                const itemMonth = itemDate.getMonth() + 1;
+                return (
+                    (!filterSubject || item.subject === filterSubject) &&
+                    itemYear === filterYear &&
+                    itemMonth === filterMonth
+                );
+            })
+            .sort((a, b) => {
+                const dateA = new Date(a.date || a.dueDate);
+                const dateB = new Date(b.date || b.dueDate);
+                return dateA - dateB;
+            })
+            .map(item => ({
+                Дата: formatDate(item.date || item.dueDate),
+                Тип: item.date ? 'Занятие' : 'Домашнее задание',
+                Предмет: item.subject,
+                Посещаемость: item.attendance !== undefined ? (item.attendance ? 'Да' : 'Нет') : '-',
+                Оценка: item.grade || item.grades?.[selectedUser?._id] || '-'
+            }));
+
+        const averageGrade = calculateAverageGrade();
+        const finalRow = {
+            Дата: '',
+            Тип: '',
+            Предмет: '',
+            Посещаемость: 'Итоговая оценка',
+            Оценка: averageGrade
+        };
+
+        filteredData.push({ Дата: '', Тип: '', Предмет: '', Посещаемость: '', Оценка: '' });
+        filteredData.push(finalRow);
+
+        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+
+        // Автоматически настраиваем ширину столбцов
+        const columnWidths = Object.keys(filteredData[0]).map(key => {
+            const maxColumnLength = Math.max(
+                key.length,
+                ...filteredData.map(row => row[key] ? row[key].toString().length : 0)
+            );
+            return { width: maxColumnLength + 2 }; // Добавляем небольшой отступ
+        });
+
+        worksheet['!cols'] = columnWidths;
+
+        // Добавляем стили для выравнивания текста по центру
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell = worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
+                if (cell) {
+                    cell.s = {
+                        alignment: { horizontal: "center" },
+                    };
+                }
+            }
+        }
+
+        // Добавляем границы для заголовков
+        const headerRow = 0;
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell = worksheet[XLSX.utils.encode_cell({ r: headerRow, c: C })];
+            if (cell) {
+                cell.s = {
+                    ...cell.s,
+                    border: {
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" }
+                    }
+                };
+            }
+        }
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Journal");
+
+        // Сохраняем файл
+        XLSX.writeFile(workbook, `${studentName}_${period}.xlsx`);
+    };
+    
+    const calculateStatistics = () => {
+        const filteredSchedule = schedule.filter(item => {
+            const itemDate = new Date(item.date);
+            const itemYear = itemDate.getFullYear();
+            const itemMonth = itemDate.getMonth() + 1;
+            return (
+                (!filterSubject || item.subject === filterSubject) &&
+                itemYear === filterYear &&
+                itemMonth === filterMonth
+            );
+        });
+
+        const filteredHomework = homework.filter(item => {
+            const itemDate = new Date(item.dueDate);
+            const itemYear = itemDate.getFullYear();
+            const itemMonth = itemDate.getMonth() + 1;
+            return (
+                (!filterSubject || item.subject === filterSubject) &&
+                itemYear === filterYear &&
+                itemMonth === filterMonth
+            );
+        });
+
+        const totalLessons = filteredSchedule.length;
+        const attendedLessons = filteredSchedule.filter(item => item.attendance).length;
+        const totalHomework = filteredHomework.length;
+
+        const totalDurationMinutes = filteredSchedule
+            .filter(item => item.attendance)
+            .reduce((sum, item) => sum + item.duration, 0);
+
+        const totalDurationHours = Math.floor(totalDurationMinutes / 60);
+        const totalDurationRemainingMinutes = totalDurationMinutes % 60;
+
+        const attendancePercentage = totalLessons > 0
+            ? (attendedLessons / totalLessons) * 100
+            : 0;
+
+        let totalDurationString = `${totalDurationHours} часов`;
+        if (totalDurationRemainingMinutes > 0) {
+            totalDurationString += ` ${totalDurationRemainingMinutes} минут`;
+        }
+
+        return {
+            totalLessons,
+            attendedLessons,
+            totalHomework,
+            totalDuration: totalDurationString,
+            attendancePercentage
+        };
     };
 
     const handleAddToSchedule = async () => {
@@ -191,7 +372,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         };
 
         try {
-            const response = await fetch('/api/schedules', {
+            const response = await fetch('http://localhost:3001/api/schedules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -218,7 +399,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
     const handleSaveGrade = async (id) => {
         try {
-            const response = await fetch(`/api/schedules/${id}/updateGrade`, {
+            const response = await fetch(`http://localhost:3001/api/schedules/${id}/updateGrade`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -243,11 +424,12 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
     const handleAddToHomework = async () => {
         const dueDateInput = document.getElementById('dueDateInput').value;
+        const subjectInput = document.getElementById('subjectSelect').value;
         const filesInput = document.getElementById('filesInput').files;
         const commentInput = document.getElementById('commentInput').value;
 
-        if (!dueDateInput || filesInput.length === 0) {
-            alert('Пожалуйста, укажите дату выполнения и прикрепите файлы');
+        if (!dueDateInput || !subjectInput || filesInput.length === 0) {
+            alert('Пожалуйста, укажите дату выполнения, выберите предмет и прикрепите файлы');
             return;
         }
 
@@ -256,6 +438,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (selectedGroup) formData.append('group_id', selectedGroup._id);
         formData.append('day', getShortDayOfWeek(new Date(dueDateInput)));
         formData.append('dueDate', dueDateInput);
+        formData.append('subject', subjectInput);
         formData.append('comment', commentInput);
 
         for (let i = 0; i < filesInput.length; i++) {
@@ -263,7 +446,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         }
 
         try {
-            const response = await fetch('/api/homework', {
+            const response = await fetch('http://localhost:3001/api/homework', {
                 method: 'POST',
                 body: formData,
             });
@@ -277,6 +460,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             setHomework([...homework, savedHomeworkItem]);
             setIsAddingHomework(false);
             document.getElementById('dueDateInput').value = '';
+            document.getElementById('subjectSelect').value = '';
             document.getElementById('filesInput').value = '';
             document.getElementById('commentInput').value = '';
         } catch (error) {
@@ -287,7 +471,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
 
     const handleAttendanceChange = async (id, attendance) => {
         try {
-            const response = await fetch(`/api/schedules/${id}/updateAttendance`, {
+            const response = await fetch(`http://localhost:3001/api/schedules/${id}/updateAttendance`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -310,7 +494,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         try {
             const gradeValueToSave = gradeValue ? parseInt(gradeValue) : null;
 
-            const response = await fetch(`/api/homework/${id}/grade/${studentId}`, {
+            const response = await fetch(`http://localhost:3001/api/homework/${id}/grade/${studentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -391,7 +575,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
             }
 
             try {
-                const response = await fetch(`/api/schedules/${editing}`, {
+                const response = await fetch(`http://localhost:3001/api/schedules/${editing}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -423,7 +607,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
 
         try {
-            const response = await fetch(`/api/schedules/${id}`, {
+            const response = await fetch(`http://localhost:3001/api/schedules/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -447,7 +631,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedItems.length} выбранных записей?`)) return;
 
         try {
-            const response = await fetch('/api/schedules/deleteMultiple', {
+            const response = await fetch('http://localhost:3001/api/schedules/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -479,7 +663,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm('Вы уверены, что хотите удалить это домашнее задание?')) return;
 
         try {
-            const response = await fetch(`/api/homework/${id}`, {
+            const response = await fetch(`http://localhost:3001/api/homework/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -503,7 +687,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         if (!window.confirm(`Вы уверены, что хотите удалить ${selectedHomeworkItems.length} выбранных заданий?`)) return;
 
         try {
-            const response = await fetch('/api/homework/deleteMultiple', {
+            const response = await fetch('http://localhost:3001/api/homework/deleteMultiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -583,12 +767,23 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
         return `${date}<br>${startTime}-${endTime}<br>${duration}`;
     };
 
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const sortedSchedule = [...schedule].sort((a, b) => new Date(b.date) - new Date(a.date));
+
     return (
         <div className="schedule-editor-container">
             <div className="editor-header">
                 <div className="name-and-actions">
                     <h3 className='name-division'>
-                        {selectedUser ? `${selectedUser.surname} ${selectedUser.name} ${selectedUser.patronymic}` : 'Выберите студента'}
+                        {selectedUser ? `${selectedUser.surname} ${selectedUser.name} ${selectedUser.patronymic}` : 'Выберите ученика'}
                         {selectedGroup && ` - ${selectedGroup.name}`}
                     </h3>
                     {selectedUser && (
@@ -596,7 +791,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                             className="demote-student-button"
                             onClick={() => setShowDemoteModal(true)}
                         >
-                            Убрать из студентов
+                            Убрать из учеников
                         </button>
                     )}
                 </div>
@@ -612,6 +807,12 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                         onClick={() => setMode('homework')}
                     >
                         Домашнее задание
+                    </button>
+                    <button
+                        className={`mode-button-scheduleeditor ${mode === 'journal' ? 'active' : ''}`}
+                        onClick={() => setMode('journal')}
+                    >
+                        Журнал успеваемости
                     </button>
                 </div>
             </div>
@@ -683,9 +884,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                 <option value="">Выберите предмет</option>
                                 <option value="Алгебра">Алгебра</option>
                                 <option value="Геометрия">Геометрия</option>
-                                <option value="Физика">Физика</option>
-                                <option value="Химия">Химия</option>
-                                <option value="Информатика">Информатика</option>
                             </select>
                         </div>
                         <div className="form-group description-group">
@@ -732,8 +930,8 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                 </tr>
                             </thead>
                             <tbody>
-                                {schedule.length > 0 ? (
-                                    schedule.map((item) => (
+                                {sortedSchedule.length > 0 ? (
+                                    sortedSchedule.map((item) => (
                                         <React.Fragment key={item._id}>
                                             <tr className={editing === item._id ? 'editing-row' : ''}>
                                                 <td>
@@ -893,9 +1091,6 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                                                     >
                                                                         <option value="Алгебра">Алгебра</option>
                                                                         <option value="Геометрия">Геометрия</option>
-                                                                        <option value="Физика">Физика</option>
-                                                                        <option value="Химия">Химия</option>
-                                                                        <option value="Информатика">Информатика</option>
                                                                     </select>
                                                                 </div>
                                                                 <div className="edit-form-group description-group">
@@ -924,7 +1119,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                         </table>
                     </div>
                 </>
-            ) : (
+            ) : mode === 'homework' ? (
                 <>
                     <div className="homework-actions">
                         <button
@@ -948,6 +1143,14 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                             <div className="form-group">
                                 <label htmlFor="dueDateInput">Дата выполнения</label>
                                 <input type="date" id="dueDateInput" className="scheduleeditor-form-input" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="subjectSelect">Предмет</label>
+                                <select id="subjectSelect" className="scheduleeditor-form-input">
+                                    <option value="">Выберите предмет</option>
+                                    <option value="Алгебра">Алгебра</option>
+                                    <option value="Геометрия">Геометрия</option>
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="commentInput">Комментарий</label>
@@ -981,6 +1184,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                     <th style={{ width: '40px' }}></th>
                                     <th>День</th>
                                     <th>Выполнить до</th>
+                                    <th>Предмет</th>
                                     <th>Файлы задания</th>
                                     <th>Комментарий</th>
                                     <th>Ответ</th>
@@ -1002,13 +1206,14 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                             </td>
                                             <td>{item.day}</td>
                                             <td>{formatDate(item.dueDate)}</td>
+                                            <td>{item.subject}</td>
                                             <td>
                                                 <div className="scheduleeditor-files-list">
                                                     {item.files.map((file, idx) => (
                                                         <div key={idx} className="scheduleeditor-file-item">
                                                             {getFileIcon(file)}
                                                             <a
-                                                                href={`/homework/${file}`}
+                                                                href={`http://localhost:3001/homework/${file}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 download
@@ -1028,7 +1233,7 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                                             <div key={idx} className="scheduleeditor-file-item">
                                                                 {getFileIcon(answer.file)}
                                                                 <a
-                                                                    href={`/homework/${answer.file}`}
+                                                                    href={`http://localhost:3001/homework/${answer.file}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     download
@@ -1107,13 +1312,176 @@ const ScheduleEditor = ({ selectedUser, selectedGroup, refreshStudents, setUsers
                                     ))
                                 ) : (
                                     <tr className="no-data-row">
-                                        <td colSpan="7">Нет данных о домашних заданиях</td>
+                                        <td colSpan="8">Нет данных о домашних заданиях</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 </>
+            ) : (
+                <div className="journal-container">
+                    <div className="filter-controls">
+                        <div className="form-group">
+                            <label htmlFor="filterSubject">Предмет</label>
+                            <select
+                                id="filterSubject"
+                                className="filter-input"
+                                value={filterSubject}
+                                onChange={(e) => setFilterSubject(e.target.value)}
+                            >
+                                <option value="">Все предметы</option>
+                                <option value="Алгебра">Алгебра</option>
+                                <option value="Геометрия">Геометрия</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="filterYear">Год</label>
+                            <select
+                                id="filterYear"
+                                className="filter-input"
+                                value={filterYear}
+                                onChange={(e) => setFilterYear(parseInt(e.target.value))}
+                            >
+                                <option value="2025">2025</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="filterMonth">Месяц</label>
+                            <select
+                                id="filterMonth"
+                                className="filter-input"
+                                value={filterMonth}
+                                onChange={(e) => setFilterMonth(parseInt(e.target.value))}
+                            >
+                                <option value="1">Январь</option>
+                                <option value="2">Февраль</option>
+                                <option value="3">Март</option>
+                                <option value="4">Апрель</option>
+                                <option value="5">Май</option>
+                                <option value="6">Июнь</option>
+                                <option value="7">Июль</option>
+                                <option value="8">Август</option>
+                                <option value="9">Сентябрь</option>
+                                <option value="10">Октябрь</option>
+                                <option value="11">Ноябрь</option>
+                                <option value="12">Декабрь</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {(() => {
+                        const stats = calculateStatistics();
+                        return (
+                            <div className="statistics">
+                                <div className="statistics-header">
+                                    <h4>Статистика за период</h4>
+                                    <button
+                                        className="toggle-statistics-button"
+                                        onClick={() => setShowStatistics(!showStatistics)}
+                                    >
+                                        {showStatistics ? 'Скрыть' : 'Показать'}
+                                    </button>
+                                </div>
+                                {showStatistics && (
+                                    <div className="journal-stats-grid">
+                                        <div className="stat-card">
+                                            <div className="stat-title">Всего занятий</div>
+                                            <div className="journal-stat-value">{stats.totalLessons}</div>
+                                        </div>
+                                        <div className="stat-card">
+                                            <div className="stat-title">Проведено занятий</div>
+                                            <div className="journal-stat-value">{stats.attendedLessons}</div>
+                                        </div>
+                                        <div className="stat-card">
+                                            <div className="stat-title">Всего времени</div>
+                                            <div className="journal-stat-value">{stats.totalDuration}</div>
+                                        </div>
+                                        <div className="stat-card">
+                                            <div className="stat-title">Посещаемость</div>
+                                            <div className="journal-stat-value">{stats.attendancePercentage.toFixed(1)}%</div>
+                                        </div>
+                                        <div className="stat-card">
+                                            <div className="stat-title">Домашних заданий</div>
+                                            <div className="journal-stat-value">{stats.totalHomework}</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
+
+                    {calculateAverageGrade() !== null && (
+                        <div className={`average-grade grade-${Math.round(calculateAverageGrade())}`}>
+                            <h4>Средняя оценка: {calculateAverageGrade()}</h4>
+                        </div>
+                    )}
+
+                    <div className="export-buttons">
+                        <button onClick={exportToExcel} className="export-button excel-button">
+                            Экспорт в Excel
+                        </button>
+                    </div>
+
+                    <div className="journal-table-container">
+                        <table className="journal-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Тип</th>
+                                    <th>Предмет</th>
+                                    <th>Посещаемость</th>
+                                    <th>Оценка</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[...schedule, ...homework]
+                                    .filter(item => {
+                                        const itemDate = new Date(item.date || item.dueDate);
+                                        const itemYear = itemDate.getFullYear();
+                                        const itemMonth = itemDate.getMonth() + 1;
+                                        return (
+                                            (!filterSubject || item.subject === filterSubject) &&
+                                            itemYear === filterYear &&
+                                            itemMonth === filterMonth
+                                        );
+                                    })
+                                    .sort((a, b) => {
+                                        const dateA = new Date(a.date || a.dueDate);
+                                        const dateB = new Date(b.date || b.dueDate);
+                                        return dateA - dateB;
+                                    })
+                                    .map((item) => (
+                                        <tr key={item._id}>
+                                            <td>{formatDate(item.date || item.dueDate)}</td>
+                                            <td>{item.date ? 'Занятие' : 'Домашнее задание'}</td>
+                                            <td>{item.subject}</td>
+                                            <td>
+                                                {item.attendance !== undefined ? (
+                                                    item.attendance ? (
+                                                        <FaRegCheckCircle className="attendance-icon present" />
+                                                    ) : (
+                                                        <FaRegTimesCircle className="attendance-icon absent" />
+                                                    )
+                                                ) : (
+                                                    <span>-</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                {item.grade || item.grades?.[selectedUser?._id] ? (
+                                                    <span className={`grade-badge grade-${item.grade || item.grades?.[selectedUser?._id]}`}>
+                                                        {item.grade || item.grades?.[selectedUser?._id]}
+                                                    </span>
+                                                ) : (
+                                                    <span>-</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             )}
         </div>
     );
