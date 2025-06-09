@@ -38,6 +38,9 @@ const Footer = () => {
                         </div>
                     </div>
                 </div>
+                <div className="copyright">
+                    © {new Date().getFullYear()} Онлайн-репетитор Easymath
+                </div>
             </div>
         </footer>
     )

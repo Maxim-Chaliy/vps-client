@@ -340,3 +340,52 @@
         min-width: 35px;
     }
 }
+
+.leave-review-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.leave-review-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #FCCD3A;
+    color: #000;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leave-review-button:hover {
+    background-color: #ffc107;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leave-review-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.review-icon {
+    font-size: 18px;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .leave-review-button-container {
+        justify-content: center;
+    }
+    
+    .leave-review-button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}

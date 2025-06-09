@@ -135,3 +135,32 @@ a {
         height: 35px;
     }
 }
+
+.copyright {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Добавьте это в существующие медиа-запросы */
+@media (max-width: 768px) {
+    .copyright {
+        font-size: 13px;
+        margin-top: 15px;
+        padding-top: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .copyright {
+        font-size: 12px;
+    margin-top: 10px;
+        padding-top: 10px;
+    }
+}

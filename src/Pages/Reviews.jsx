@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Helmet } from 'react-helmet';
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 import '../Components/style/reviews.css';
 import { format } from 'date-fns';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { FaQuoteLeft } from 'react-icons/fa';
+import { FaQuoteLeft, FaPencilAlt } from 'react-icons/fa';
 
 const Reviews = () => {
     const [comments, setComments] = useState([]);
@@ -41,31 +40,12 @@ const Reviews = () => {
         setPage(newPage);
     };
 
+    const handleLeaveReview = () => {
+        window.open('https://vk.com/topic-216067267_49113818?offset=0', '_blank');
+    };
+
     return (
         <>
-            <Helmet>
-                <title>Отзывы наших учеников</title>
-                <meta name="description" content="Реальные истории успеха и благодарности от наших учеников. Узнайте, как мы помогаем достичь высоких результатов." />
-                <meta name="keywords" content="отзывы, ученики, успехи, благодарности, курсы, подготовка" />
-                <meta property="og:title" content="Отзывы наших учеников" />
-                <meta property="og:description" content="Реальные истории успеха и благодарности от наших учеников. Узнайте, как мы помогаем достичь высоких результатов." />
-                <meta property="og:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Отзывы наших учеников" />
-                <meta name="twitter:description" content="Реальные истории успеха и благодарности от наших учеников. Узнайте, как мы помогаем достичь высоких результатов." />
-                <meta name="twitter:image" content="https://easymath-online.ru/path-to-your-image.jpg" />
-                <script type="application/ld+json">
-                    {`
-                        {
-                            "@context": "https://schema.org",
-                            "@type": "WebPage",
-                            "name": "Отзывы наших учеников",
-                            "description": "Реальные истории успеха и благодарности от наших учеников. Узнайте, как мы помогаем достичь высоких результатов.",
-                            "url": "https://easymath-online.ru/reviews"
-                        }
-                    `}
-                </script>
-            </Helmet>
             <Header />
             <main className="reviews-main">
                 <div className='reviews-all-content'>
@@ -79,6 +59,16 @@ const Reviews = () => {
                     <div className="block-reviews">
                         <div className="reviews-container">
                             {error && <div className="error-message">{error}</div>}
+
+                            <div className="leave-review-button-container">
+                                <button 
+                                    className="leave-review-button"
+                                    onClick={handleLeaveReview}
+                                >
+                                    <FaPencilAlt className="review-icon" />
+                                    Оставить отзыв
+                                </button>
+                            </div>
 
                             <div className="comments-list">
                                 {loading ? (
