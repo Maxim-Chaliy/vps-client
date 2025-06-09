@@ -4,8 +4,22 @@ import { Link, useNavigate } from "react-router-dom";
 import '../Components/style/header.css';
 
 const Header = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        return !!localStorage.getItem('token');
+    });
+
+    const [isAdmin, setIsAdmin] = useState(() => {
+        return localStorage.getItem('role') === 'admin';
+    });
+
+    const [isStudent, setIsStudent] = useState(() => {
+        return localStorage.getItem('role') === 'student';
+    });
+
+    const [userFullName, setUserFullName] = useState(() => {
+        return localStorage.getItem('userFullName') || '';
+    });
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
@@ -14,27 +28,15 @@ const Header = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const userRole = localStorage.getItem('role');
-        
-        if (token) {
-            setIsAuthenticated(true);
-            
-            if (userRole === 'admin') {
-                setIsAdmin(true);
-            }
-        }
-
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            
+
             if (currentScrollY > 10) {
                 setIsScrolled(true);
             } else {
                 setIsScrolled(false);
             }
 
-            // Не скрываем шапку если открыто мобильное меню
             if (!isMenuOpen) {
                 if (currentScrollY > lastScrollY && currentScrollY > 100) {
                     setShowHeader(false);
@@ -52,7 +54,7 @@ const Header = () => {
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         window.addEventListener('resize', handleResize);
-        
+
         return () => {
             window.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleResize);
@@ -62,8 +64,11 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
+        localStorage.removeItem('userFullName');
         setIsAuthenticated(false);
         setIsAdmin(false);
+        setIsStudent(false);
+        setUserFullName('');
         setIsMenuOpen(false);
         navigate('/');
     };
@@ -98,7 +103,7 @@ const Header = () => {
 
     const renderUserLinks = () => {
         if (isAdmin) return null;
-        
+
         return (
             <>
                 <Link className="nav-link" to="/educmat" onClick={closeMenu}>Учебные материалы</Link>
@@ -110,9 +115,8 @@ const Header = () => {
 
     return (
         <header className={`header ${isScrolled ? 'scrolled' : ''} ${!showHeader ? 'hidden' : ''}`}>
-            {/* Добавляем оверлей для мобильного меню */}
             <div className={`navigation-overlay ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu} />
-            
+
             <div className="header-container">
                 <div className="header-content">
                     <div className="logo">
@@ -129,8 +133,8 @@ const Header = () => {
                         </Link>
                     </div>
 
-                    <button 
-                        className={`mobile-menu-button ${isMenuOpen ? 'open' : ''}`} 
+                    <button
+                        className={`mobile-menu-button ${isMenuOpen ? 'open' : ''}`}
                         onClick={toggleMenu}
                         aria-label="Меню"
                     >
@@ -146,18 +150,23 @@ const Header = () => {
                         </nav>
 
                         <div className="header-actions">
-                            {!isAdmin && (
-                                <Link 
-                                    className="application-button" 
-                                    to="/appform" 
+                            {isAuthenticated && (
+                                <div className="user-fullname">
+                                    {userFullName}
+                                </div>
+                            )}
+                            {!isAdmin && !isStudent && (
+                                <Link
+                                    className="application-button"
+                                    to="/appform"
                                     onClick={closeMenu}
                                 >
                                     Подать заявку
                                 </Link>
                             )}
                             {isAuthenticated ? (
-                                <button 
-                                    className="auth-button logout" 
+                                <button
+                                    className="auth-button logout"
                                     onClick={handleLogout}
                                     aria-label="Выйти"
                                 >
@@ -169,8 +178,8 @@ const Header = () => {
                                     <div className="button-text">Выйти</div>
                                 </button>
                             ) : (
-                                <button 
-                                    className="auth-button login" 
+                                <button
+                                    className="auth-button login"
                                     onClick={() => {
                                         closeMenu();
                                         navigate('/authorization');

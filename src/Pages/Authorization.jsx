@@ -70,6 +70,10 @@ const Authorization = () => {
                 localStorage.setItem('studentId', data.user.id);
                 localStorage.setItem('role', data.user.role);
 
+                // Сохраняем ФИО пользователя в localStorage
+                const fullName = `${data.user.surname} ${data.user.name} ${data.user.patronymic || ''}`;
+                localStorage.setItem('userFullName', fullName);
+
                 if (data.user.role === 'admin') {
                     navigate('/controlpanel');
                 } else {
