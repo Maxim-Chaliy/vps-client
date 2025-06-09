@@ -42,13 +42,13 @@ const ControlPanel = () => {
             color: "#9C27B0",
             description: "Просмотр расписания на день/неделю"
         },
-        {
-            title: "Социальные сети",
-            path: "/settings",
-            icon: "⚙️",
-            color: "#607D8B",
-            description: "Ссылки на соцсети"
-        },
+        // {
+        //     title: "Социальные сети",
+        //     path: "/settings",
+        //     icon: "⚙️",
+        //     color: "#607D8B",
+        //     description: "Ссылки на соцсети"
+        // },
     ];
 
     return (

@@ -48,16 +48,13 @@ const Schedule = () => {
                 setIsLoading(true);
 
                 try {
-                    // Загружаем группы студента
                     const groupsResponse = await fetch(`/api/groups/student/${studentId}`);
                     const groupsData = await groupsResponse.json();
                     setGroups(groupsData);
 
-                    // Загружаем индивидуальное расписание студента
                     const individualSchedulesResponse = await fetch(`/api/schedules/student/${studentId}`);
                     const individualSchedules = await individualSchedulesResponse.json();
 
-                    // Загружаем групповые расписания для всех групп студента
                     const groupPromises = groupsData.map(group =>
                         fetch(`/api/schedules/group/${group._id}`).then(res => res.json())
                     );
@@ -65,10 +62,8 @@ const Schedule = () => {
                     const groupSchedulesResults = await Promise.all(groupPromises);
                     const groupSchedules = groupSchedulesResults.flat();
 
-                    // Объединяем все занятия
                     const allSchedules = [...individualSchedules, ...groupSchedules];
 
-                    // Сортируем по дате и времени
                     const sortedSchedules = allSchedules.sort((a, b) => {
                         const dateA = new Date(a.date);
                         const dateB = new Date(b.date);
@@ -83,11 +78,9 @@ const Schedule = () => {
 
                     setSchedules(sortedSchedules);
 
-                    // Загружаем домашние задания (индивидуальные и групповые)
                     const individualHomeworkResponse = await fetch(`/api/homework/${studentId}`);
                     const individualHomework = await individualHomeworkResponse.json();
 
-                    // Загружаем групповые домашние задания для всех групп студента
                     const groupHomeworkPromises = groupsData.map(group =>
                         fetch(`/api/homework/group/${group._id}`).then(res => res.json())
                     );
@@ -95,11 +88,9 @@ const Schedule = () => {
                     const groupHomeworkResults = await Promise.all(groupHomeworkPromises);
                     const groupHomework = groupHomeworkResults.flat();
 
-                    // Объединяем все домашние задания
                     const allHomework = [...individualHomework, ...groupHomework];
                     const currentDate = new Date();
 
-                    // Разделяем задания на три категории
                     const overdueHomework = allHomework.filter(hw =>
                         new Date(hw.dueDate) < currentDate && hw.answer.length === 0
                     );
@@ -108,16 +99,10 @@ const Schedule = () => {
                     );
                     const sentHomework = allHomework.filter(hw => hw.answer.length > 0);
 
-                    // Сортируем просроченные по степени просроченности (самые старые первыми)
                     overdueHomework.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-                    // Сортируем неотправленные по дате сдачи (ближайшие первыми)
                     unsentHomework.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-                    // Сортируем отправленные по дате сдачи (самые новые первыми)
                     sentHomework.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
 
-                    // Объединяем: сначала просроченные, потом неотправленные, затем отправленные
                     const sortedHomework = [...overdueHomework, ...unsentHomework, ...sentHomework];
 
                     setHomework(sortedHomework);
@@ -300,6 +285,14 @@ const Schedule = () => {
         const isExpanded = expandedItems[lesson._id];
         const isGroupLesson = !!lesson.group_id;
 
+        // Получаем оценку студента, если она есть
+        let studentGrade;
+        if (isGroupLesson && lesson.grade_group) {
+            studentGrade = lesson.grade_group[studentId];
+        } else {
+            studentGrade = lesson.grade;
+        }
+
         return (
             <motion.div
                 key={lesson._id}
@@ -331,6 +324,14 @@ const Schedule = () => {
                         {lesson.attendance !== null && (
                             <span className={`attendance-badge ${lesson.attendance ? 'present' : 'absent'}`}>
                                 {lesson.attendance ? 'Присутствовал' : 'Отсутствовал'}
+                            </span>
+                        )}
+                        {studentGrade !== undefined && studentGrade !== null && (
+                            <span
+                                className="schedule-grade-badge"
+                                style={{ backgroundColor: getGradeColor(studentGrade) }}
+                            >
+                                {studentGrade}
                             </span>
                         )}
                     </div>
@@ -373,7 +374,7 @@ const Schedule = () => {
                                     <div className="detail-item">
                                         <span className="detail-label">Группа:</span>
                                         <span className="detail-value">
-                                            {groups.find(g => g._id === lesson.group_id)?.name || 'Неизвестная группа'}
+                                            {groups.find(g => g._id.toString() === lesson.group_id.toString())?.name || 'Неизвестная группа'}
                                         </span>
                                     </div>
                                 )}
@@ -390,6 +391,19 @@ const Schedule = () => {
         const isSelected = selectedItem === hw._id;
         const isGroupHomework = !!hw.group_id;
         const isOverdue = new Date(hw.dueDate) < new Date() && hw.answer.length === 0;
+
+        // Получаем оценку студента, если она есть
+        let studentGrade;
+        if (hw.grades) {
+            // Если grades - это Map
+            if (typeof hw.grades.get === 'function') {
+                studentGrade = hw.grades.get(studentId);
+            }
+            // Если grades - это обычный объект
+            else if (typeof hw.grades === 'object') {
+                studentGrade = hw.grades[studentId];
+            }
+        }
 
         return (
             <motion.div
@@ -415,7 +429,6 @@ const Schedule = () => {
                         <span className="hw-due-date">
                             <FiCalendar className="icon" />
                             {formatDate(hw.dueDate)}
-                            {isOverdue}
                         </span>
                         <span className="hw-subject">{hw.subject}</span>
                     </div>
@@ -437,13 +450,12 @@ const Schedule = () => {
                                 Ожидается
                             </span>
                         )}
-
-                        {hw.grade && (
+                        {studentGrade !== undefined && (
                             <span
                                 className="schedule-grade-badge"
-                                style={{ backgroundColor: getGradeColor(hw.grade) }}
+                                style={{ backgroundColor: getGradeColor(studentGrade) }}
                             >
-                                {hw.grade}
+                                {studentGrade}
                             </span>
                         )}
                     </div>
@@ -466,9 +478,14 @@ const Schedule = () => {
                                 <h4>Тип задания:</h4>
                                 <p className={isGroupHomework ? "group-assignment" : "individual-assignment"}>
                                     {isGroupHomework ?
-                                        `Групповое (${groups.find(g => g._id === hw.group_id)?.name || 'Неизвестная группа'})` :
+                                        `Групповое (${groups.find(g => g._id.toString() === hw.group_id?.toString())?.name || 'Неизвестная группа'})` :
                                         'Индивидуальное'}
                                 </p>
+                            </div>
+
+                            <div className="hw-comment-section">
+                                <h4>Комментарий репетитора:</h4>
+                                <p>{hw.comment || 'Комментарий отсутствует'}</p>
                             </div>
 
                             <div className="hw-files-section">
@@ -532,6 +549,7 @@ const Schedule = () => {
             </motion.div>
         );
     };
+
 
     return (
         <>
